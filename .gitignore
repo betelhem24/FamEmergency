@@ -1,0 +1,24 @@
+# Dependencies (Don't upload! Too big and npm install recreates it)
+node_modules/
+
+# Environment Variables (Contains My secret API keys and DB passwords go here)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build folders (Files generated automatically. no need to track these)
+dist/
+build/
+out/
+
+# Logs (Error reports)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE / Operating System files(Random system junk from my computer)
+.DS_Store
+.vscode/
+.idea/
