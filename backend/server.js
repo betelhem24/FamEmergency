@@ -15,10 +15,13 @@ app.use(cors());
 app.use(express.json());
 
 // 5. Routes
+
+// Home route
 app.get('/', (req, res) => {
   res.send('FamEmergency Server is Running!');
 });
 
+// GET route: Fetch all users
 app.get('/users', async (req, res) => {
   try {
     const users = await prisma.user.findMany();
@@ -29,23 +32,24 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// NEW: Create a new user in the database
+// POST route: Create a new user
 app.post('/users', async (req, res) => {
   try {
-    // 1. Get the data from the request body (what the user typed)
-    const { name, email } = req.body; 
+    // 1. Grab name, email, AND password from the request body
+    const { name, email, password } = req.body; 
 
-    // 2. Use Prisma to save this data into the Neon database
+    // 2. Tell Prisma to include the password when creating the user
     const newUser = await prisma.user.create({
       data: {
         name: name,
         email: email,
+        password: password, 
       },
     });
 
     // 3. Send back the newly created user with a "201 Created" success code
     res.status(201).json(newUser);
-    
+
   } catch (error) {
     console.error("Create User Error:", error);
     res.status(500).json({ error: "Could not create user" });
