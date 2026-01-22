@@ -1,42 +1,59 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.1);       /*--glass-bg: This is a CSS Variable.*/
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --main-bg: #0f172a; /* Dark Blue */
+}
+
+body {
+  margin: 0;
+  background-color: var(--main-bg);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;   /*horizontally (left to right)*/
+  align-items: center;       /*vertically (top to bottom)*/
+  height: 100vh;
+  color: white;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px); /* This creates the blur effect */
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
   padding: 2rem;
-  text-align: center;
+  width: 350px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);    
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: white;
+  box-sizing: border-box;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button {
+  width: 100%;
+  padding: 10px;
+  background: #3b82f6; 
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  /* I use 'all' here so it covers background AND brightness */
+  transition: all 0.3s ease; 
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+button:hover {
+  /* This is what you wanted! It makes the button glow slightly */
+  filter: brightness(1.1);
+  /* I can also add a slight lift effect */
+  transform: translateY(-2px);
 }
