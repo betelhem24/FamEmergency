@@ -1,6 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+// I added 'type' before PayloadAction to follow strict 2026 TS rules
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-// 1. THE CONTRACT (Interface)
+
+// 1. THE CONTRACT
 interface AuthState {
   user: {
     id: string;
@@ -16,17 +18,17 @@ const initialState: AuthState = {
   token: null,
 };
 
-// 3. THE SLICE (The Logic)
+// 3. THE LOGIC
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    //  setCredentials takes the user data and "writes" it to the brain
+    // I use the 'type' PayloadAction here to measure our data package
     setCredentials: (state, action: PayloadAction<{ user: any; token: string }>) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
     },
-    //  logout "wipes" the brain clean
+    
     logout: (state) => {
       state.user = null;
       state.token = null;
