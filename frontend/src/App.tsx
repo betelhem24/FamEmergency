@@ -26,7 +26,6 @@ function App() {
       
     } catch (err) {
       // 🔍 THE PRO FIX:
-      // Word-by-Word:
       // 'as' = I are telling TypeScript: "Trust me, I know this error comes from Axios."
       // '<{error: string}>' = We are defining that the server's JSON has a key called 'error' which is text.
       const error = err as AxiosError<{error: string}>;
