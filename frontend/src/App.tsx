@@ -1,54 +1,56 @@
-// 1. IMPORTS: Bringing in our tools
+// 1. IMPORTS
 import React, { useState } from 'react';
-import axios from 'axios';
+// Word-by-Word: AxiosError is a "Type" that describes exactly what a failure looks like
+import axios, { AxiosError } from 'axios'; 
 import './App.css';
 
 function App() {
-  // 2. STATE: Creating the 3 memory boxes for our user data
-  // <string> tells TypeScript to only allow text here
+  // 2. STATE
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  // 3. THE BRIDGE: The function that talks to the Backend
+  // 3. THE BRIDGE
   const handleRegister = async (e: React.FormEvent) => {
-    // This prevents the page from refreshing when we click the button
     e.preventDefault();
 
     try {
-      // Sending the 3 pieces of data to our Backend port 5000
       const response = await axios.post('http://localhost:5000/users', {
         name: name,
         email: email,
         password: password
       });
 
-      // If successful, show an alert with the new user's name
       console.log("Success:", response.data);
       alert('Success! User created: ' + response.data.name);
       
-    } catch (error) {
-      // If the Backend is off or the email is a duplicate, this runs
-      console.error("Error details:", error);
-      alert('Error creating user. Check if the server is running!');
+    } catch (err) {
+      // 🔍 THE PRO FIX:
+      // Word-by-Word:
+      // 'as' = I are telling TypeScript: "Trust me, I know this error comes from Axios."
+      // '<{error: string}>' = We are defining that the server's JSON has a key called 'error' which is text.
+      const error = err as AxiosError<{error: string}>;
+
+      if (error.response && error.response.data && error.response.data.error) {
+        // Now TypeScript knows exactly what 'error.response.data.error' is!
+        alert(error.response.data.error);
+      } else {
+        alert('Error: Cannot reach the server.');
+      }
     }
   };
 
-  // 4. THE UI: What actually appears on your website
+  // 4. THE UI
   return (
     <div className="glass-card">
       <h2>Join FamEmergency</h2>
-      
       <form onSubmit={handleRegister}>
-        {/* Name Input */}
         <input 
           placeholder="Full Name" 
           value={name}
           onChange={(e) => setName(e.target.value)} 
           required 
         />
-
-        {/* Email Input */}
         <input 
           placeholder="Email Address" 
           type="email" 
@@ -56,8 +58,6 @@ function App() {
           onChange={(e) => setEmail(e.target.value)} 
           required 
         />
-
-        {/* Password Input */}
         <input 
           placeholder="Password" 
           type="password" 
@@ -65,15 +65,8 @@ function App() {
           onChange={(e) => setPassword(e.target.value)} 
           required 
         />
-
-        {/* The Action Button */}
         <button type="submit">Register</button>
       </form>
-
-      {/* Visual confirmation for you to see the memory working */}
-      <div style={{ marginTop: '20px', fontSize: '12px', opacity: 0.6 }}>
-        <p>Typing: {name} | {email}</p>
-      </div>
     </div>
   );
 }
