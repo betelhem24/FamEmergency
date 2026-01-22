@@ -5,7 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-// 3. Import your internal files AFTER dotenv is ready
+// 3. Import your internal files after dotenv is ready
 const prisma = require('./db/prisma');
 
 const app = express();
@@ -47,7 +47,7 @@ app.post('/users', async (req, res) => {
       },
     });
 
-    // 3. Send back the newly created user with a "201 Created" success code
+    // 3.  Send back the newly created user with a "201 Created" success code
     res.status(201).json(newUser);
 
   } catch (error) {
@@ -55,6 +55,8 @@ app.post('/users', async (req, res) => {
     res.status(500).json({ error: "Could not create user" });
   }
 });
+
+
 
 // 6. Start Server
 const PORT = process.env.PORT || 5000;
