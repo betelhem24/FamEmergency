@@ -1,20 +1,21 @@
-// 1. Load environment variables IMMEDIATELY
+//  Load environment variables IMMEDIATELY
 require('dotenv').config();
 
-// 2. Import external tools
+//  Import external tools
 const express = require('express');
 const cors = require('cors');
 
-// 3. Import your internal files after dotenv is ready
+//  Import your internal files after dotenv is ready
 const prisma = require('./db/prisma');
+const bcrypt = require('bcrypt');
 
 const app = express();
 
-// 4. Middleware setup
+//  Middleware setup
 app.use(cors());
 app.use(express.json());
 
-// 5. Routes
+//  Routes
 
 // Home route
 app.get('/', (req, res) => {
@@ -35,19 +36,22 @@ app.get('/users', async (req, res) => {
 // POST route: Create a new user
 app.post('/users', async (req, res) => {
   try {
-    // 1. Grab name, email, AND password from the request body
+    // Grab name, email, AND password from the request body
     const { name, email, password } = req.body; 
 
-    // 2. Tell Prisma to include the password when creating the user
+    // NEW: Scramble the password 10 times (10 "salts")
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const newUser = await prisma.user.create({
       data: {
         name: name,
         email: email,
-        password: password, 
+        password: hashedPassword, // We save the HASH, not the real password!
       },
     });
 
-    // 3.  Send back the newly created user with a "201 Created" success code
+    //   Send back the newly created user with a "201 Created" success code
     res.status(201).json(newUser);
 
   } catch (error) {
