@@ -17,3 +17,5 @@
 * **Backend**: Node.js, Express
 * **Database**: MongoDB (Geospatial Indexing)
 * **Real-time**: Socket.io
+
+localhost:5000/users
