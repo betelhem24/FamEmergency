@@ -29,6 +29,29 @@ app.get('/users', async (req, res) => {
   }
 });
 
+// NEW: Create a new user in the database
+app.post('/users', async (req, res) => {
+  try {
+    // 1. Get the data from the request body (what the user typed)
+    const { name, email } = req.body; 
+
+    // 2. Use Prisma to save this data into the Neon database
+    const newUser = await prisma.user.create({
+      data: {
+        name: name,
+        email: email,
+      },
+    });
+
+    // 3. Send back the newly created user with a "201 Created" success code
+    res.status(201).json(newUser);
+    
+  } catch (error) {
+    console.error("Create User Error:", error);
+    res.status(500).json({ error: "Could not create user" });
+  }
+});
+
 // 6. Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
