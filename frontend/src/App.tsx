@@ -19,25 +19,25 @@ function App() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   
-  // 1. STATE: To store the list of contacts we get from the database
+// 1. STATE: To store the list of contacts
   const [contacts, setContacts] = useState<Contact[]>([]);
 
-  // 2. LOGIC: The function to fetch contacts from the Backend
+  // 2. LOGIC: The function to fetch contacts
+  // Word-by-Word: useCallback "freezes" this function so it doesn't change every time the page refreshes
   const fetchContacts = useCallback(async () => {
     if (!user) return;
     try {
-      // Word-by-Word: We use the GET route we made in server.js
       const response = await axios.get(`http://localhost:5000/contacts/${user.id}`);
       setContacts(response.data);
     } catch (err) {
       console.error("Error fetching contacts:", err);
     }
-  }, [user]);
+  }, [user]); // Word: Only re-create if 'user' changes
 
-  // 3. AUTOMATION: Run fetchContacts automatically when the page loads
+  // 3. AUTOMATION: Run fetchContacts automatically
   useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
+    fetchContacts(); 
+  }, [fetchContacts]); // Word-by-Word: This is the "Watch List." When fetchContacts is ready, run it.
 
   const handleLogout = () => {
     dispatch(logout());
