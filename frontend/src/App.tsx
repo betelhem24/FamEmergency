@@ -36,14 +36,20 @@ function App() {
     }
   }, [user]); // Changed from [user?.id] to [user] to satisfy the compiler
 
-  // 4. THE AUTOMATION: Safe synchronization
+ // 4. THE AUTOMATION: Safe synchronization (Line 40-45)
   useEffect(() => {
-    // Word: We only run this if a user actually exists
-    if (user) {
+    // Word: Create a variable to track if this specific 'run' is still valid
+    let isMounted = true;
+
+    if (user?.id && isMounted) {
       fetchContacts();
     }
-  }, [user, fetchContacts]); // Word: This keeps the external system (Database) in sync with React
 
+    // Word: This 'cleanup' function runs if the component disappears
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, fetchContacts]); // Word: We watch the specific ID and the function
   const handleLogout = () => {
     dispatch(logout());
   };
