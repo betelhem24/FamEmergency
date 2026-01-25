@@ -1,12 +1,43 @@
+import { useEffect, useState, useCallback } from 'react'; // Added useEffect and useState
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from './store/authSlice';
-import type { RootState } from './store'; 
+import type { RootState } from './store';
+import axios from 'axios';
 import './App.css';
-import RegisterForm from './components/RegisterForm'; 
+import RegisterForm from './components/RegisterForm';
+import ContactForm from './components/ContactForm'; // Word: Import the form
+
+// Word-by-Word: We define what a Contact looks like for TypeScript
+interface Contact {
+  id: number;
+  name: string;
+  phone: string;
+  relation: string;
+}
 
 function App() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
+  
+  // 1. STATE: To store the list of contacts we get from the database
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
+  // 2. LOGIC: The function to fetch contacts from the Backend
+  const fetchContacts = useCallback(async () => {
+    if (!user) return;
+    try {
+      // Word-by-Word: We use the GET route we made in server.js
+      const response = await axios.get(`http://localhost:5000/contacts/${user.id}`);
+      setContacts(response.data);
+    } catch (err) {
+      console.error("Error fetching contacts:", err);
+    }
+  }, [user]);
+
+  // 3. AUTOMATION: Run fetchContacts automatically when the page loads
+  useEffect(() => {
+    fetchContacts();
+  }, [fetchContacts]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -15,12 +46,31 @@ function App() {
   return (
     <div className="container">
       {user ? (
-        <div className="glass-card">
-          <h1>Welcome, {user.name}! 👋</h1>
-          <p>You are now logged into FamEmergency.</p>
-          <button onClick={handleLogout} className="btn-secondary">
-            Logout
-          </button>
+        <div className="dashboard-layout">
+          <div className="glass-card">
+            <h1>Welcome, {user.name}! 👋</h1>
+            <button onClick={handleLogout} className="btn-secondary">Logout</button>
+            
+            <hr />
+
+            {/* Word: We pass fetchContacts so the form can refresh the list */}
+            <ContactForm onContactAdded={fetchContacts} />
+          </div>
+
+          <div className="glass-card list-section">
+            <h3>Your Emergency Contacts</h3>
+            {contacts.length === 0 ? (
+              <p>No contacts added yet.</p>
+            ) : (
+              <ul className="contact-list">
+                {contacts.map((c) => (
+                  <li key={c.id} className="contact-item">
+                    <strong>{c.name}</strong> ({c.relation}) - {c.phone}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       ) : (
         <div className="glass-card">
