@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // New Tools
 import { store } from './store';
 import App from './App';
-import Login from './Login'; // Import the placeholder we made
+import Login from './Login'; 
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
