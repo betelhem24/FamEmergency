@@ -14,3 +14,25 @@ model User {
   password  String
   createdAt DateTime @default(now())
 }
+
+// This is your existing User model (Keep it!)
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  //  This tells Prisma that a User can have a list of contacts
+  contacts  EmergencyContact[] 
+}
+
+// This is the NEW model (Add this!)
+model EmergencyContact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  relation  String   // e.g., "Mother", "Husband", "Doctor"
+  
+  //  This links the contact to a specific User
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
