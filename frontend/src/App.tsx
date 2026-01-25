@@ -7,6 +7,8 @@ import './App.css';
 import RegisterForm from './components/RegisterForm';
 import ContactForm from './components/ContactForm';
 
+// 1. THE BLUEPRINT: We tell TypeScript what a "Contact" looks like.
+// This prevents errors when we try to display the name or phone.
 interface Contact {
   id: number;
   name: string;
@@ -18,13 +20,12 @@ function App() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   
-  // 1. STATE: List memory
+  // 2. THE MEMORY: A place to store the list of family members.
   const [contacts, setContacts] = useState<Contact[]>([]);
 
-  // 2. LOGIC: Define the fetcher
-  // Word-by-Word: We use useCallback to make sure this function is "stable"
+  // 3. THE ACTION: Optimized for the React Compiler
+  // Word-by-Word: We change the dependency to [user] because the compiler prefers the whole object.
   const fetchContacts = useCallback(async () => {
-    // Word: We only try to fetch if we have a valid user ID
     if (!user?.id) return;
     
     try {
@@ -33,14 +34,15 @@ function App() {
     } catch (err) {
       console.error("Error fetching contacts:", err);
     }
-  }, [user?.id]); // Word: Only re-create if the specific user ID changes
+  }, [user]); // Changed from [user?.id] to [user] to satisfy the compiler
 
-  // 3. AUTOMATION: Run on start
+  // 4. THE AUTOMATION: Safe synchronization
   useEffect(() => {
+    // Word: We only run this if a user actually exists
     if (user) {
       fetchContacts();
     }
-  }, [user, fetchContacts]); // Word: We include both in the watch-list to satisfy TS
+  }, [user, fetchContacts]); // Word: This keeps the external system (Database) in sync with React
 
   const handleLogout = () => {
     dispatch(logout());
@@ -49,12 +51,13 @@ function App() {
   return (
     <div className="container">
       {user ? (
+        /* --- LOGGED IN VIEW --- */
         <div className="dashboard-layout">
           <div className="glass-card">
             <h1>Welcome, {user.name}! 👋</h1>
             <button onClick={handleLogout} className="btn-secondary">Logout</button>
             <hr />
-            {/* Word: We pass the function to the child component */}
+            {/* We give the form the power to refresh the list */}
             <ContactForm onContactAdded={fetchContacts} />
           </div>
 
@@ -64,6 +67,7 @@ function App() {
               <p>No contacts added yet.</p>
             ) : (
               <ul className="contact-list">
+                {/* We loop through every contact and draw it on the screen */}
                 {contacts.map((c) => (
                   <li key={c.id} className="contact-item">
                     <strong>{c.name}</strong> ({c.relation}) - {c.phone}
@@ -74,6 +78,7 @@ function App() {
           </div>
         </div>
       ) : (
+        /* --- LOGGED OUT VIEW --- */
         <div className="glass-card">
           <h2>Create Account</h2>
           <RegisterForm /> 
