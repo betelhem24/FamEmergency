@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // New Tools
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { store } from './store';
 import App from './App';
-import Login from './Login'; 
+import Login from './Login';
+import ProtectedRoute from './components/ProtectedRoute'; // Word: Import our Guard
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -12,14 +13,22 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <BrowserRouter>
         <Routes>
-          {/*  When URL is /register, show the App component */}
-          <Route path="/register" element={<App />} />
+          {/* Word-by-Word: We WRAP the App component inside the ProtectedRoute guard */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <App />
+              </ProtectedRoute>
+            } 
+          />
           
-          {/*  When URL is /login, show the Login component */}
           <Route path="/login" element={<Login />} />
+          {/* Word: Registration is public, so no guard here */}
+          <Route path="/register" element={<App />} /> 
           
-          {/*  If someone goes to just "/", send them to /login automatically */}
-          <Route path="/" element={<Navigate to="/login" />} />
+          {/* Word: Fallback to login */}
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </BrowserRouter>
     </Provider>
