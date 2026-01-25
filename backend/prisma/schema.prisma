@@ -1,3 +1,4 @@
+// This is your standard Prisma setup
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,32 +8,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 1. THE USER MODEL (Only list this ONCE)
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String?
   password  String
-  createdAt DateTime @default(now())
-}
-
-// This is your existing User model (Keep it!)
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  //  This tells Prisma that a User can have a list of contacts
   contacts  EmergencyContact[] 
 }
 
-// This is the NEW model (Add this!)
+// 2. THE EMERGENCY CONTACT MODEL
 model EmergencyContact {
   id        Int      @id @default(autoincrement())
   name      String
   phone     String
-  relation  String   // e.g., "Mother", "Husband", "Doctor"
+  relation  String
   
-  //  This links the contact to a specific User
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
 }
