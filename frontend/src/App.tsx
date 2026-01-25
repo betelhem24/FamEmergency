@@ -1,71 +1,39 @@
-// 1. IMPORTS
-import React, { useState } from 'react';
-// Word-by-Word: AxiosError is a "Type" that describes exactly what a failure looks like
-import axios, { AxiosError } from 'axios'; 
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from './store/authSlice';
+import type { RootState } from './store'; // Added 'type' here to stop TS errors
 import './App.css';
+import RegisterForm from './components/RegisterForm'; 
 
 function App() {
-  // 2. STATE
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  // Word-by-Word: We ask the store if 'user' is inside the 'auth' slice
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
 
-  // 3. THE BRIDGE
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await axios.post('http://localhost:5000/users', {
-        name: name,
-        email: email,
-        password: password
-      });
-
-      console.log("Success:", response.data);
-      alert('Success! User created: ' + response.data.name);
-      
-    } catch (err) {
-      // 🔍 THE PRO FIX:
-      // 'as' = I are telling TypeScript: "Trust me, I know this error comes from Axios."
-      // '<{error: string}>' = We are defining that the server's JSON has a key called 'error' which is text.
-      const error = err as AxiosError<{error: string}>;
-
-      if (error.response && error.response.data && error.response.data.error) {
-        // Now TypeScript knows exactly what 'error.response.data.error' is!
-        alert(error.response.data.error);
-      } else {
-        alert('Error: Cannot reach the server.');
-      }
-    }
+  const handleLogout = () => {
+    dispatch(logout());
   };
 
-  // 4. THE UI
   return (
-    <div className="glass-card">
-      <h2>Join FamEmergency</h2>
-      <form onSubmit={handleRegister}>
-        <input 
-          placeholder="Full Name" 
-          value={name}
-          onChange={(e) => setName(e.target.value)} 
-          required 
-        />
-        <input 
-          placeholder="Email Address" 
-          type="email" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-        />
-        <input 
-          placeholder="Password" 
-          type="password" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-        />
-        <button type="submit">Register</button>
-      </form>
+    <div className="container">
+      {user ? (
+        <div className="glass-card">
+          <h1>Welcome, {user.name}! 👋</h1>
+          <p>You are now logged into FamEmergency.</p>
+          <button onClick={handleLogout} className="btn-secondary">
+            Logout
+          </button>
+        </div>
+      ) : (
+        <div className="glass-card">
+          <h2>Create Account</h2>
+          {/* Word-by-Word: This is the component we just created in Step 1 */}
+          <RegisterForm /> 
+          <p className="auth-link">
+            Already have an account? <a href="/login">Login here</a>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
