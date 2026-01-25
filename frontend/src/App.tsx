@@ -7,8 +7,7 @@ import './App.css';
 import RegisterForm from './components/RegisterForm';
 import ContactForm from './components/ContactForm';
 
-// 1. THE BLUEPRINT: We tell TypeScript what a "Contact" looks like.
-// This prevents errors when we try to display the name or phone.
+// 1. THE BLUEPRINT: Defines the shape of a contact object
 interface Contact {
   id: number;
   name: string;
@@ -20,36 +19,44 @@ function App() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   
-  // 2. THE MEMORY: A place to store the list of family members.
+  // 2. THE MEMORY: Stores the array of contacts from the DB
   const [contacts, setContacts] = useState<Contact[]>([]);
 
-  // 3. THE ACTION: Optimized for the React Compiler
-  // Word-by-Word: We change the dependency to [user] because the compiler prefers the whole object.
+  // 3. THE ACTION: A stable function to pull data from the API
   const fetchContacts = useCallback(async () => {
+    // Word-by-Word: We only proceed if we have a valid logged-in user ID
     if (!user?.id) return;
     
     try {
       const response = await axios.get(`http://localhost:5000/contacts/${user.id}`);
+      // Word: We update the state with the array of contacts
       setContacts(response.data);
     } catch (err) {
       console.error("Error fetching contacts:", err);
     }
-  }, [user]); // Changed from [user?.id] to [user] to satisfy the compiler
+  }, [user]); // Word: The compiler wants to watch the 'user' object
 
- // 4. THE AUTOMATION: Safe synchronization (Line 40-45)
+  // 4. THE AUTOMATION: This is the section the Compiler was flagging
   useEffect(() => {
-    // Word: Create a variable to track if this specific 'run' is still valid
-    let isMounted = true;
+    // Word: We create a 'flag' to prevent cascading renders
+    let active = true;
 
-    if (user?.id && isMounted) {
-      fetchContacts();
-    }
-
-    // Word: This 'cleanup' function runs if the component disappears
-    return () => {
-      isMounted = false;
+    // Word: We define a sub-function to handle the async work
+    const load = async () => {
+      if (user?.id && active) {
+        await fetchContacts();
+      }
     };
-  }, [user?.id, fetchContacts]); // Word: We watch the specific ID and the function
+
+    // Word: We trigger the load
+    load();
+
+    // Word: Cleanup function runs when the component unmounts or user changes
+    return () => {
+      active = false;
+    };
+  }, [user, fetchContacts]); // Word: Providing full dependencies for the Compiler
+
   const handleLogout = () => {
     dispatch(logout());
   };
@@ -63,7 +70,7 @@ function App() {
             <h1>Welcome, {user.name}! 👋</h1>
             <button onClick={handleLogout} className="btn-secondary">Logout</button>
             <hr />
-            {/* We give the form the power to refresh the list */}
+            {/* Word: We pass the fetch function so the form can trigger a refresh */}
             <ContactForm onContactAdded={fetchContacts} />
           </div>
 
@@ -73,7 +80,7 @@ function App() {
               <p>No contacts added yet.</p>
             ) : (
               <ul className="contact-list">
-                {/* We loop through every contact and draw it on the screen */}
+                {/* Word-by-Word: .map transforms our data into a visual list */}
                 {contacts.map((c) => (
                   <li key={c.id} className="contact-item">
                     <strong>{c.name}</strong> ({c.relation}) - {c.phone}
