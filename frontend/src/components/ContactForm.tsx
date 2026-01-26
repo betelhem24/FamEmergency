@@ -1,80 +1,105 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import axios from 'axios';
+import { RootState } from '../store';
 
-const ContactForm = ({ onContactAdded }: { onContactAdded: () => void }) => {
-  // 1. STATE: Memory for the form inputs
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [relation, setRelation] = useState('');
+//  I define the Props to include the new edit data
+interface ContactFormProps {
+  onContactAdded: () => void;
+  editData?: { id: number; name: string; phone: string; relation: string } | null;
+  onCancelEdit?: () => void;
+}
 
-  // 2. BRAIN: Get the logged-in user's ID from Redux
-  const { user } = useSelector((state: RootState) => state.auth);
+const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onCancelEdit }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  
+  //  State for the input fields
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    relation: 'Family'
+  });
 
-  // 3. LOGIC: Sending the data to the Backend
+  //  When 'editData' changes (the user clicks Edit), we fill the form
+  useEffect(() => {
+    if (editData) {
+      setFormData({
+        name: editData.name,
+        phone: editData.phone,
+        relation: editData.relation
+      });
+    } else {
+      // Word: If editData is null, clear the form (Add mode)
+      setFormData({ name: '', phone: '', relation: 'Family' });
+    }
+  }, [editData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Word: If no user is logged in, we can't save a contact
     if (!user) return;
 
     try {
-      // Word-by-Word: axios.post sends the data to our new /contacts route
-      await axios.post('http://localhost:5000/contacts', {
-        name,
-        phone,
-        relation,
-        userId: user.id, // Word: We attach the ID of the owner
-      });
-
-      // Word: Clear the form after success
-      setName('');
-      setPhone('');
-      setRelation('');
-      
-      // Word: This tells the parent page to refresh the list of contacts
-      onContactAdded();
-      alert("Emergency Contact Saved!");
-
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        alert(err.response?.data?.error || "Failed to save contact");
+      if (editData) {
+        //  If we are editing, use the PUT route with the contact ID
+        await axios.put(`http://localhost:5000/contacts/${editData.id}`, formData);
+        alert("Contact Updated!");
+      } else {
+        // If we are NOT editing, use the POST route to create new
+        await axios.post('http://localhost:5000/contacts', {
+          ...formData,
+          userId: user.id
+        });
+        alert("Contact Saved!");
       }
+      
+      onContactAdded(); // Refresh the list
+    } catch (error) {
+      console.error("Save Error:", error);
+      alert("Failed to save contact.");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="contact-form">
-      <h3>Add Emergency Contact</h3>
-      <div className="form-group">
-        <input 
-          type="text" 
-          placeholder="Contact Name" 
-          value={name} 
-          onChange={(e) => setName(e.target.value)} 
-          required 
-        />
+      <h3>{editData ? "Edit Contact" : "Add Emergency Contact"}</h3>
+      
+      <input
+        type="text"
+        placeholder="Name"
+        value={formData.name}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        required
+      />
+      
+      <input
+        type="text"
+        placeholder="Phone Number"
+        value={formData.phone}
+        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+        required
+      />
+      
+      <select 
+        value={formData.relation}
+        onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
+      >
+        <option value="Family">Family</option>
+        <option value="Friend">Friend</option>
+        <option value="Work">Work</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <div className="form-actions">
+        <button type="submit" className="btn-primary">
+          {editData ? "Update Contact" : "Save Contact"}
+        </button>
+        
+        {editData && (
+          <button type="button" onClick={onCancelEdit} className="btn-secondary">
+            Cancel
+          </button>
+        )}
       </div>
-      <div className="form-group">
-        <input 
-          type="text" 
-          placeholder="Phone Number" 
-          value={phone} 
-          onChange={(e) => setPhone(e.target.value)} 
-          required 
-        />
-      </div>
-      <div className="form-group">
-        <input 
-          type="text" 
-          placeholder="Relation (e.g. Mother)" 
-          value={relation} 
-          onChange={(e) => setRelation(e.target.value)} 
-          required 
-        />
-      </div>
-      <button type="submit" className="btn-primary">Save Contact</button>
     </form>
   );
 };
