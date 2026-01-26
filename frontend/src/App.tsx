@@ -1,8 +1,9 @@
 // I import the necessary tools from React and React Router
+// I use 'import type' for RootState because it is a TypeScript definition, not a value
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from './store';
+import type { RootState } from './store'; // FIXED LINE
 
 // I import the different page components
 import Login from './pages/Login';
