@@ -121,6 +121,36 @@ app.get('/contacts/:userId', async (req, res) => {
   }
 });
 
+// UPDATE CONTACT ROUTE
+// 'app.put' is the standard method for updating existing data.
+app.put('/contacts/:id', async (req, res) => {
+  // Word: Get the ID of the contact from the URL
+  const { id } = req.params;
+  // Word: Get the new Name, Phone, and Relation from the request body
+  const { name, phone, relation } = req.body;
+
+  try {
+    // Word-by-Word: 'prisma.emergencyContact.update' finds the row and changes it.
+    const updatedContact = await prisma.emergencyContact.update({
+      where: {
+        id: parseInt(id), // Word: Find the contact with this ID
+      },
+      data: {
+        name: name,         // Word: Overwrite the old name with the new one
+        phone: phone,       // Word: Overwrite the old phone
+        relation: relation, // Word: Overwrite the old relation
+      },
+    });
+
+    console.log("✏️ Contact updated in Database!");
+    // Word: Send the updated contact back to the frontend
+    res.json(updatedContact);
+  } catch (error) {
+    console.error("Update Error:", error);
+    res.status(500).json({ error: "Could not update contact." });
+  }
+});
+
 // DELETE CONTACT ROUTE
 app.delete('/contacts/:id', async (req, res) => {
   // Word: 'req.params' extracts the ID from the URL link
