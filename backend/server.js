@@ -7,7 +7,9 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 
 const app = express();
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
+// I am now importing the shared prisma connection from my db folder
+const prisma = require('./db/prisma');
 
 // MIDDLEWARE
 app.use(cors()); 
