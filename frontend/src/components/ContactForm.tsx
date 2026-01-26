@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { RootState } from '../store';
+// Word: We check the path. If your store is in 'src/store/index.ts', we use '../store'
+import { RootState } from '../store'; 
 
-//  I define the Props to include the new edit data
 interface ContactFormProps {
   onContactAdded: () => void;
   editData?: { id: number; name: string; phone: string; relation: string } | null;
@@ -13,15 +13,16 @@ interface ContactFormProps {
 const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onCancelEdit }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   
-  //  State for the input fields
+  // Word-by-Word: We explicitly tell React what 'formData' looks like
+  // This prevents the red line on setFormData.
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     relation: 'Family'
   });
 
-  //  When 'editData' changes (the user clicks Edit), we fill the form
   useEffect(() => {
+    // Word: If editData exists and is NOT null
     if (editData) {
       setFormData({
         name: editData.name,
@@ -29,7 +30,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
         relation: editData.relation
       });
     } else {
-      // Word: If editData is null, clear the form (Add mode)
+      // Word: Reset to empty strings if we are adding a new contact
       setFormData({ name: '', phone: '', relation: 'Family' });
     }
   }, [editData]);
@@ -40,19 +41,17 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
 
     try {
       if (editData) {
-        //  If we are editing, use the PUT route with the contact ID
+        // Word: PUT means "Update existing"
         await axios.put(`http://localhost:5000/contacts/${editData.id}`, formData);
-        alert("Contact Updated!");
       } else {
-        // If we are NOT editing, use the POST route to create new
+        // Word: POST means "Create new"
         await axios.post('http://localhost:5000/contacts', {
           ...formData,
           userId: user.id
         });
-        alert("Contact Saved!");
       }
       
-      onContactAdded(); // Refresh the list
+      onContactAdded(); 
     } catch (error) {
       console.error("Save Error:", error);
       alert("Failed to save contact.");
@@ -67,6 +66,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
         type="text"
         placeholder="Name"
         value={formData.name}
+        // Word: '...formData' keeps the other fields safe while we change 'name'
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         required
       />
@@ -91,7 +91,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
 
       <div className="form-actions">
         <button type="submit" className="btn-primary">
-          {editData ? "Update Contact" : "Save Contact"}
+          {editData ? "Update" : "Save"}
         </button>
         
         {editData && (
