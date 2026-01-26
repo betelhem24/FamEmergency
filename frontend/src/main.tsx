@@ -1,36 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+// I import Provider so the entire app can access the Redux 'Global Memory'
 import { Provider } from 'react-redux';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// I import our store that we configured earlier
 import { store } from './store';
+// I import App, which acts as the 'Traffic Controller' for our routes
 import App from './App';
-import Login from './Login';
-import ProtectedRoute from './components/ProtectedRoute'; // Word: Import our Guard
+// I import the global CSS for our Glassmorphism variables
 import './index.css';
 
+// I tell React to find the 'root' div in your index.html and start the app there
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    {/* I wrap the App in the Redux Provider so state is available everywhere */}
     <Provider store={store}>
-      <BrowserRouter>
-        <Routes>
-          {/* Word-by-Word: We WRAP the App component inside the ProtectedRoute guard */}
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <App />
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route path="/login" element={<Login />} />
-          {/* Word: Registration is public, so no guard here */}
-          <Route path="/register" element={<App />} /> 
-          
-          {/* Word: Fallback to login */}
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </BrowserRouter>
+      <App />
     </Provider>
   </React.StrictMode>
 );
