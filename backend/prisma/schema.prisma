@@ -1,29 +1,39 @@
-// This is your standard Prisma setup
+// I define the standard Prisma generator to create the client for JavaScript
 generator client {
   provider = "prisma-client-js"
 }
 
+// I set up the connection to the PostgreSQL database using the URL from the .env file
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// 1. THE USER MODEL (Only list this ONCE)
+// I define the User model to store account information
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int                @id @default(autoincrement())
+  email     String             @unique
   name      String?
   password  String
+  
+  // I added this role field to identify if the user is a PATIENT or a DOCTOR
+  // It defaults to PATIENT for security
+  role      String             @default("PATIENT")
+  
+  // I create a relation to link many emergency contacts to one user
   contacts  EmergencyContact[] 
 }
 
-// 2. THE EMERGENCY CONTACT MODEL
+// I define the EmergencyContact model to store specific contact details
 model EmergencyContact {
   id        Int      @id @default(autoincrement())
   name      String
   phone     String
   relation  String
   
+  // I store the ID of the user who owns this contact
   userId    Int
+  
+  // I establish the link back to the User model using the userId field
   user      User     @relation(fields: [userId], references: [id])
 }
