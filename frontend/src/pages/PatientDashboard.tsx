@@ -1,9 +1,9 @@
 // I import React and the QR Code generator component
+// I use 'import type' here as well to satisfy the verbatimModuleSyntax rule
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../store';
 import { QRCodeSVG } from 'qrcode.react';
-
+import type { RootState } from '../store'; // FIXED LINE
 const PatientDashboard: React.FC = () => {
   // I grab the user information from the Redux store
   const { user } = useSelector((state: RootState) => state.auth);
