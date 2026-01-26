@@ -20,6 +20,10 @@ model User {
   // It defaults to PATIENT for security
   role      String             @default("PATIENT")
   
+  // I add this to track exactly when the user registered
+  // The 'now()' function automatically grabs the current time from the server
+  createdAt DateTime           @default(now()) 
+  
   // I create a relation to link many emergency contacts to one user
   contacts  EmergencyContact[] 
 }
