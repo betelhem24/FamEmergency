@@ -1,34 +1,21 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
-import type { RootState } from '../store'; 
+import { contactApi } from '../api/contactApi';
+import type { RootState } from '../store';
+// I added the 'type' keyword here to fix the red line.
+// This tells the compiler that Contact is a blueprint, not a variable.
+import type { Contact } from '../types/contact';
 
-// Word: The blueprint for the data itself
-interface Contact {
-  id: number;
-  name: string;
-  phone: string;
-  relation: string;
-}
-
-// Word-by-Word: This is the "Door" that tells App.tsx what is allowed.
-// We MUST define these here so App.tsx doesn't show the 'IntrinsicAttributes' error.
 interface ContactFormProps {
   onContactAdded: () => void;
   editData: Contact | null;
   onCancelEdit: () => void;
 }
 
-// Word: React.FC<ContactFormProps> tells TypeScript: 
-// "This function is a component that MUST accept the props we defined above."
-const ContactForm: React.FC<ContactFormProps> = ({ 
-  onContactAdded, 
-  editData, 
-  onCancelEdit 
-}) => {
+const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onCancelEdit }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   
-  // Word: We set the state immediately from the props.
+  // I initialize the form state. If editData exists, I fill the boxes.
   const [formData, setFormData] = useState({
     name: editData?.name || '',
     phone: editData?.phone || '',
@@ -41,14 +28,11 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
     try {
       if (editData) {
-        // Word: PUT route for Update
-        await axios.put(`http://localhost:5000/contacts/${editData.id}`, formData);
+        // I use the dedicated API service to send the update
+        await contactApi.update(editData.id, formData);
       } else {
-        // Word: POST route for Create
-        await axios.post('http://localhost:5000/contacts', {
-          ...formData,
-          userId: user.id
-        });
+        // I use the API service to create a new entry
+        await contactApi.create({ ...formData, userId: user.id });
       }
       onContactAdded();
     } catch (error) {
@@ -82,15 +66,10 @@ const ContactForm: React.FC<ContactFormProps> = ({
         <option value="Work">Work</option>
         <option value="Other">Other</option>
       </select>
-
       <div className="form-actions">
-        <button type="submit" className="btn-primary">
-          {editData ? "Update" : "Save"}
-        </button>
+        <button type="submit" className="btn-primary">{editData ? "Update" : "Save"}</button>
         {editData && (
-          <button type="button" onClick={onCancelEdit} className="btn-secondary">
-            Cancel
-          </button>
+          <button type="button" onClick={onCancelEdit} className="btn-secondary">Cancel</button>
         )}
       </div>
     </form>
