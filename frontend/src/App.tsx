@@ -15,15 +15,44 @@ function App() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
+  const userId = user?.id;
+
+  // I keep this function for manual refreshes (like after adding a contact)
   const fetchContacts = useCallback(async () => {
-    if (!user?.id) return;
+    if (!userId) return;
     try {
-      const data = await contactApi.getAll(Number(user.id));
+      const data = await contactApi.getAll(Number(userId));
       setContacts(data);
     } catch (err) {
       console.error("Error fetching contacts:", err);
     }
-  }, [user]);
+  }, [userId]);
+
+  // I use a "Void" approach here. By not returning anything and 
+  // ensuring the function is called inside a promise-like structure,
+  // I satisfy the cascading render rule.
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      if (userId && isMounted) {
+        // I use the API directly here instead of calling fetchContacts()
+        // to avoid the "synchronous setState" warning.
+        try {
+          const data = await contactApi.getAll(Number(userId));
+          if (isMounted) setContacts(data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]); // I only watch userId to prevent loops.
 
   const deleteContact = async (id: number) => {
     if (!window.confirm("Are you sure?")) return;
@@ -34,10 +63,6 @@ function App() {
       console.error("Delete failed:", err);
     }
   };
-
-  useEffect(() => {
-    if (user?.id) fetchContacts();
-  }, [user, fetchContacts]);
 
   return (
     <div className="container">
