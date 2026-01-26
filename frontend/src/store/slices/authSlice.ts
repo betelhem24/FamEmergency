@@ -1,5 +1,5 @@
-// I use 'import type' for PayloadAction to satisfy the verbatimModuleSyntax rule
 import { createSlice } from '@reduxjs/toolkit';
+// I use 'import type' for PayloadAction to satisfy the verbatimModuleSyntax rule
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 // I define the user structure
