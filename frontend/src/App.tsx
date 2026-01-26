@@ -1,100 +1,56 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from './store/authSlice';
-import type { RootState } from './store';
-import { contactApi } from './api/contactApi';
-import type { Contact } from './types/contact';
-import './App.css';
-import RegisterForm from './components/RegisterForm';
-import ContactForm from './components/ContactForm';
-import ContactList from './components/ContactList';
+// I import the necessary tools from React and React Router
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from './store';
 
-function App() {
-  const user = useSelector((state: RootState) => state.auth.user);
-  const dispatch = useDispatch();
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+// I import the different page components
+import Login from './pages/Login';
+import PatientDashboard from './pages/PatientDashboard';
+import DoctorDashboard from './pages/DoctorDashboard';
 
-  const userId = user?.id;
-
-  // I keep this function for manual refreshes (like after adding a contact)
-  const fetchContacts = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const data = await contactApi.getAll(Number(userId));
-      setContacts(data);
-    } catch (err) {
-      console.error("Error fetching contacts:", err);
-    }
-  }, [userId]);
-
-  // I use a "Void" approach here. By not returning anything and 
-  // ensuring the function is called inside a promise-like structure,
-  // I satisfy the cascading render rule.
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      if (userId && isMounted) {
-        // I use the API directly here instead of calling fetchContacts()
-        // to avoid the "synchronous setState" warning.
-        try {
-          const data = await contactApi.getAll(Number(userId));
-          if (isMounted) setContacts(data);
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [userId]); // I only watch userId to prevent loops.
-
-  const deleteContact = async (id: number) => {
-    if (!window.confirm("Are you sure?")) return;
-    try {
-      await contactApi.delete(id);
-      fetchContacts();
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  };
+const App: React.FC = () => {
+  // I pull the user and authentication status from the Redux store
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   return (
-    <div className="container">
-      {user ? (
-        <div className="dashboard-layout">
-          <div className="glass-card">
-            <h1>Hello, {user.name}!</h1>
-            <button onClick={() => dispatch(logout())} className="btn-secondary">Logout</button>
-            <hr />
-            <ContactForm 
-              key={editingContact?.id || 'new'} 
-              editData={editingContact}
-              onContactAdded={() => { fetchContacts(); setEditingContact(null); }}
-              onCancelEdit={() => setEditingContact(null)}
-            />
-          </div>
-          <div className="glass-card list-section">
-            <h3>Your Emergency Contacts</h3>
-            <ContactList 
-              contacts={contacts} 
-              onEdit={setEditingContact} 
-              onDelete={deleteContact} 
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="glass-card">
-          <RegisterForm />
-        </div>
-      )}
-    </div>
+    <Router>
+      <Routes>
+        {/* I define the public Login route */}
+        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
+
+        {/* I define the logic for the Home path '/' */}
+        <Route 
+          path="/" 
+          element={
+            !isAuthenticated ? (
+              <Navigate to="/login" />
+            ) : user?.role === 'DOCTOR' ? (
+              <Navigate to="/doctor-dashboard" />
+            ) : (
+              <Navigate to="/patient-dashboard" />
+            )
+          } 
+        />
+
+        {/* I protect the Patient Dashboard: only PATIENT role can enter */}
+        <Route 
+          path="/patient-dashboard" 
+          element={
+            isAuthenticated && user?.role === 'PATIENT' ? <PatientDashboard /> : <Navigate to="/login" />
+          } 
+        />
+
+        {/* I protect the Doctor Dashboard: only DOCTOR role can enter */}
+        <Route 
+          path="/doctor-dashboard" 
+          element={
+            isAuthenticated && user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />
+          } 
+        />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
