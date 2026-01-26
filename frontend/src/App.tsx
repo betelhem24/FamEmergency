@@ -7,7 +7,7 @@ import './App.css';
 import RegisterForm from './components/RegisterForm';
 import ContactForm from './components/ContactForm';
 
-// 1. THE BLUEPRINT: Defines the shape of a contact object
+// BLUEPRINT: Defines what a Contact looks like
 interface Contact {
   id: number;
   name: string;
@@ -19,43 +19,54 @@ function App() {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
   
-  // 2. THE MEMORY: Stores the array of contacts from the DB
+  // MEMORY: Stores the list of contacts
   const [contacts, setContacts] = useState<Contact[]>([]);
 
-  // 3. THE ACTION: A stable function to pull data from the API
+  // EDIT STATE: Stores the contact being edited. If null, we are adding new.
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+
+  // FETCH LOGIC: Pulls data from the Backend
   const fetchContacts = useCallback(async () => {
-    // Word-by-Word: We only proceed if we have a valid logged-in user ID
     if (!user?.id) return;
-    
     try {
       const response = await axios.get(`http://localhost:5000/contacts/${user.id}`);
-      // Word: We update the state with the array of contacts
       setContacts(response.data);
     } catch (err) {
       console.error("Error fetching contacts:", err);
     }
-  }, [user]); // Word: The compiler wants to watch the 'user' object
+  }, [user]);
 
-  // 4. THE AUTOMATION: This is the section the Compiler was flagging
+  // DELETE LOGIC: Removes a contact
+  const deleteContact = async (contactId: number) => {
+    if (!window.confirm("Are you sure you want to delete this contact?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/contacts/${contactId}`);
+      fetchContacts();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete contact.");
+    }
+  };
+
+  // START EDITING: Fills the 'editingContact' memory and scrolls up
+  const startEditing = (contact: Contact) => {
+    setEditingContact(contact);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // AUTOMATION: Syncs with DB on login
   useEffect(() => {
-    // Word: We create a 'flag' to prevent cascading renders
     let active = true;
-
-    // Word: We define a sub-function to handle the async work
     const load = async () => {
       if (user?.id && active) {
         await fetchContacts();
       }
     };
-
-    // Word: We trigger the load
     load();
-
-    // Word: Cleanup function runs when the component unmounts or user changes
     return () => {
       active = false;
     };
-  }, [user, fetchContacts]); // Word: Providing full dependencies for the Compiler
+  }, [user, fetchContacts]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -64,14 +75,21 @@ function App() {
   return (
     <div className="container">
       {user ? (
-        /* --- LOGGED IN VIEW --- */
         <div className="dashboard-layout">
           <div className="glass-card">
             <h1>Welcome, {user.name}! 👋</h1>
             <button onClick={handleLogout} className="btn-secondary">Logout</button>
             <hr />
-            {/* Word: We pass the fetch function so the form can trigger a refresh */}
-            <ContactForm onContactAdded={fetchContacts} />
+            
+            {/* UPDATED: We now pass the editingContact and a way to clear it to the form */}
+            <ContactForm 
+              onContactAdded={() => {
+                fetchContacts();
+                setEditingContact(null); // Word: Clear edit mode after saving
+              }} 
+              editData={editingContact}
+              onCancelEdit={() => setEditingContact(null)} // Word: Way to cancel editing
+            />
           </div>
 
           <div className="glass-card list-section">
@@ -80,10 +98,28 @@ function App() {
               <p>No contacts added yet.</p>
             ) : (
               <ul className="contact-list">
-                {/* Word-by-Word: .map transforms our data into a visual list */}
                 {contacts.map((c) => (
                   <li key={c.id} className="contact-item">
-                    <strong>{c.name}</strong> ({c.relation}) - {c.phone}
+                    <div className="contact-info">
+                      <strong>{c.name}</strong> ({c.relation}) - {c.phone}
+                    </div>
+                    
+                    <div className="contact-actions">
+                      {/* EDIT BUTTON: Sends this specific contact info to the state */}
+                      <button 
+                        onClick={() => startEditing(c)} 
+                        className="btn-edit"
+                      >
+                        Edit
+                      </button>
+
+                      <button 
+                        onClick={() => deleteContact(c.id)} 
+                        className="btn-delete"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -91,7 +127,6 @@ function App() {
           </div>
         </div>
       ) : (
-        /* --- LOGGED OUT VIEW --- */
         <div className="glass-card">
           <h2>Create Account</h2>
           <RegisterForm /> 
