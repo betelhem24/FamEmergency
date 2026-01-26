@@ -26,6 +26,7 @@ app.post('/users', async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        // The database will automatically add role: "PATIENT" and the current date
       },
     });
 
@@ -43,6 +44,7 @@ app.post('/users', async (req, res) => {
 });
 
 // USER LOGIN ROUTE
+// I updated this section to include the 'role' in the response
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -61,11 +63,13 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // I send the role back so the Frontend knows if this is a Patient or Doctor
     res.json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role, 
       },
       token: "dummy-token-123" 
     });
@@ -80,10 +84,6 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/contacts', async (req, res) => {
   const { name, phone, relation, userId } = req.body;
 
-  console.log("--- New Contact Request ---");
-  console.log("User ID:", userId);
-  console.log("Name:", name);
-
   try {
     const newContact = await prisma.emergencyContact.create({
       data: {
@@ -94,12 +94,11 @@ app.post('/contacts', async (req, res) => {
       },
     });
 
-    console.log("✅ Successfully saved to Database!");
     res.status(201).json(newContact);
 
   } catch (error) {
     console.error("❌ PRISMA SAVE ERROR:", error);
-    res.status(500).json({ error: "Could not save contact. Please check backend logs." });
+    res.status(500).json({ error: "Could not save contact." });
   }
 });
 
@@ -122,28 +121,22 @@ app.get('/contacts/:userId', async (req, res) => {
 });
 
 // UPDATE CONTACT ROUTE
-// 'app.put' is the standard method for updating existing data.
 app.put('/contacts/:id', async (req, res) => {
-  //  Get the ID of the contact from the URL
   const { id } = req.params;
-  // Get the new Name, Phone, and Relation from the request body
   const { name, phone, relation } = req.body;
 
   try {
-    // 'prisma.emergencyContact.update' finds the row and changes it.
     const updatedContact = await prisma.emergencyContact.update({
       where: {
-        id: parseInt(id), // Word: Find the contact with this ID
+        id: parseInt(id),
       },
       data: {
-        name: name,         // Overwrite the old name with the new one
-        phone: phone,       //  Overwrite the old phone
-        relation: relation, //  Overwrite the old relation
+        name: name,
+        phone: phone,
+        relation: relation,
       },
     });
 
-    console.log("✏️ Contact updated in Database!");
-    //  Send the updated contact back to the frontend
     res.json(updatedContact);
   } catch (error) {
     console.error("Update Error:", error);
@@ -153,18 +146,15 @@ app.put('/contacts/:id', async (req, res) => {
 
 // DELETE CONTACT ROUTE
 app.delete('/contacts/:id', async (req, res) => {
-  //  'req.params' extracts the ID from the URL link
   const { id } = req.params;
 
   try {
-    //  Prisma looks for the specific ID and removes it from the cloud
     await prisma.emergencyContact.delete({
       where: {
         id: parseInt(id), 
       },
     });
 
-    console.log("🗑️ Contact deleted from Database!");
     res.status(200).json({ message: "Contact deleted successfully" });
   } catch (error) {
     console.error("Delete Error:", error);
