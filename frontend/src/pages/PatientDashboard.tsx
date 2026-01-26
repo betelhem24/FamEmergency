@@ -1,40 +1,48 @@
-// I import React and the QR Code generator component
-// I use 'import type' here as well to satisfy the verbatimModuleSyntax rule
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { QRCodeSVG } from 'qrcode.react';
-import type { RootState } from '../store'; // FIXED LINE
+// I import the type-only RootState to satisfy your TS config
+import type { RootState } from '../store';
+
 const PatientDashboard: React.FC = () => {
-  // I grab the user information from the Redux store
+  // I extract the user object from our Redux auth state
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // I create a string of data that the QR code will represent
-  // In a professional app, this would be a link to a secure API
+  // I prepare the data string for the QR code
   const medicalData = JSON.stringify({
     id: user?.id,
     name: user?.name,
-    history: "No known allergies, Blood Type: O+",
+    history: "Blood Type: O+, No Allergies",
   });
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1>Patient Dashboard</h1>
-      <p>Welcome, <strong>{user?.name}</strong></p>
-      
-      <div style={{ marginTop: '50px', background: 'white', padding: '20px', display: 'inline-block' }}>
-        <h3>Your Medical QR Code</h3>
+    <div className="login-container"> {/* I reuse the centering logic from Login */}
+      {/* I apply the 'glass-card' class to give it the frosted look */}
+      <div className="glass-card">
+        <h1 style={{ marginBottom: '10px' }}>Patient Portal</h1>
+        <p>Welcome, <strong>{user?.name}</strong></p>
         
-        {/* I render the QR code using the SVG format for high quality */}
-        <QRCodeSVG 
-          value={medicalData} 
-          size={256}
-          level={"H"} // I use 'High' error correction so it scans even if slightly damaged
-          includeMargin={true}
-        />
+        <div style={{ 
+          marginTop: '30px', 
+          background: 'white', // We keep the QR background white so it is easy to scan
+          padding: '15px', 
+          borderRadius: '15px',
+          display: 'inline-block' 
+        }}>
+          <QRCodeSVG value={medicalData} size={200} level="H" />
+        </div>
         
-        <p style={{ color: '#666', fontSize: '14px' }}>
-          Show this to your doctor to share your history.
+        <p style={{ marginTop: '20px', fontSize: '0.9rem', opacity: 0.8 }}>
+          Emergency responders can scan this code to view your vital info.
         </p>
+        
+        <button 
+          className="login-button" 
+          style={{ marginTop: '20px', background: 'rgba(255,255,255,0.1)', border: '1px solid white' }}
+          onClick={() => window.location.reload()}
+        >
+          Update History
+        </button>
       </div>
     </div>
   );
