@@ -1,60 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-// Word: We check the path. If your store is in 'src/store/index.ts', we use '../store'
-import { RootState } from '../store'; 
+
+// Word-by-Word: We add the 'type' keyword here to satisfy 'verbatimModuleSyntax'
+// This fixes the 'ts(1484)' error for RootState.
+import type { RootState } from '../store'; 
+
+interface ContactItem {
+  id: number;
+  name: string;
+  phone: string;
+  relation: string;
+}
 
 interface ContactFormProps {
   onContactAdded: () => void;
-  editData?: { id: number; name: string; phone: string; relation: string } | null;
+  editData?: ContactItem | null;
   onCancelEdit?: () => void;
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onCancelEdit }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   
-  // Word-by-Word: We explicitly tell React what 'formData' looks like
-  // This prevents the red line on setFormData.
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     relation: 'Family'
   });
 
+  // Word-by-Word: To avoid "Cascading Renders," we check if the data is 
+  // ACTUALLY different before we call setFormData.
   useEffect(() => {
-    // Word: If editData exists and is NOT null
     if (editData) {
-      setFormData({
-        name: editData.name,
-        phone: editData.phone,
-        relation: editData.relation
-      });
+      // Word: We only update if the name in the form is different from the edit data
+      if (formData.name !== editData.name) {
+        setFormData({
+          name: editData.name,
+          phone: editData.phone,
+          relation: editData.relation
+        });
+      }
     } else {
-      // Word: Reset to empty strings if we are adding a new contact
-      setFormData({ name: '', phone: '', relation: 'Family' });
+      // Word: If no editData, ensure the form is empty
+      if (formData.name !== '') {
+        setFormData({ name: '', phone: '', relation: 'Family' });
+      }
     }
-  }, [editData]);
+  }, [editData, formData.name]); // Word: The 'Effect' now watches both
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     try {
-      if (editData) {
-        // Word: PUT means "Update existing"
+      if (editData && editData.id) {
         await axios.put(`http://localhost:5000/contacts/${editData.id}`, formData);
+        alert("Updated!");
       } else {
-        // Word: POST means "Create new"
         await axios.post('http://localhost:5000/contacts', {
           ...formData,
           userId: user.id
         });
+        alert("Saved!");
       }
-      
-      onContactAdded(); 
+      onContactAdded();
     } catch (error) {
       console.error("Save Error:", error);
-      alert("Failed to save contact.");
     }
   };
 
@@ -66,7 +77,6 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
         type="text"
         placeholder="Name"
         value={formData.name}
-        // Word: '...formData' keeps the other fields safe while we change 'name'
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         required
       />
