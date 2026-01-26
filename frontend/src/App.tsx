@@ -1,13 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from './store/authSlice';
-import type { RootState } from './store';
+
+//  Check if your file is in 'src/store/authSlice.ts'
+// If 'store' is a folder, we must include it in the path.
+import { logout } from './store/authSlice'; 
+
+//  Check if your file is 'src/store.ts' or 'src/store/index.ts'
+import type { RootState } from './store'; 
+
 import axios from 'axios';
 import './App.css';
+
+// Check if your components are in 'src/components/'
 import RegisterForm from './components/RegisterForm';
 import ContactForm from './components/ContactForm';
-
 // BLUEPRINT: Defines what a Contact looks like
+
+
 interface Contact {
   id: number;
   name: string;
