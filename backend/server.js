@@ -1,5 +1,5 @@
-// 1. INITIAL SETUP
-require('dotenv').config(); // Load secrets from .env first!
+// INITIAL SETUP
+require('dotenv').config(); 
 
 const express = require('express');
 const cors = require('cors');
@@ -9,11 +9,11 @@ const bcrypt = require('bcrypt');
 const app = express();
 const prisma = new PrismaClient();
 
-// 2. MIDDLEWARE
-app.use(cors()); // Allow Frontend to talk to Backend
-app.use(express.json()); // Allow Backend to read JSON data
+// MIDDLEWARE
+app.use(cors()); 
+app.use(express.json()); 
 
-// 3. THE REGISTRATION ROUTE
+// USER REGISTRATION ROUTE
 app.post('/users', async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -42,7 +42,7 @@ app.post('/users', async (req, res) => {
   }
 });
 
-// 4. THE LOGIN ROUTE
+// USER LOGIN ROUTE
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -76,37 +76,38 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// 5. THE EMERGENCY CONTACT ROUTES (NEW SECTION)
-// Word-by-Word: We create a POST route for the frontend to send new contact data
+// CREATE CONTACT ROUTE
 app.post('/contacts', async (req, res) => {
   const { name, phone, relation, userId } = req.body;
 
+  console.log("--- New Contact Request ---");
+  console.log("User ID:", userId);
+  console.log("Name:", name);
+
   try {
-    // Word-by-Word: await means we wait for the database to finish creating the contact
     const newContact = await prisma.emergencyContact.create({
       data: {
         name: name,
         phone: phone,
         relation: relation,
-        userId: parseInt(userId), // Word: parseInt turns the ID text into a number
+        userId: parseInt(userId), 
       },
     });
 
-    // Word: res.status(201) means "Created successfully"
+    console.log("✅ Successfully saved to Database!");
     res.status(201).json(newContact);
 
   } catch (error) {
-    console.error("Error saving contact:", error);
-    res.status(500).json({ error: "Could not save contact. Please try again." });
+    console.error("❌ PRISMA SAVE ERROR:", error);
+    res.status(500).json({ error: "Could not save contact. Please check backend logs." });
   }
 });
 
-// Word-by-Word: We create a GET route to load contacts for a specific user
+// FETCH ALL CONTACTS FOR A USER ROUTE
 app.get('/contacts/:userId', async (req, res) => {
-  const { userId } = req.params; // Word: params grabs the ID from the URL link
+  const { userId } = req.params;
 
   try {
-    // Word-by-Word: findMany finds ALL items that match the rule in 'where'
     const contacts = await prisma.emergencyContact.findMany({
       where: { 
         userId: parseInt(userId) 
@@ -115,12 +116,33 @@ app.get('/contacts/:userId', async (req, res) => {
 
     res.json(contacts);
   } catch (error) {
-    console.error("Error fetching contacts:", error);
+    console.error("❌ FETCH ERROR:", error);
     res.status(500).json({ error: "Could not fetch contacts." });
   }
 });
 
-// 6. START THE SERVER
+// DELETE CONTACT ROUTE
+app.delete('/contacts/:id', async (req, res) => {
+  // Word: 'req.params' extracts the ID from the URL link
+  const { id } = req.params;
+
+  try {
+    // Word: Prisma looks for the specific ID and removes it from the cloud
+    await prisma.emergencyContact.delete({
+      where: {
+        id: parseInt(id), 
+      },
+    });
+
+    console.log("🗑️ Contact deleted from Database!");
+    res.status(200).json({ message: "Contact deleted successfully" });
+  } catch (error) {
+    console.error("Delete Error:", error);
+    res.status(500).json({ error: "Could not delete contact." });
+  }
+});
+
+// SERVER STARTUP
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
