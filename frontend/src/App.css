@@ -57,3 +57,41 @@ button:hover {
   /* I can also add a slight lift effect */
   transform: translateY(-2px);
 }
+
+/* CONTACT LIST LAYOUT */
+.contact-list {
+  list-style: none; /* Word: Removes the default bullet points */
+  padding: 0;       /* Word: Removes the default inner space */
+}
+
+.contact-item {
+  display: flex;           /* Word: Turns the item into a 'row' */
+  justify-content: space-between; /* Word: Pushes text to the left and button to the right */
+  align-items: center;     /* Word: Centers the text and button vertically */
+  padding: 12px;           /* Word: Adds space inside the row */
+  margin-bottom: 10px;     /* Word: Adds space between different contacts */
+  background: rgba(255, 255, 255, 0.1); /* Word: Semi-transparent background */
+  border-radius: 8px;      /* Word: Makes the corners rounded */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Word: Subtle white border */
+}
+
+/* THE DELETE BUTTON STYLE */
+.btn-delete {
+  background-color: #ff4d4d; /* Word: A bright 'Alert' Red */
+  color: white;             /* Word: White text on the red background */
+  border: none;             /* Word: Removes the default button border */
+  padding: 6px 12px;        /* Word: Makes the button a nice rectangle */
+  border-radius: 6px;       /* Word: Rounds the button corners */
+  cursor: pointer;          /* Word: Changes mouse to a hand when hovering */
+  font-size: 0.85rem;       /* Word: Makes the text slightly smaller */
+  transition: background 0.3s ease; /* Word: Makes the hover effect smooth */
+}
+
+.btn-delete:hover {
+  background-color: #cc0000; /* Word: A darker red when the mouse touches it */
+}
+
+.contact-info {
+  color: #ffffff; /* Word: Ensures the names are bright white */
+  font-size: 0.95rem;
+}
