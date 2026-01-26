@@ -2,22 +2,23 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-// I import the modular routes
+// I import my modular route files
 const authRoutes = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
 
-// I apply middleware
+// I enable CORS so the frontend and backend can talk
 app.use(cors());
+// I enable JSON parsing so I can read data sent from the frontend
 app.use(express.json());
 
-// I connect the routes to specific URL paths
-// This keeps the server.js file very clean
+// I connect the Auth routes to the path /api/auth
 app.use('/api/auth', authRoutes);
+// I connect the Contact routes to the path /api/contacts
 app.use('/api/contacts', contactRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running professionally on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
