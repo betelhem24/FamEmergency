@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { contactApi } from '../api/contactApi';
 import type { RootState } from '../store';
-// I added the 'type' keyword here to fix the red line.
-// This tells the compiler that Contact is a blueprint, not a variable.
 import type { Contact } from '../types/contact';
 
 interface ContactFormProps {
@@ -15,7 +13,7 @@ interface ContactFormProps {
 const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onCancelEdit }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   
-  // I initialize the form state. If editData exists, I fill the boxes.
+  // I initialize the form. Using 'Number()' ensures the ID is never a string.
   const [formData, setFormData] = useState({
     name: editData?.name || '',
     phone: editData?.phone || '',
@@ -24,15 +22,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    // I check if the user exists and has a valid ID
+    if (!user?.id) return;
 
     try {
       if (editData) {
-        // I use the dedicated API service to send the update
         await contactApi.update(editData.id, formData);
       } else {
-        // I use the API service to create a new entry
-        await contactApi.create({ ...formData, userId: user.id });
+        // I explicitly convert userId to a number to satisfy TypeScript
+        await contactApi.create({ ...formData, userId: Number(user.id) });
       }
       onContactAdded();
     } catch (error) {
@@ -42,7 +40,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
 
   return (
     <form onSubmit={handleSubmit} className="contact-form">
-      <h3>{editData ? "Edit Contact" : "Add Emergency Contact"}</h3>
+      <h3>{editData ? "Edit" : "Add"} Contact</h3>
       <input
         type="text"
         placeholder="Name"
@@ -52,15 +50,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
       />
       <input
         type="text"
-        placeholder="Phone Number"
+        placeholder="Phone"
         value={formData.phone}
         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         required
       />
-      <select 
-        value={formData.relation}
-        onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
-      >
+      <select value={formData.relation} onChange={(e) => setFormData({ ...formData, relation: e.target.value })}>
         <option value="Family">Family</option>
         <option value="Friend">Friend</option>
         <option value="Work">Work</option>
@@ -68,9 +63,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onContactAdded, editData, onC
       </select>
       <div className="form-actions">
         <button type="submit" className="btn-primary">{editData ? "Update" : "Save"}</button>
-        {editData && (
-          <button type="button" onClick={onCancelEdit} className="btn-secondary">Cancel</button>
-        )}
+        {editData && <button type="button" onClick={onCancelEdit} className="btn-secondary">Cancel</button>}
       </div>
     </form>
   );
