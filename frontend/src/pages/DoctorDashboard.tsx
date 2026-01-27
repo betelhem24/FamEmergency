@@ -1,45 +1,67 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+// I import the logout action to allow the doctor to sign out
+import { logout } from '../store/slices/authSlice';
 import { QrReader } from 'react-qr-reader';
 import type { RootState } from '../store';
 
 const DoctorDashboard: React.FC = () => {
+  const dispatch = useDispatch();
+  // I pull the doctor's info from the 'Global Memory' (Redux)
   const { user } = useSelector((state: RootState) => state.auth);
+  // I create a 'state' to hold the text we get from the QR code
   const [scanResult, setScanResult] = useState<string | null>(null);
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1>Doctor Dashboard</h1>
-      <p>Medical Helper: <strong>{user?.name}</strong></p>
-
-      <div style={{ maxWidth: '400px', margin: '0 auto', border: '2px solid #007bff', borderRadius: '10px' }}>
-        <h3>Scan Patient QR Code</h3>
-        
-        {/* I use the QrReader component from the version 3 library */}
-        <QrReader
-          // I handle the result and any errors inside this one prop
-          onResult={(result, error) => {
-            if (!!result) {
-              setScanResult(result.getText());
-            }
-            if (!!error) {
-              // I ignore common 'no QR found' noise to keep the console clean
-            }
-          }}
-          // I tell it to use the back camera
-          constraints={{ facingMode: 'environment' }}
-          // I set the width of the camera container
-          containerStyle={{ width: '100%' }}
-        />
-      </div>
-
-      {scanResult && (
-        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-          <h4>Patient Data:</h4>
-          <pre style={{ textAlign: 'left', whiteSpace: 'pre-wrap' }}>{scanResult}</pre>
-          <button onClick={() => setScanResult(null)}>Clear and Scan Again</button>
+    <div className="login-container">
+      <div className="glass-card" style={{ maxWidth: '500px' }}>
+        {/* Logout Section */}
+        <div style={{ textAlign: 'right' }}>
+          <button className="login-button" style={{ width: 'auto', padding: '5px 15px', background: 'rgba(255,255,255,0.1)' }} onClick={() => dispatch(logout())}>
+            Logout
+          </button>
         </div>
-      )}
+
+        <h2>Medical Scanner</h2>
+        <p>Doctor: <strong>{user?.name}</strong></p>
+
+        {/* Camera Container with Glass Border */}
+        <div style={{ 
+          marginTop: '20px', 
+          border: '2px solid var(--glass-border)', 
+          borderRadius: '15px', 
+          overflow: 'hidden',
+          background: '#000' 
+        }}>
+          <QrReader
+            onResult={(result, error) => {
+              // If the camera 'sees' a code, I save the text
+              if (result) {
+                setScanResult(result.getText());
+              }
+            }}
+            // I tell the device to use the back camera ('environment')
+            constraints={{ facingMode: 'environment' }}
+            containerStyle={{ width: '100%' }}
+          />
+        </div>
+
+        {/* Results Section: Only shows if 'scanResult' is not empty */}
+        {scanResult && (
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '15px', 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            borderRadius: '10px',
+            textAlign: 'left'
+          }}>
+            <h4 style={{ margin: '0 0 10px 0' }}>Patient History:</h4>
+            {/* I display the raw text data found in the QR */}
+            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '12px' }}>{scanResult}</pre>
+            <button className="login-button" onClick={() => setScanResult(null)}>Scan Next Patient</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
