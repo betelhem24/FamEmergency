@@ -1,48 +1,56 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+// I import the logout action to clear the Redux memory
+import { logout } from '../store/slices/authSlice';
 import { QRCodeSVG } from 'qrcode.react';
-// I import the type-only RootState to satisfy your TS config
 import type { RootState } from '../store';
 
 const PatientDashboard: React.FC = () => {
-  // I extract the user object from our Redux auth state
+  // I initialize 'dispatch' so I can call the logout function
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // I prepare the data string for the QR code
   const medicalData = JSON.stringify({
     id: user?.id,
     name: user?.name,
     history: "Blood Type: O+, No Allergies",
   });
 
+  // I create a function to handle the exit process
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
   return (
-    <div className="login-container"> {/* I reuse the centering logic from Login */}
-      {/* I apply the 'glass-card' class to give it the frosted look */}
+    <div className="login-container">
       <div className="glass-card">
-        <h1 style={{ marginBottom: '10px' }}>Patient Portal</h1>
+        {/* I add a Logout button at the top right of the card */}
+        <div style={{ textAlign: 'right' }}>
+          <button 
+            onClick={handleLogout}
+            style={{ 
+              background: 'rgba(255, 0, 0, 0.2)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)', 
+              color: 'white',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            Logout
+          </button>
+        </div>
+
+        <h1>Patient Portal</h1>
         <p>Welcome, <strong>{user?.name}</strong></p>
         
-        <div style={{ 
-          marginTop: '30px', 
-          background: 'white', // We keep the QR background white so it is easy to scan
-          padding: '15px', 
-          borderRadius: '15px',
-          display: 'inline-block' 
-        }}>
-          <QRCodeSVG value={medicalData} size={200} level="H" />
+        <div style={{ background: 'white', padding: '15px', borderRadius: '15px', display: 'inline-block', marginTop: '20px' }}>
+          <QRCodeSVG value={medicalData} size={180} level="H" />
         </div>
         
-        <p style={{ marginTop: '20px', fontSize: '0.9rem', opacity: 0.8 }}>
-          Emergency responders can scan this code to view your vital info.
+        <p style={{ marginTop: '20px', fontSize: '0.8rem' }}>
+          Your unique Medical ID for emergencies.
         </p>
-        
-        <button 
-          className="login-button" 
-          style={{ marginTop: '20px', background: 'rgba(255,255,255,0.1)', border: '1px solid white' }}
-          onClick={() => window.location.reload()}
-        >
-          Update History
-        </button>
       </div>
     </div>
   );
