@@ -33,14 +33,14 @@ const DoctorDashboard: React.FC = () => {
           overflow: 'hidden',
           background: '#000' 
         }}>
-          <QrReader
-            onResult={(result, error) => {
+         <QrReader
+            onResult={(result) => { // I removed 'error' from here
               // If the camera 'sees' a code, I save the text
               if (result) {
                 setScanResult(result.getText());
               }
             }}
-            // I tell the device to use the back camera ('environment')
+            // I tell the device to use the back camera
             constraints={{ facingMode: 'environment' }}
             containerStyle={{ width: '100%' }}
           />
