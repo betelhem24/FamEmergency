@@ -1,23 +1,16 @@
 {
   "compilerOptions": {
-    /* Basic Options */
-    "target": "ES2020",                                // Sets the JavaScript version for the output files
-    "module": "CommonJS",                             // Node.js uses CommonJS modules (require/exports)
-    "lib": ["ES2020"],                                // Tells the compiler which standard library features to include
-    "outDir": "./dist",                               // This is where your converted .js files will go
-    "rootDir": "./server",                            // Tells the compiler where your TypeScript source files are
-    "strict": true,                                   // Enables all strict type-checking options for safety
-    
-    /* Module Resolution */
-    "moduleResolution": "node",                       // Helps the compiler find your imports correctly
-    "esModuleInterop": true,                          // Allows you to import CommonJS modules easily
-    "skipLibCheck": true,                             // Saves time by not checking every single library file
-    "forceConsistentCasingInFileNames": true,         // Ensures file naming is consistent across different systems
-
-    /* Output Control */
-    "noEmit": false,                                  // Change to FALSE so the computer creates the .js files
-    "resolveJsonModule": true                         // Allows you to import .json files directly
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "outDir": "../dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": false
   },
-  "include": ["server/**/*"],                         // Only look at files inside the server folder
-  "exclude": ["node_modules"]                         // Ignore external libraries
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
 }
