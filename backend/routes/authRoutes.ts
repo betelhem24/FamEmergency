@@ -1,10 +1,12 @@
 import express from 'express';
-import { register } from '../controllers/authController'; // I import the register function I just wrote
+import { registerUser, loginUser } from '../controllers/authController'; // I added loginUser here
 
 const router = express.Router();
 
-// I create a POST route for registration
-// The full URL will be: http://localhost:5000/api/auth/register
-router.post('/register', register);
+// I am keeping the registration route
+router.post('/register', registerUser);
+
+// I am adding the new login route
+router.post('/login', loginUser);
 
 export default router;
