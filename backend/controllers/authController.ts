@@ -1,35 +1,47 @@
 import { Request, Response } from 'express';
-import User from '../models/User'; // I import our secure User model
+import User from '../models/User';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
-// This function handles new user registration
-export const register = async (req: Request, res: Response) => {
+// ... (registerUser remains the same)
+
+// I am adding the loginUser function below
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    const { email, password } = req.body;
 
-    // 1. I check if the user already exists in MongoDB
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    // I am checking if the user exists in the database
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(401).json({ message: 'Invalid email or password' });
+      return;
     }
 
-    // 2. I create a new user instance
-    // Note: The password will be hashed automatically by our Model!
-    const user = await User.create({
-      name,
-      email,
-      password
-    });
+    // I am comparing the entered password with the hashed password in the database
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(401).json({ message: 'Invalid email or password' });
+      return;
+    }
 
-    // 3. I send back a success message (without the password!)
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
+    // I am generating a JWT token for the user
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1d' }
+    );
+
+    // I am sending the user data and token back to the client
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
-      });
-    }
-  } catch (error: any) {
-    res.status(500).json({ message: 'Server Error', error: error.message });
+      },
+    });
+  } catch (error) {
+    // I am handling any server errors
+    res.status(500).json({ message: 'Server error', error });
   }
 };
