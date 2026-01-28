@@ -1,0 +1,71 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.glass-card {
+  /* I pull these from your global variables */
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 450px; /* Slightly wider for registration */
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  text-align: center;
+  color: white;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.input-group input, .input-group select {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: white;
+  outline: none;
+}
+
+/* Style for the dropdown/select arrow */
+.input-group select option {
+  background: #222; 
+  color: white;
+}
+
+.register-button {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-blue);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.register-button:hover {
+  filter: brightness(1.2);
+}
+
+.register-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
