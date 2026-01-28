@@ -1,56 +1,80 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../store/thunks';
-import type { AppDispatch, RootState } from '../store'; // Added 'type' here
+import type { AppDispatch, RootState } from '../store';
+import './Register.css'; // I am importing the new styles
 
 const Register: React.FC = () => {
-  // I initialize the dispatch function to send actions to Redux
   const dispatch = useDispatch<AppDispatch>();
-  
-  // I pull the loading and error state from our Redux "Brain"
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
-  // I set up local state for the form inputs
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'PATIENT' as 'PATIENT' | 'DOCTOR' // Cast to match our User type exactly
+    role: 'PATIENT' as 'PATIENT' | 'DOCTOR'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // I trigger the registration process through Redux
     dispatch(registerUser(formData));
   };
 
   return (
     <div className="register-container">
-      <h2>Create Account</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input 
-          type="text" 
-          placeholder="Full Name" 
-          onChange={(e) => setFormData({...formData, name: e.target.value})} 
-          required 
-        />
-        <input 
-          type="email" 
-          placeholder="Email" 
-          onChange={(e) => setFormData({...formData, email: e.target.value})} 
-          required 
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          onChange={(e) => setFormData({...formData, password: e.target.value})} 
-          required 
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registering...' : 'Sign Up'}
-        </button>
-      </form>
+      <div className="glass-card">
+        <h2>Create Account</h2>
+        <p>Join our medical family</p>
+        
+        {error && <p style={{ color: '#ff6b6b', marginBottom: '10px' }}>{error}</p>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Full Name</label>
+            <input 
+              type="text" 
+              placeholder="Enter your name" 
+              onChange={(e) => setFormData({...formData, name: e.target.value})} 
+              required 
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Email Address</label>
+            <input 
+              type="email" 
+              placeholder="email@example.com" 
+              onChange={(e) => setFormData({...formData, email: e.target.value})} 
+              required 
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Password</label>
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              onChange={(e) => setFormData({...formData, password: e.target.value})} 
+              required 
+            />
+          </div>
+
+          <div className="input-group">
+            <label>I am a:</label>
+            <select 
+              value={formData.role}
+              onChange={(e) => setFormData({...formData, role: e.target.value as 'PATIENT' | 'DOCTOR'})}
+            >
+              <option value="PATIENT">Patient</option>
+              <option value="DOCTOR">Doctor</option>
+            </select>
+          </div>
+
+          <button className="register-button" type="submit" disabled={loading}>
+            {loading ? 'Processing...' : 'Register'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
