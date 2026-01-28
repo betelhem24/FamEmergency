@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'; // 1. Added this
 import { loginUser } from '../store/thunks';
+import { clearError } from '../store/slices/authSlice'; // 2. Added this
 import type { AppDispatch, RootState } from '../store';
-import './Login.css'; // I am adding this line to connect your styles
+import './Login.css';
 
 const Login: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,7 +17,6 @@ const Login: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // I trigger the login process via the modular thunk
     dispatch(loginUser(formData));
   };
 
@@ -52,6 +53,18 @@ const Login: React.FC = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        {/* 3. ADD THIS SECTION BELOW THE FORM */}
+        <p style={{ marginTop: '15px', fontSize: '14px', color: 'white' }}>
+          Don't have an account?{' '}
+          <Link 
+            to="/register" 
+            onClick={() => dispatch(clearError())} 
+            style={{ color: 'var(--primary-blue)', fontWeight: 'bold', textDecoration: 'none' }}
+          >
+            Register here
+          </Link>
+        </p>
       </div>
     </div>
   );
