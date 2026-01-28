@@ -29,12 +29,14 @@ export const register = async (req: Request, res: Response) => {
 
     // 4. I SAVE TO NEON (Our structured SQL database for redundancy)
     // I am using prisma to ensure the data is synced across both platforms
+    // I must pass the id as a string because we changed schema.prisma to id String @id
     await prisma.user.create({
       data: {
+        id: mongoUser._id.toString(), // I sync the MongoDB ID to SQL
         name,
         email,
         password: hashedPassword,
-        role
+        role: role.toUpperCase() // I ensure role matches SQL Enum (PATIENT/DOCTOR)
       }
     });
 
