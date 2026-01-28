@@ -16,17 +16,7 @@ const userSchema = new Schema<IUser>({
 }, { timestamps: true });
 
 // I removed 'next' because 'async' functions handle the flow automatically
-userSchema.pre<IUser>('save', async function () {
-  // If the password is not changed, I stop here
-  if (!this.isModified('password')) return;
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    // No need to call next() here!
-  } catch (error: any) {
-    throw error; // I throw the error so Mongoose knows it failed
-  }
-});
+// I removed the pre-save hook because hashing is handled in the controller.
+// This prevents double-hashing which was causing login failures.
 
 export default mongoose.model<IUser>('User', userSchema);
