@@ -11,21 +11,19 @@ datasource db {
 
 // I define the User model to store account information in Neon
 model User {
-  id        Int      @id @default(autoincrement())
+  // I changed this to String to match the MongoDB ObjectId format
+  id        String   @id
   email     String   @unique
   name      String?
   password  String
   
-  // I added this role field to identify if the user is a PATIENT or a DOCTOR
-  // It defaults to PATIENT for security
+  // I identify if the user is a PATIENT or a DOCTOR
   role      String   @default("PATIENT")
   
-  // I add this to track exactly when the user registered
-  // The 'now()' function automatically grabs the current time from the server
+  // I track exactly when the user registered
   createdAt DateTime @default(now()) 
   
   // I create a relation to link many emergency contacts to one user
-  // This allows one person to have multiple people to call in a crisis
   contacts  EmergencyContact[] 
 }
 
@@ -36,10 +34,9 @@ model EmergencyContact {
   phone     String
   relation  String
   
-  // I store the ID of the user who owns this contact
-  userId    Int
+  // I store the String ID of the user who owns this contact
+  userId    String
   
-  // I establish the link back to the User model using the userId field
-  // The 'fields' maps to our local userId, and 'references' maps to the User's id
+  // I establish the link back to the User model
   user      User     @relation(fields: [userId], references: [id])
 }
