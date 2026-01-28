@@ -1,12 +1,13 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController'; // I added loginUser here
+// I changed 'registerUser' to 'register' and 'loginUser' to 'login'
+import { register, login } from '../controllers/authController';
 
 const router = express.Router();
 
-// I am keeping the registration route
-router.post('/register', registerUser);
+// I link the /register path to the register function
+router.post('/register', register);
 
-// I am adding the new login route
-router.post('/login', loginUser);
+// I link the /login path to the login function
+router.post('/login', login);
 
 export default router;
