@@ -1,20 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Premium Glassmorphism Variables */
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(16px);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   
-  /* Premium Color Palette */
-  --primary-blue: #3b82f6; /* Modern calm blue */
+  --primary-blue: #3b82f6;
   --primary-hover: #2563eb;
   --text-white: #ffffff;
   --text-muted: #cbd5e1;
   --input-bg: rgba(0, 0, 0, 0.2);
   
-  /* Deep, Rich Gradient */
   --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
 }
 
