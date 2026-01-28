@@ -1,24 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  /* I define the glass effect variables */
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-blur: blur(12px);
+  /* Premium Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(16px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   
-  /* I define professional colors */
-  --primary-blue: #007bff;
+  /* Premium Color Palette */
+  --primary-blue: #3b82f6; /* Modern calm blue */
+  --primary-hover: #2563eb;
   --text-white: #ffffff;
+  --text-muted: #cbd5e1;
+  --input-bg: rgba(0, 0, 0, 0.2);
   
-  /* I create a medical-themed gradient for the background */
-  --bg-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+  /* Deep, Rich Gradient */
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
 }
 
 body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
-  /* I apply the gradient to the whole screen */
   background: var(--bg-gradient);
   background-attachment: fixed;
   min-height: 100vh;
   color: var(--text-white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
