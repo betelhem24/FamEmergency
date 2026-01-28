@@ -1,41 +1,44 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-// I fixed the path to include the 'slices' folder
-// I changed 'setCredentials' to 'loginSuccess' to match our authSlice.ts
-import { loginSuccess } from '../store/slices/authSlice';
-import './Login.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../store/thunks'; // Use the Thunk, not the slice action
+import type { AppDispatch, RootState } from '../store';
 
 const Login: React.FC = () => {
-  const dispatch = useDispatch();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.auth);
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // I am sending the user to Redux
-    dispatch(loginSuccess({
-      user: { id: 1, name: 'Betelhem', email, role: 'PATIENT' },
-      token: 'fake-jwt-token'
-    }));
+    // I trigger the login process
+    dispatch(loginUser(formData));
   };
 
   return (
     <div className="login-container">
-      <div className="glass-card">
-        <h2>Family Emergency App</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div className="input-group">
-            <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          </div>
-          <button type="submit" className="login-button">Login</button>
-        </form>
-      </div>
+      <h2>Login</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <input 
+          type="email" 
+          placeholder="Email" 
+          onChange={(e) => setFormData({...formData, email: e.target.value})} 
+          required 
+        />
+        <input 
+          type="password" 
+          placeholder="Password" 
+          onChange={(e) => setFormData({...formData, password: e.target.value})} 
+          required 
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
     </div>
   );
 };
