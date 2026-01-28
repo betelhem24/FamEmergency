@@ -5,20 +5,24 @@ import { QrReader } from 'react-qr-reader';
 import type { RootState } from '../store';
 import './Dashboard.css';
 
+// I define the exact structure the library provides to avoid 'any'
+interface IQrResult {
+  getText(): string;
+}
+
 const DoctorDashboard: React.FC = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // I handle scanning states
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
-  // I fix the red line by allowing 'undefined' as the library requires
-  const handleScanResult = (result: any | null | undefined) => {
+  // I use the interface here to ensure full type safety
+  const handleScanResult = (result: IQrResult | null | undefined) => {
     if (result) {
       setScanResult(result.getText());
-      setIsScanning(false); 
+      setIsScanning(false);
     }
   };
 
@@ -36,7 +40,7 @@ const DoctorDashboard: React.FC = () => {
             {isScanning ? (
               <>
                 <QrReader
-                  onResult={handleScanResult}
+                  onResult={(result) => handleScanResult(result as IQrResult | null | undefined)}
                   constraints={{ facingMode }}
                   containerStyle={{ width: '100%' }}
                 />
