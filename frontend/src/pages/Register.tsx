@@ -10,9 +10,7 @@ const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   
-  // I track password visibility state here too for consistency
   const [showPassword, setShowPassword] = useState(false);
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,25 +25,25 @@ const Register: React.FC = () => {
 
   return (
     <div className="register-container">
-      <div className="glass-card">
+      <div className="glass-card register-card">
         <h2>Create Account</h2>
-        <p>Join our medical family</p>
+        <p>Join our medical network</p>
         
-        {error && <p style={{ color: '#ff6b6b', marginBottom: '10px' }}>{error}</p>}
+        {error && <p className="error-text">{error}</p>}
         
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Full Name</label>
             <input 
               type="text" 
-              placeholder="Enter your name" 
+              placeholder="Your Name" 
               onChange={(e) => setFormData({...formData, name: e.target.value})} 
               required 
             />
           </div>
 
           <div className="input-group">
-            <label>Email Address</label>
+            <label>Email</label>
             <input 
               type="email" 
               placeholder="email@example.com" 
@@ -62,26 +60,13 @@ const Register: React.FC = () => {
               onChange={(e) => setFormData({...formData, password: e.target.value})} 
               required 
             />
-            {/* Same professional text-based toggle for the register page */}
-            <span 
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ 
-                position: 'absolute', 
-                right: '15px', 
-                top: '38px', 
-                cursor: 'pointer',
-                fontSize: '12px',
-                color: 'var(--primary-blue)',
-                fontWeight: 'bold',
-                textTransform: 'uppercase'
-              }}
-            >
+            <span className="toggle-pass" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? 'Hide' : 'Show'}
             </span>
           </div>
 
           <div className="input-group">
-            <label>I am a:</label>
+            <label>Account Type</label>
             <select 
               value={formData.role} 
               onChange={(e) => setFormData({...formData, role: e.target.value as 'PATIENT' | 'DOCTOR'})}
@@ -92,19 +77,12 @@ const Register: React.FC = () => {
           </div>
 
           <button className="register-button" type="submit" disabled={loading}>
-            {loading ? 'Processing...' : 'Register'}
+            {loading ? 'Creating...' : 'Register'}
           </button>
         </form>
 
-        <p style={{ marginTop: '15px', fontSize: '14px', color: 'white' }}>
-          Already have an account?{' '}
-          <Link 
-            to="/login" 
-            onClick={() => dispatch(clearError())} 
-            style={{ color: 'var(--primary-blue)', fontWeight: 'bold', textDecoration: 'none' }}
-          >
-            Login here
-          </Link>
+        <p className="auth-footer">
+          Joined already? <Link to="/login" onClick={() => dispatch(clearError())}>Login</Link>
         </p>
       </div>
     </div>
