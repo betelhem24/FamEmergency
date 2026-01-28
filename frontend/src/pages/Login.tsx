@@ -7,40 +7,28 @@ import type { AppDispatch, RootState } from '../store';
 import './Login.css';
 
 const Login: React.FC = () => {
-  // I initialize the dispatch function to send actions to our Redux store
   const dispatch = useDispatch<AppDispatch>();
-  
-  // I pull the loading and error states from the global auth state
   const { loading, error } = useSelector((state: RootState) => state.auth);
   
-  // I track if the password should be visible (text) or hidden (dots)
   const [showPassword, setShowPassword] = useState(false);
-
-  // I keep track of the email and password the user types
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
 
   const handleSubmit = (e: React.FormEvent) => {
-    // I prevent the page from refreshing when the form is submitted
     e.preventDefault();
-    // I trigger the login process via our modular Thunk
     dispatch(loginUser(formData));
   };
 
   return (
     <div className="login-container">
-      <div className="glass-card">
+      <div className="glass-card auth-card">
         <h2>Login</h2>
-        <p>Welcome back to FamEmergency</p>
+        <p>Welcome to FamEmergency</p>
         
-        {/* I display the error message in red if the login fails */}
-        {error && <p style={{ color: '#ff6b6b', marginBottom: '10px' }}>{error}</p>}
+        {error && <p className="error-text">{error}</p>}
         
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>Email Address</label>
+            <label>Email</label>
             <input 
               type="email" 
               placeholder="email@example.com" 
@@ -52,26 +40,12 @@ const Login: React.FC = () => {
           <div className="input-group" style={{ position: 'relative' }}>
             <label>Password</label>
             <input 
-              // I change the input type dynamically based on showPassword state
               type={showPassword ? 'text' : 'password'} 
               placeholder="••••••••" 
               onChange={(e) => setFormData({...formData, password: e.target.value})} 
               required 
             />
-            {/* Professional text-based toggle button */}
-            <span 
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ 
-                position: 'absolute', 
-                right: '15px', 
-                top: '38px', 
-                cursor: 'pointer',
-                fontSize: '12px',
-                color: 'var(--primary-blue)',
-                fontWeight: 'bold',
-                textTransform: 'uppercase'
-              }}
-            >
+            <span className="toggle-pass" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? 'Hide' : 'Show'}
             </span>
           </div>
@@ -81,16 +55,8 @@ const Login: React.FC = () => {
           </button>
         </form>
 
-        {/* Navigation link to the Register page */}
-        <p style={{ marginTop: '15px', fontSize: '14px', color: 'white' }}>
-          Don't have an account?{' '}
-          <Link 
-            to="/register" 
-            onClick={() => dispatch(clearError())} 
-            style={{ color: 'var(--primary-blue)', fontWeight: 'bold', textDecoration: 'none' }}
-          >
-            Register here
-          </Link>
+        <p className="auth-footer">
+          New here? <Link to="/register" onClick={() => dispatch(clearError())}>Register</Link>
         </p>
       </div>
     </div>
