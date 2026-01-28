@@ -21,7 +21,12 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem('token');
     },
-  },
+
+    // This clears the error message when switching between Login and Register
+    clearError: (state) => {
+      state.error = null;
+    },
+  }, // I made sure there is only one brace here
   extraReducers: (builder) => {
     builder
       // Login Logic
@@ -41,19 +46,16 @@ const authSlice = createSlice({
       })
       
       // Registration Logic
-      // I set loading to true while the server creates the new account
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      // If registration is successful, I log the user in immediately
       .addCase(registerUser.fulfilled, (state, action: PayloadAction<{ user: User; token: string }>) => {
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
       })
-      // If registration fails, I capture the error (like "User already exists")
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -61,5 +63,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;
