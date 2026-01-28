@@ -8,33 +8,34 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // 1. I check if the user already exists in MongoDB
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    // I convert email to lowercase to prevent "Maya" vs "maya" issues
+    const normalizedEmail = email.toLowerCase();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // 2. I hash the password with a consistent salt round
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 3. I SAVE TO MONGODB
+    // I save to MongoDB first to get the generated _id
     const mongoUser = new User({
       name,
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       password: hashedPassword,
       role
     });
     await mongoUser.save();
 
-    // 4. I SAVE TO NEON (SQL) - Ensuring ID is a String
+    // I sync to Neon SQL using the same String ID
     await prisma.user.create({
       data: {
         id: mongoUser._id.toString(),
         name,
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         password: hashedPassword,
         role: role.toUpperCase() as any,
-        createdAt: new Date() // I manually set this to avoid schema mismatch
+        createdAt: new Date() // I manually set this to fix the 500 error
       }
     });
 
@@ -46,7 +47,7 @@ export const register = async (req: Request, res: Response) => {
 
     res.status(201).json({
       token,
-      user: { id: mongoUser._id, name, email, role }
+      user: { id: mongoUser._id, name, email: normalizedEmail, role }
     });
     
   } catch (error) {
@@ -58,14 +59,15 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email.toLowerCase();
 
-    // 1. I look for the user using a case-insensitive email search
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // I look for the user in MongoDB
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 2. I compare the password directly with the stored hash
+    // I verify the password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
