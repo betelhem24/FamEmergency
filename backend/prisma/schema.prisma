@@ -1,4 +1,4 @@
-// I define the standard Prisma generator to create the client for JavaScript
+// I define the standard Prisma generator to create the client for TypeScript
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,22 +9,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// I define the User model to store account information
+// I define the User model to store account information in Neon
 model User {
-  id        Int                @id @default(autoincrement())
-  email     String             @unique
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
   name      String?
   password  String
   
   // I added this role field to identify if the user is a PATIENT or a DOCTOR
   // It defaults to PATIENT for security
-  role      String             @default("PATIENT")
+  role      String   @default("PATIENT")
   
   // I add this to track exactly when the user registered
   // The 'now()' function automatically grabs the current time from the server
-  createdAt DateTime           @default(now()) 
+  createdAt DateTime @default(now()) 
   
   // I create a relation to link many emergency contacts to one user
+  // This allows one person to have multiple people to call in a crisis
   contacts  EmergencyContact[] 
 }
 
@@ -39,5 +40,6 @@ model EmergencyContact {
   userId    Int
   
   // I establish the link back to the User model using the userId field
+  // The 'fields' maps to our local userId, and 'references' maps to the User's id
   user      User     @relation(fields: [userId], references: [id])
 }
