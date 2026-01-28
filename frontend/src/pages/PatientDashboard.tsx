@@ -9,11 +9,20 @@ const PatientDashboard: React.FC = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // I create a string of data to be stored inside the QR code
+  // I use a temporary interface to tell TS about the MongoDB ID
+  interface MongoUser {
+    _id?: string;
+    name?: string;
+    email?: string;
+    role?: string;
+  }
+  
+  const userData = user as MongoUser;
+
   const qrData = JSON.stringify({
-    id: user?._id,
-    name: user?.name,
-    role: user?.role,
+    id: userData?._id,
+    name: userData?.name,
+    role: userData?.role,
     timestamp: new Date().toISOString()
   });
 
@@ -25,7 +34,6 @@ const PatientDashboard: React.FC = () => {
       </header>
 
       <div className="dashboard-grid">
-        {/* QR Identification Card */}
         <section className="glass-card">
           <h3>Emergency QR Code</h3>
           <div className="qr-wrapper">
@@ -34,13 +42,12 @@ const PatientDashboard: React.FC = () => {
           <p className="qr-hint">Show this to a doctor in case of emergency.</p>
         </section>
 
-        {/* Profile Information Card */}
         <section className="glass-card">
           <h3>Patient Profile</h3>
           <div className="profile-details">
-            <p><strong>Full Name:</strong> {user?.name}</p>
-            <p><strong>Email:</strong> {user?.email}</p>
-            <p><strong>Account ID:</strong> {user?._id?.substring(0, 8)}...</p>
+            <p><strong>Full Name:</strong> {userData?.name}</p>
+            <p><strong>Email:</strong> {userData?.email}</p>
+            <p><strong>Account ID:</strong> {userData?._id?.substring(0, 8)}...</p>
             <p><strong>Status:</strong> <span className="status-online">Active</span></p>
           </div>
         </section>
