@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../store/thunks';
-import { AppDispatch, RootState } from '../store';
+import type { AppDispatch, RootState } from '../store'; // Added 'type' here
 
 const Register: React.FC = () => {
   // I initialize the dispatch function to send actions to Redux
@@ -15,7 +15,7 @@ const Register: React.FC = () => {
     name: '',
     email: '',
     password: '',
-    role: 'PATIENT' // Default role as per our User interface
+    role: 'PATIENT' as 'PATIENT' | 'DOCTOR' // Cast to match our User type exactly
   });
 
   const handleSubmit = (e: React.FormEvent) => {
