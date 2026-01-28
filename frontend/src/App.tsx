@@ -1,54 +1,65 @@
-// I import the necessary tools from React and React Router
-// I use 'import type' for RootState because it is a TypeScript definition, not a value
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import type { RootState } from './store'; // FIXED LINE
+import type { RootState } from './store';
 
-// I import the different page components
+// Pages
 import Login from './pages/Login';
+import Register from './pages/Register';
 import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
 
+// Components
+import ProtectedRoute from './components/ProtectedRoute';
+
 const App: React.FC = () => {
-  // I pull the user and authentication status from the Redux store
+  // I pull the user info to handle role-based redirection
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   return (
     <Router>
       <Routes>
-        {/* I define the public Login route */}
+        {/* Public Routes */}
+        {/* If logged in, I redirect them away from Login/Register to the home logic */}
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
+        <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" />} />
 
-        {/* I define the logic for the Home path '/' */}
+        {/* Home Logic: Redirects user based on their specific role */}
         <Route 
           path="/" 
           element={
-            !isAuthenticated ? (
-              <Navigate to="/login" />
-            ) : user?.role === 'DOCTOR' ? (
-              <Navigate to="/doctor-dashboard" />
-            ) : (
-              <Navigate to="/patient-dashboard" />
-            )
+            <ProtectedRoute>
+              {user?.role === 'DOCTOR' ? (
+                <Navigate to="/doctor-dashboard" replace />
+              ) : (
+                <Navigate to="/patient-dashboard" replace />
+              )}
+            </ProtectedRoute>
           } 
         />
 
-        {/* I protect the Patient Dashboard: only PATIENT role can enter */}
+        {/* Patient Route: Protected by Guard */}
         <Route 
           path="/patient-dashboard" 
           element={
-            isAuthenticated && user?.role === 'PATIENT' ? <PatientDashboard /> : <Navigate to="/login" />
+            <ProtectedRoute>
+              <PatientDashboard />
+            </ProtectedRoute>
           } 
         />
 
-        {/* I protect the Doctor Dashboard: only DOCTOR role can enter */}
+        {/* Doctor Route: Protected by Guard */}
         <Route 
           path="/doctor-dashboard" 
           element={
-            isAuthenticated && user?.role === 'DOCTOR' ? <DoctorDashboard /> : <Navigate to="/login" />
+            <ProtectedRoute>
+              <DoctorDashboard />
+            </ProtectedRoute>
           } 
         />
+
+        {/* Fallback: Send any unknown link to the home logic */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
