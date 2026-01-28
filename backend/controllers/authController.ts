@@ -1,52 +1,49 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User'; // I use this for MongoDB operations
-import prisma from '../db/prisma'; // I use this for Neon (PostgreSQL) operations
+import User from '../models/User'; 
+import prisma from '../db/prisma';
 
-// I export the register function to handle new account creation
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // 1. I check if the user already exists in MongoDB to avoid duplicates
-    const existingUser = await User.findOne({ email });
+    // 1. I check if the user already exists in MongoDB
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // 2. I hash the password so it is stored as a secret code, not plain text
+    // 2. I hash the password with a consistent salt round
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 3. I SAVE TO MONGODB (Our flexible NoSQL database)
+    // 3. I SAVE TO MONGODB
     const mongoUser = new User({
       name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       role
     });
     await mongoUser.save();
 
-    // 4. I SAVE TO NEON (Our structured SQL database for redundancy)
-    // I am using the MongoDB _id as a string to match the SQL 'id' field
+    // 4. I SAVE TO NEON (SQL) - Ensuring ID is a String
     await prisma.user.create({
       data: {
-        id: mongoUser._id.toString(), // I manually sync the ID as a string
+        id: mongoUser._id.toString(),
         name,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
-        role: role.toUpperCase() as any // I convert to PATIENT/DOCTOR for SQL
+        role: role.toUpperCase() as any,
+        createdAt: new Date() // I manually set this to avoid schema mismatch
       }
     });
 
-    // 5. I generate a JWT token so the user stays logged in after registering
     const token = jwt.sign(
       { userId: mongoUser._id, role: mongoUser.role },
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '1h' }
     );
 
-    // 6. I send the success response back to the frontend
     res.status(201).json({
       token,
       user: { id: mongoUser._id, name, email, role }
@@ -58,39 +55,31 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-// I export the login function to handle existing user access
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    // 1. I look for the user in MongoDB by their email address
-    const user = await User.findOne({ email });
+    // 1. I look for the user using a case-insensitive email search
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 2. I compare the typed password with the hashed password in the database
+    // 2. I compare the password directly with the stored hash
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 3. I create a new JWT token for this session
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '1h' }
     );
 
-    // 4. I return the user info and token to the frontend
     res.json({
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     console.error('Login Error:', error);
