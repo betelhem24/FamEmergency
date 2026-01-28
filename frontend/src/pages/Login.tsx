@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'; // 1. Added this
+import { Link } from 'react-router-dom';
 import { loginUser } from '../store/thunks';
-import { clearError } from '../store/slices/authSlice'; // 2. Added this
+import { clearError } from '../store/slices/authSlice';
 import type { AppDispatch, RootState } from '../store';
 import './Login.css';
 
 const Login: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
+  
+  // I add this state to track if the password is visible or hidden
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -39,14 +42,28 @@ const Login: React.FC = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="input-group" style={{ position: 'relative' }}>
             <label>Password</label>
             <input 
-              type="password" 
+              // I switch the type dynamically: 'password' hides it, 'text' shows it
+              type={showPassword ? 'text' : 'password'} 
               placeholder="••••••••" 
               onChange={(e) => setFormData({...formData, password: e.target.value})} 
               required 
             />
+            {/* The "Eye" toggle button */}
+            <span 
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '40px',
+                cursor: 'pointer',
+                fontSize: '18px'
+              }}
+            >
+              {showPassword ? '👁️' : '🙈'}
+            </span>
           </div>
 
           <button className="login-button" type="submit" disabled={loading}>
@@ -54,7 +71,6 @@ const Login: React.FC = () => {
           </button>
         </form>
 
-        {/* 3. ADD THIS SECTION BELOW THE FORM */}
         <p style={{ marginTop: '15px', fontSize: '14px', color: 'white' }}>
           Don't have an account?{' '}
           <Link 
