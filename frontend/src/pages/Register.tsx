@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'; // 1. Added this
 import { registerUser } from '../store/thunks';
+import { clearError } from '../store/slices/authSlice'; // 2. Added this
 import type { AppDispatch, RootState } from '../store';
-import './Register.css'; // I am importing the new styles
+import './Register.css';
 
 const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -74,6 +76,18 @@ const Register: React.FC = () => {
             {loading ? 'Processing...' : 'Register'}
           </button>
         </form>
+
+        {/* 3. ADD THIS SECTION BELOW THE FORM */}
+        <p style={{ marginTop: '15px', fontSize: '14px', color: 'white' }}>
+          Already have an account?{' '}
+          <Link 
+            to="/login" 
+            onClick={() => dispatch(clearError())} 
+            style={{ color: 'var(--primary-blue)', fontWeight: 'bold', textDecoration: 'none' }}
+          >
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );
