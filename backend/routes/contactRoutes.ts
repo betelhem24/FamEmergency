@@ -1,13 +1,10 @@
-import express from 'express';
-// I am importing express to manage the paths.
+import { Router } from 'express';
+import { addContact } from '../controllers/contactController';
+// I point to the middleware folder. 
+import { protect } from '../middleware/authMiddleware'; 
 
-const router = express.Router();
-// I am initializing the routing tool.
+const router = Router();
 
-router.get('/test', (req, res) => {
-// I am creating a test path to make sure contacts are working.
-  res.send("Contact route is working");
-});
+router.post('/add', protect, addContact);
 
 export default router;
-// I am sharing this file with the rest of the app.
