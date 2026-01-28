@@ -1,66 +1,69 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-// I import the logout action to allow the doctor to sign out
 import { logout } from '../store/slices/authSlice';
 import { QrReader } from 'react-qr-reader';
 import type { RootState } from '../store';
 
 const DoctorDashboard: React.FC = () => {
   const dispatch = useDispatch();
-  // I pull the doctor's info from the 'Global Memory' (Redux)
   const { user } = useSelector((state: RootState) => state.auth);
-  // I create a 'state' to hold the text we get from the QR code
   const [scanResult, setScanResult] = useState<string | null>(null);
 
   return (
-    <div className="login-container">
-      <div className="glass-card" style={{ maxWidth: '500px' }}>
-        {/* Logout Section */}
-        <div style={{ textAlign: 'right' }}>
-          <button className="login-button" style={{ width: 'auto', padding: '5px 15px', background: 'rgba(255,255,255,0.1)' }} onClick={() => dispatch(logout())}>
-            Logout
-          </button>
-        </div>
+    <div className="dashboard-container">
+      {/* Top Navigation Bar */}
+      <header className="dashboard-header">
+        <h1>Medical Control</h1>
+        <button className="logout-btn-small" onClick={() => dispatch(logout())}>
+          Logout
+        </button>
+      </header>
 
-        <h2>Medical Scanner</h2>
-        <p>Doctor: <strong>{user?.name}</strong></p>
-
-        {/* Camera Container with Glass Border */}
-        <div style={{ 
-          marginTop: '20px', 
-          border: '2px solid var(--glass-border)', 
-          borderRadius: '15px', 
-          overflow: 'hidden',
-          background: '#000' 
-        }}>
-         <QrReader
-            onResult={(result) => { // I removed 'error' from here
-              // If the camera 'sees' a code, I save the text
-              if (result) {
-                setScanResult(result.getText());
-              }
-            }}
-            // I tell the device to use the back camera
-            constraints={{ facingMode: 'environment' }}
-            containerStyle={{ width: '100%' }}
-          />
-        </div>
-
-        {/* Results Section: Only shows if 'scanResult' is not empty */}
-        {scanResult && (
-          <div style={{ 
-            marginTop: '20px', 
-            padding: '15px', 
-            background: 'rgba(255, 255, 255, 0.1)', 
-            borderRadius: '10px',
-            textAlign: 'left'
-          }}>
-            <h4 style={{ margin: '0 0 10px 0' }}>Patient History:</h4>
-            {/* I display the raw text data found in the QR */}
-            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '12px' }}>{scanResult}</pre>
-            <button className="login-button" onClick={() => setScanResult(null)}>Scan Next Patient</button>
+      {/* Responsive Grid Layout */}
+      <div className="dashboard-grid">
+        
+        {/* Card 1: The Scanner (Main Action) */}
+        <section className="glass-card scanner-section">
+          <h3>Medical Scanner</h3>
+          <div className="scanner-container">
+            <QrReader
+              onResult={(result) => {
+                if (result) {
+                  setScanResult(result.getText());
+                }
+              }}
+              constraints={{ facingMode: 'environment' }}
+              containerStyle={{ width: '100%', borderRadius: '15px', overflow: 'hidden' }}
+            />
           </div>
-        )}
+          <p className="scanner-hint">Scan Patient's QR ID for instant history</p>
+        </section>
+
+        {/* Card 2: Doctor Profile & Stats */}
+        <section className="glass-card info-section">
+          <h3>Physician Details</h3>
+          <div className="profile-details">
+            <p><strong>Doctor:</strong> {user?.name}</p>
+            <p><strong>Specialty:</strong> Emergency Medicine</p>
+            <p><strong>System Status:</strong> <span className="status-online">Online</span></p>
+          </div>
+        </section>
+
+        {/* Card 3: Scan Results (Only shows when data is found) */}
+        <section className="glass-card results-section">
+          <h3>Scan Results</h3>
+          {scanResult ? (
+            <div className="scan-content">
+              <pre className="history-data">{scanResult}</pre>
+              <button className="action-btn" onClick={() => setScanResult(null)}>
+                Clear & Scan Next
+              </button>
+            </div>
+          ) : (
+            <p className="placeholder-text">Waiting for scanner data...</p>
+          )}
+        </section>
+
       </div>
     </div>
   );
