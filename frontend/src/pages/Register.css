@@ -1,3 +1,4 @@
+/* Optimized Register Styles */
 .register-container {
   display: flex;
   justify-content: center;
@@ -6,66 +7,45 @@
   padding: 20px;
 }
 
-.glass-card {
-  /* I pull these from your global variables */
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 40px;
+/* We reuse the glass-card base and just adjust the width for more fields */
+.glass-card.register-card {
   width: 100%;
-  max-width: 450px; /* Slightly wider for registration */
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  max-width: 480px;
   text-align: center;
-  color: white;
 }
 
-.input-group {
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.input-group input, .input-group select {
+/* Professional Select/Dropdown styling */
+.input-group select {
   width: 100%;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  background: var(--input-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 12px;
   color: white;
-  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
 }
 
-/* Style for the dropdown/select arrow */
-.input-group select option {
-  background: #222; 
-  color: white;
+.input-group select:focus {
+  border-color: var(--primary-blue);
+  outline: none;
 }
 
 .register-button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background: var(--primary-blue);
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   color: white;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
-  margin-top: 10px;
+  margin-top: 15px;
+  transition: transform 0.2s;
 }
 
-.register-button:hover {
-  filter: brightness(1.2);
-}
-
-.register-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.register-button:hover { transform: translateY(-1px); }
+.register-button:disabled { opacity: 0.6; cursor: not-allowed; }
