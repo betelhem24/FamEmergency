@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'; // 1. Added this
+import { Link } from 'react-router-dom';
 import { registerUser } from '../store/thunks';
-import { clearError } from '../store/slices/authSlice'; // 2. Added this
+import { clearError } from '../store/slices/authSlice';
 import type { AppDispatch, RootState } from '../store';
 import './Register.css';
 
 const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
+  
+  // I track password visibility state here too for consistency
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -51,20 +54,36 @@ const Register: React.FC = () => {
             />
           </div>
 
-          <div className="input-group">
+          <div className="input-group" style={{ position: 'relative' }}>
             <label>Password</label>
             <input 
-              type="password" 
+              type={showPassword ? 'text' : 'password'} 
               placeholder="••••••••" 
               onChange={(e) => setFormData({...formData, password: e.target.value})} 
               required 
             />
+            {/* Same professional text-based toggle for the register page */}
+            <span 
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ 
+                position: 'absolute', 
+                right: '15px', 
+                top: '38px', 
+                cursor: 'pointer',
+                fontSize: '12px',
+                color: 'var(--primary-blue)',
+                fontWeight: 'bold',
+                textTransform: 'uppercase'
+              }}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </span>
           </div>
 
           <div className="input-group">
             <label>I am a:</label>
             <select 
-              value={formData.role}
+              value={formData.role} 
               onChange={(e) => setFormData({...formData, role: e.target.value as 'PATIENT' | 'DOCTOR'})}
             >
               <option value="PATIENT">Patient</option>
@@ -77,7 +96,6 @@ const Register: React.FC = () => {
           </button>
         </form>
 
-        {/* 3. ADD THIS SECTION BELOW THE FORM */}
         <p style={{ marginTop: '15px', fontSize: '14px', color: 'white' }}>
           Already have an account?{' '}
           <Link 
