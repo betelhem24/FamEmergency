@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User'; 
+import User from '../models/User';
 import prisma from '../db/prisma';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, medicalLicense, department, bloodType, allergies } = req.body;
 
     // I convert email to lowercase to prevent "Maya" vs "maya" issues
     const normalizedEmail = email.toLowerCase();
@@ -18,26 +18,34 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // I save to MongoDB first to get the generated _id
+    // I save to MongoDB
     const mongoUser = new User({
       name,
       email: normalizedEmail,
       password: hashedPassword,
-      role
+      role,
+      medicalLicense,
+      department,
+      bloodType,
+      allergies
     });
     await mongoUser.save();
 
-    // I sync to Neon SQL using the same String ID
-    await prisma.user.create({
-      data: {
-        id: mongoUser._id.toString(),
-        name,
-        email: normalizedEmail,
-        password: hashedPassword,
-        role: role.toUpperCase() as any,
-        createdAt: new Date() // I manually set this to fix the 500 error
-      }
-    });
+    // I sync to Neon SQL
+    try {
+      await prisma.user.create({
+        data: {
+          id: mongoUser._id.toString(),
+          name,
+          email: normalizedEmail,
+          password: hashedPassword,
+          role: role.toUpperCase() as any,
+          createdAt: new Date()
+        }
+      });
+    } catch (sqlError) {
+      console.error('SQL Sync Error (non-fatal):', sqlError);
+    }
 
     const token = jwt.sign(
       { userId: mongoUser._id, role: mongoUser.role },
@@ -49,7 +57,7 @@ export const register = async (req: Request, res: Response) => {
       token,
       user: { id: mongoUser._id, name, email: normalizedEmail, role }
     });
-    
+
   } catch (error) {
     console.error('Registration Error:', error);
     res.status(500).json({ message: 'Something went wrong during registration' });

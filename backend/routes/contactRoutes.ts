@@ -1,10 +1,8 @@
-import { Router } from 'express';
-import { addContact } from '../controllers/contactController';
-// I point to the middleware folder. 
-import { protect } from '../middleware/authMiddleware'; 
+import express from 'express';
+import { getContacts } from '../controllers/contacts/manageController';
 
-const router = Router();
+const router = express.Router();
 
-router.post('/add', protect, addContact);
+router.get('/', getContacts);
 
 export default router;

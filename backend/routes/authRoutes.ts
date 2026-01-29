@@ -1,13 +1,13 @@
 import express from 'express';
-// I changed 'registerUser' to 'register' and 'loginUser' to 'login'
-import { register, login } from '../controllers/authController';
+import { register } from '../controllers/auth/registerController';
+import { login } from '../controllers/auth/loginController';
 
 const router = express.Router();
 
-// I link the /register path to the register function
+// POST /api/auth/register - User registration
 router.post('/register', register);
 
-// I link the /login path to the login function
+// POST /api/auth/login - User login
 router.post('/login', login);
 
 export default router;

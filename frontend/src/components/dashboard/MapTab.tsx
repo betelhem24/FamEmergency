@@ -1,0 +1,79 @@
+import React from 'react';
+import { Search, Navigation, Hospital, Shield } from 'lucide-react';
+
+const MapTab: React.FC = () => {
+    return (
+        <div className="space-y-8 animate-in zoom-in duration-500">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h2 className="text-2xl font-black text-medical-navy italic">Global Safety Map</h2>
+                    <p className="text-sm text-slate-400 font-medium uppercase tracking-[0.2em]">Real-time awareness node</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="relative flex-1 md:w-80">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Search emergency facilities..."
+                            className="w-full bg-white border border-slate-200 pl-12 pr-4 py-4 rounded-2xl text-xs font-bold text-medical-navy focus:ring-2 focus:ring-medical-cyan/50 outline-none transition-all placeholder:text-slate-300"
+                        />
+                    </div>
+                    <button className="p-4 bg-medical-navy text-white rounded-2xl shadow-xl">
+                        <Navigation size={20} strokeWidth={2.5} />
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="lg:col-span-3 medical-glass min-h-[500px] border-4 border-white overflow-hidden relative shadow-2xl">
+                    {/* Simulated Map */}
+                    <div className="absolute inset-0 bg-slate-100 bg-[radial-gradient(circle,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[length:24px_24px]" />
+
+                    <div className="absolute top-1/3 left-1/2 w-8 h-8 -ml-4 rounded-full bg-medical-cyan/20 flex items-center justify-center">
+                        <div className="w-4 h-4 bg-medical-cyan rounded-full shadow-[0_0_15px_rgba(0,242,255,1)]" />
+                    </div>
+
+                    <div className="absolute bottom-6 left-6 p-4 medical-glass bg-white/90 border-slate-200">
+                        <div className="text-[10px] font-black text-slate-400 uppercase mb-1">Current Sector</div>
+                        <div className="text-sm font-black text-medical-navy font-mono">COORD_NY_CENTRAL_04</div>
+                    </div>
+                </div>
+
+                <div className="space-y-6">
+                    <div className="medical-glass p-6">
+                        <h3 className="text-xs font-black text-medical-navy uppercase mb-6 tracking-widest flex items-center gap-2 italic">
+                            <Hospital size={16} className="text-medical-cyan" /> Nearby Support
+                        </h3>
+                        <div className="space-y-4">
+                            {[
+                                { name: 'Metro Health Center', dist: '0.8 mi', status: 'H-Ready' },
+                                { name: 'Central Fire Dept', dist: '1.2 mi', status: 'R-Active' },
+                                { name: '24h Trauma Unit', dist: '3.5 mi', status: 'H-Ready' }
+                            ].map(loc => (
+                                <div key={loc.name} className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                                    <div className="text-xs font-black text-medical-navy mb-0.5">{loc.name}</div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">{loc.dist}</span>
+                                        <span className="text-[10px] font-black text-medical-cyan uppercase">{loc.status}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="medical-glass p-6 bg-gradient-to-br from-white to-slate-50">
+                        <div className="flex items-center gap-3 mb-4">
+                            <Shield className="text-medical-navy" size={20} />
+                            <span className="text-xs font-black text-medical-navy tracking-tight uppercase">Safe Zones</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed uppercase">
+                            Emergency routing is optimized for maximum security and minimum transit time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default MapTab;

@@ -1,36 +1,59 @@
 import express, { Application } from 'express';
+import { createServer } from 'http';
+import { Server as SocketServer } from 'socket.io';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-// I import the authentication routes for Login/Register
 import authRoutes from './routes/authRoutes';
-// I import the contact routes to handle SQL family data
 import contactRoutes from './routes/contactRoutes';
+import medicalRoutes from './routes/medicalRoutes';
+import emergencyRoutes from './routes/emergencyRoutes';
+import locationRoutes from './routes/locationRoutes';
+import familyRoutes from './routes/familyRoutes';
+import doctorRoutes from './routes/doctorRoutes';
+import { setupSocketHandlers } from './socketHandlers';
 
 dotenv.config();
 
 const app: Application = express();
+const httpServer = createServer(app);
+const io = new SocketServer(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
-// 1. Middleware
-// I use cors to allow the frontend to communicate with this server
+// Middleware
 app.use(cors());
-// I use express.json so the server can parse incoming JSON data
 app.use(express.json());
 
-// 2. Database Connection
-// I connect to MongoDB to handle the primary user accounts
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/medical_app')
+// Database Connection
+mongoose.connect(
+  process.env.MONGO_URI || 'mongodb://localhost:27017/medical_app'
+)
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.log('Database connection error:', err));
 
-// 3. Routes
-// All auth requests go to /api/auth
+// Routes
 app.use('/api/auth', authRoutes);
-// All emergency contact requests go to /api/contacts
 app.use('/api/contacts', contactRoutes);
+app.use('/api/medical', medicalRoutes);
+app.use('/api/emergency', emergencyRoutes);
+app.use('/api/location', locationRoutes);
+app.use('/api/family', familyRoutes);
+app.use('/api/doctor', doctorRoutes);
 
-// 4. Server Start
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Setup Socket.io handlers
+setupSocketHandlers(io);
+
+// Make io accessible to routes
+app.set('io', io);
+
+// Server Start
+httpServer.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Socket.io ready for real-time connections`);
 });

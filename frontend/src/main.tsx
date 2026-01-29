@@ -1,20 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// I import Provider so the entire app can access the Redux 'Global Memory'
-import { Provider } from 'react-redux';
-// I import our store that we configured earlier
+import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
-// I import App, which acts as the 'Traffic Controller' for our routes
+import type { RootState } from './store';
+import { SocketProvider } from './context/SocketContext';
 import App from './App';
-// I import the global CSS for our Glassmorphism variables
 import './index.css';
 
-// I tell React to find the 'root' div in your index.html and start the app there
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    {/* I wrap the App in the Redux Provider so state is available everywhere */}
-    <Provider store={store}>
+const AppWithSocket = () => {
+  const token = useSelector((state: RootState) => state.auth.token);
+
+  return (
+    <SocketProvider token={token}>
       <App />
-    </Provider>
-  </React.StrictMode>
-);
+    </SocketProvider>
+  );
+};
+
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <AppWithSocket />
+      </Provider>
+    </React.StrictMode>
+  );
+}
