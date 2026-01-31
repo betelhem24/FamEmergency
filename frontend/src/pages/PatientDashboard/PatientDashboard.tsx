@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import BottomNav from '../../components/layout/BottomNav';
-import ProfilTab from '../../components/dashboard/ProfileTab';
+import ProfileTab from '../../components/dashboard/ProfileTab';
 import EmergencyTab from '../../components/dashboard/EmergencyTab';
 import FirstAidTab from '../../components/dashboard/FirstAidTab';
 import MapTab from '../../components/dashboard/MapTab';

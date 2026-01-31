@@ -14,28 +14,39 @@
 }
 
 @layer utilities {
-  .glass-card {
-    @apply bg-white/[0.1] backdrop-blur-[15px] border border-white/[0.2];
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+
+  .glass-card,
+  .glass-panel,
+  .glass-nav,
+  .medical-glass {
+    @apply backdrop-blur-[15px] border border-white/[0.2];
     transform: translateZ(0);
     will-change: transform, backdrop-filter;
   }
 
+  .glass-card {
+    @apply bg-white/[0.1];
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  }
+
   .glass-panel {
-    @apply bg-slate-900/[0.45] backdrop-blur-[15px] border border-white/[0.15] shadow-lg;
-    transform: translateZ(0);
+    @apply bg-slate-900/[0.45] border-white/[0.15] shadow-lg;
   }
 
   .glass-nav {
-    @apply bg-navy-deep/[0.85] backdrop-blur-[15px] border-t border-white/[0.15];
-    transform: translateZ(0);
+    @apply bg-navy-deep/[0.85] border-t border-white/[0.15];
+  }
+
+  .medical-glass {
+    @apply bg-white border border-slate-100 shadow-2xl;
   }
 
   @media (max-width: 640px) {
 
     .glass-card,
     .glass-panel,
-    .glass-nav {
+    .glass-nav,
+    .medical-glass {
       backdrop-filter: blur(10px);
     }
   }
