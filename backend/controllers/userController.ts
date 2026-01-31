@@ -6,7 +6,7 @@ export const getUserWithMedicalData = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         // Check if ID is valid MongoDB ID to avoid crash
-        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        if (typeof id !== 'string' || !id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ message: 'Invalid ID format' });
         }
 
