@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Send, User, Activity, MessageCircle, Heart, Zap, ShieldCheck } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Send, User, Activity, MessageCircle, Heart, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 
 const SOCKET_URL = 'http://localhost:5000';
@@ -78,8 +78,8 @@ export const DoctorChat: React.FC = () => {
                                     key={p.userId}
                                     onClick={() => setActiveChatId(p.userId)}
                                     className={`w-full p-4 rounded-2xl border transition-all text-left flex items-center justify-between ${activeChatId === p.userId
-                                            ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
-                                            : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-medical-cyan/30'
+                                        ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
+                                        : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-medical-cyan/30'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -137,8 +137,8 @@ export const DoctorChat: React.FC = () => {
                                         className={`flex flex-col ${msg.from === user?.id ? 'items-end' : 'items-start'}`}
                                     >
                                         <div className={`max-w-[70%] p-4 rounded-[1.5rem] border ${msg.from === user?.id
-                                                ? 'bg-slate-900 border-slate-900 text-white rounded-tr-none shadow-lg'
-                                                : 'bg-slate-50 border-slate-100 text-slate-900 rounded-tl-none'
+                                            ? 'bg-slate-900 border-slate-900 text-white rounded-tr-none shadow-lg'
+                                            : 'bg-slate-50 border-slate-100 text-slate-900 rounded-tl-none'
                                             }`}>
                                             <p className="text-sm font-medium tracking-tight leading-relaxed">{msg.message}</p>
                                         </div>
