@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Send, MessageSquare, Heart, ShieldAlert, Activity, Search, BookOpen, Flame, Wind, Droplet } from 'lucide-react';
+import { Users, Send, MessageSquare, Heart, ShieldAlert, Activity, Search, BookOpen, Wind, Droplet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
