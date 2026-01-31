@@ -29,10 +29,11 @@ const Community: React.FC = () => {
     ];
 
     useEffect(() => {
-        // Register Service Worker for Offline Cache
-        if ('serviceWorker' in navigator) {
+        // One-time Service Worker registration
+        if ('serviceWorker' in navigator && !window.__sw_registered) {
             navigator.serviceWorker.register('/sw.js').then(() => {
                 console.log('COMMUNITY: Service Worker Active (Offline Library Enabled)');
+                window.__sw_registered = true;
             });
         }
 

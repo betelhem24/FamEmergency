@@ -25,8 +25,15 @@ const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
 
 // Custom Hook for Geo-Fencing Logic
 const useGeoFencing = (myLocation, safeZones) => {
+    const [lastCheck, setLastCheck] = useState(0);
+
     useEffect(() => {
         if (!myLocation || !safeZones.length) return;
+
+        // PERFORMANCE: Throttle geo-fencing checks to once every 3 seconds to save CPU
+        const now = Date.now();
+        if (now - lastCheck < 3000) return;
+        setLastCheck(now);
 
         safeZones.forEach(zone => {
             const distance = L.latLng(myLocation.latitude, myLocation.longitude)
@@ -34,11 +41,10 @@ const useGeoFencing = (myLocation, safeZones) => {
 
             if (distance > zone.radius) {
                 console.warn(`GEOFENCE: Left safe zone "${zone.name}"!`);
-                // In a real app, this would trigger a push notification
                 if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]);
             }
         });
-    }, [myLocation, safeZones]);
+    }, [myLocation, safeZones, lastCheck]);
 };
 
 export const LiveMap: React.FC = () => {

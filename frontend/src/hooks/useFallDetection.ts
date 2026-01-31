@@ -73,19 +73,18 @@ export const useFallDetection = (onConfirmedFall: (coords: { latitude: number, l
             const acc = event.accelerationIncludingGravity;
             if (!acc) return;
 
-            const magnitude = Math.sqrt(
-                (acc.x || 0) ** 2 +
-                (acc.y || 0) ** 2 +
-                (acc.z || 0) ** 2
-            );
+            // PERFORMANCE: Use squared magnitude for threshold check to avoid Math.sqrt overhead on every event
+            const magSquared = (acc.x || 0) ** 2 + (acc.y || 0) ** 2 + (acc.z || 0) ** 2;
+            const thresholdSquared = FALL_THRESHOLD ** 2;
 
-            if (magnitude > FALL_THRESHOLD && !impactDetected) {
+            if (magSquared > thresholdSquared && !impactDetected) {
                 impactDetected = true;
                 impactTime = Date.now();
-                console.log("FALL: Potential impact detected!", magnitude);
+                console.log("FALL: Potential impact detected!", Math.sqrt(magSquared));
             }
 
             if (impactDetected && Date.now() - impactTime > 2000) {
+                const magnitude = Math.sqrt(magSquared);
                 if (magnitude < STABILITY_THRESHOLD) {
                     console.log("FALL: Impact confirmed via stability check.");
                     triggerSOS();
