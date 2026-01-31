@@ -1,12 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IPost extends Document {
-    userId: Schema.Types.ObjectId;
+    userId: string;
     userName: string;
     content: string;
-    supports: Schema.Types.ObjectId[];
+    supports: string[];
     comments: {
-        userId: Schema.Types.ObjectId;
+        userId: string;
         userName: string;
         text: string;
         createdAt: Date;
@@ -15,12 +15,12 @@ export interface IPost extends Document {
 }
 
 const postSchema = new Schema<IPost>({
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: String, required: true },
     userName: { type: String, required: true },
     content: { type: String, required: true },
-    supports: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+    supports: [{ type: String, default: [] }],
     comments: [{
-        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        userId: { type: String, required: true },
         userName: { type: String, required: true },
         text: { type: String, required: true },
         createdAt: { type: Date, default: Date.now }
