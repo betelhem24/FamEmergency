@@ -1,13 +1,12 @@
 import express from 'express';
-import { register } from '../controllers/auth/registerController';
-import { login } from '../controllers/auth/loginController';
+import { register, login } from '../controllers/authController';
 
 const router = express.Router();
 
-// POST /api/auth/register - User registration
+// POST /api/auth/register - User registration (Neon-Primary)
 router.post('/register', register);
 
-// POST /api/auth/login - User login
+// POST /api/auth/login - User login (Neon-Primary)
 router.post('/login', login);
 
 export default router;
