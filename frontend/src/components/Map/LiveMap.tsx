@@ -1,6 +1,7 @@
 // @ts-nocheck
-import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import 'leaflet/dist/leaflet.css';
@@ -22,9 +23,34 @@ const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
     return null;
 };
 
+// Custom Hook for Geo-Fencing Logic
+const useGeoFencing = (myLocation, safeZones) => {
+    useEffect(() => {
+        if (!myLocation || !safeZones.length) return;
+
+        safeZones.forEach(zone => {
+            const distance = L.latLng(myLocation.latitude, myLocation.longitude)
+                .distanceTo(L.latLng(zone.lat, zone.lng));
+
+            if (distance > zone.radius) {
+                console.warn(`GEOFENCE: Left safe zone "${zone.name}"!`);
+                // In a real app, this would trigger a push notification
+                if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]);
+            }
+        });
+    }, [myLocation, safeZones]);
+};
+
 export const LiveMap: React.FC = () => {
     const myLocation = useSelector((state: RootState) => state.location.myLocation);
     const familyLocations = useSelector((state: RootState) => state.location.familyLocations);
+
+    // Mock Safe Zones (In production, these would come from the backend/doctor)
+    const [safeZones] = useState([
+        { id: 1, name: 'Home Safe Zone', lat: 32.0853, lng: 34.7818, radius: 500, color: '#06b6d4' }
+    ]);
+
+    useGeoFencing(myLocation, safeZones);
 
     const defaultCenter: [number, number] = [32.0853, 34.7818]; // Tel Aviv
     const center: [number, number] = myLocation
@@ -32,35 +58,82 @@ export const LiveMap: React.FC = () => {
         : defaultCenter;
 
     return (
-        <div style={{ height: '400px', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+        <div className="relative w-full h-[450px] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl glass-panel">
             <MapContainer
                 center={center}
-                zoom={13}
+                zoom={14}
                 style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={false}
             >
                 <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
                 <MapUpdater center={center} />
 
-                {myLocation && (
-                    <Marker position={[myLocation.latitude, myLocation.longitude]}>
-                        <Popup>Your Location</Popup>
-                    </Marker>
-                )}
+                {/* Geo-Fencing Visuals */}
+                {safeZones.map(zone => (
+                    <Circle
+                        key={zone.id}
+                        center={[zone.lat, zone.lng]}
+                        radius={zone.radius}
+                        pathOptions={{
+                            color: zone.color,
+                            fillColor: zone.color,
+                            fillOpacity: 0.1,
+                            dashArray: '10, 10'
+                        }}
+                    >
+                        <Popup>{zone.name}</Popup>
+                    </Circle>
+                ))}
 
-                {familyLocations.map((member) =>
-                    member.location && (
-                        <Marker
-                            key={member.userId}
-                            position={[member.location.latitude, member.location.longitude]}
-                        >
-                            <Popup>{member.name}</Popup>
+                {/* Marker Clustering */}
+                <MarkerClusterGroup
+                    chunkedLoading
+                    maxClusterRadius={50}
+                    spiderfyOnMaxZoom={true}
+                >
+                    {myLocation && (
+                        <Marker position={[myLocation.latitude, myLocation.longitude]}>
+                            <Popup>
+                                <div className="text-center">
+                                    <p className="font-black uppercase text-[10px] text-life-cyan">You</p>
+                                    <p className="text-[9px] text-slate-500">Live Status: Active</p>
+                                </div>
+                            </Popup>
                         </Marker>
-                    )
-                )}
+                    )}
+
+                    {familyLocations.map((member) =>
+                        member.location && (
+                            <Marker
+                                key={member.userId}
+                                position={[member.location.latitude, member.location.longitude]}
+                            >
+                                <Popup>
+                                    <div className="text-center">
+                                        <p className="font-black uppercase text-[10px] text-white">{member.name}</p>
+                                        <p className="text-[9px] text-slate-500">Member ID: {member.userId.slice(-4)}</p>
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        )
+                    )}
+                </MarkerClusterGroup>
             </MapContainer>
+
+            {/* Glass UI Overlay for Map Controls */}
+            <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
+                <div className="bg-black/40 backdrop-blur-md border border-white/10 p-3 rounded-2xl flex justify-between items-center px-6">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Network Sync</span>
+                    </div>
+                    <span className="text-[10px] font-black text-life-cyan uppercase tracking-widest">{familyLocations.length} Members Online</span>
+                </div>
+            </div>
         </div>
     );
 };
+
