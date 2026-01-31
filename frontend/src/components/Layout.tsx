@@ -9,7 +9,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-medical-cyan selection:text-[#020617] overflow-hidden relative">
             <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#020617] via-[#020617] to-[#0f172a] pointer-events-none" />
-            <div className="absolute inset-0 z-0 opacity-20">
+            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
                 {[...Array(6)].map((_, i) => (
                     <motion.div
                         key={i}
