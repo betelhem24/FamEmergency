@@ -23,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
     const userCount = await prisma.user.count();
     const newUserRole = role || 'PATIENT';
 
-    const user = await prisma.user.create({
+    const user = await (prisma.user as any).create({
       data: {
         id: `user_${Date.now()}_${userCount}`,
         name,
