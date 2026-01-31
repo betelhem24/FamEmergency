@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { User, ClipboardList, Heart, Activity, ShieldCheck, Mail, Phone, Calendar, Download, QrCode } from 'lucide-react';
+import { User, ClipboardList, Heart, Activity, ShieldCheck, Mail, Calendar, Download, QrCode } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../../context/AuthContext';
 import html2canvas from 'html2canvas';
@@ -133,8 +133,5 @@ const ProfileTab: React.FC = () => {
         </div>
     );
 };
-
-export default ProfileTab;
-
 
 export default ProfileTab;
