@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
 export const connectDB = async () => {
     try {
         await prisma.$connect();
-        console.log('Neon PostgreSQL connected successfully via Prisma');
+        console.log('[SUCCESS] Neon PostgreSQL Connected');
     } catch (error) {
         console.error('Neon Database connection failed:', error);
         // Requirement: Throw error if connection fails to prevent starting with fake data
