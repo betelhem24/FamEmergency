@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ScanLine, ArrowLeft, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -21,11 +21,12 @@ const DoctorScanner = () => {
                 await html5QrCode.start(
                     { facingMode: "environment" },
                     config,
-                    (decodedText) => {
+                    (decodedText: string) => {
                         handleScanSuccess(decodedText);
                     },
-                    (errorMessage) => {
+                    (errorMessage: string) => {
                         // ignore failures during scanning
+                        console.debug(errorMessage);
                     }
                 );
             } catch (err) {
