@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encrypt, decrypt } from '../utils/encryption';
 
 export interface IMedicalRecord extends Document {
     userId: string;
@@ -50,5 +51,41 @@ const medicalRecordSchema = new Schema<IMedicalRecord>({
         relationship: String
     }]
 }, { timestamps: true });
+
+// Encryption Hook
+medicalRecordSchema.pre('save', function (next) {
+    if (this.isModified('allergies')) {
+        this.allergies = this.allergies.map(a => encrypt(a));
+    }
+    if (this.isModified('conditions')) {
+        this.conditions = this.conditions.map(c => encrypt(c));
+    }
+    if (this.isModified('medications')) {
+        this.medications = this.medications.map(m => ({
+            ...m,
+            name: encrypt(m.name)
+        }));
+    }
+    next();
+});
+
+// Decryption Hook (Triggered on retrieval)
+medicalRecordSchema.post('init', function (doc) {
+    if (doc.allergies) {
+        doc.allergies = doc.allergies.map(a => {
+            try { return decrypt(a); } catch (e) { return a; }
+        });
+    }
+    if (doc.conditions) {
+        doc.conditions = doc.conditions.map(c => {
+            try { return decrypt(c); } catch (e) { return c; }
+        });
+    }
+    if (doc.medications) {
+        doc.medications = doc.medications.map((m: any) => {
+            try { return { ...m, name: decrypt(m.name) }; } catch (e) { return m; }
+        });
+    }
+});
 
 export default mongoose.model<IMedicalRecord>('MedicalRecord', medicalRecordSchema);
