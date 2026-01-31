@@ -90,43 +90,46 @@ const ProfileTab: React.FC = () => {
 
             <div className="space-y-8">
                 {/* Visual Passport Card for Printing */}
-                <div ref={cardRef} className="glass-card p-8 bg-slate-900 border border-white/10 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <QrCode size={120} />
+                <div ref={cardRef} className="bg-white p-10 rounded-[2.5rem] relative overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.4)] border border-slate-100">
+                    <div className="absolute top-0 right-0 p-6 opacity-[0.05]">
+                        <QrCode size={180} className="text-slate-900" />
                     </div>
 
-                    <h3 className="text-xs font-black uppercase tracking-[0.3em] mb-10 flex items-center gap-3 italic text-life-cyan">
-                        <ShieldCheck size={18} /> Emergency Identity
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] mb-12 flex items-center gap-3 italic text-slate-400">
+                        <ShieldCheck size={18} className="text-life-cyan" /> Secure Identity Node
                     </h3>
 
-                    {/* QR CENTERPIECE */}
-                    <div className="bg-white p-4 rounded-3xl mx-auto w-fit mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-life-cyan/20">
+                    {/* QR CENTERPIECE - SHARP CLEAN EDGES */}
+                    <div className="bg-white p-6 rounded-2xl mx-auto w-fit mb-10 shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-slate-100">
                         <QRCodeSVG value={`https://famemergency.com/v/${user?.id}`} size={160} />
                     </div>
 
-                    <div className="text-center space-y-2 mb-8">
-                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">{user?.name || "Patient Name"}</h2>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">UID: {user?.id?.slice(-8).toUpperCase()}</p>
+                    <div className="text-center space-y-2 mb-10">
+                        <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">{user?.name || "Patient Name"}</h2>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">Sector UID: {user?.id?.slice(-8).toUpperCase()}</p>
                     </div>
 
                     <button
                         onClick={downloadID}
-                        className="w-full py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all group"
+                        className="w-full py-5 bg-slate-900 text-white rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 shadow-xl"
                     >
-                        <Download size={16} className="text-life-cyan group-hover:bounce" />
+                        <Download size={16} className="text-life-cyan" />
                         Download Physical ID
                     </button>
                 </div>
 
-                <div className="glass-panel p-8 rounded-3xl border border-white/5 bg-white/2 overflow-hidden border-dashed">
-                    <h4 className="text-[9px] font-black text-slate-500 uppercase mb-4 tracking-widest italic">Digital Wallet Status</h4>
-                    <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-3">
-                        <span className="text-[10px] font-black text-white uppercase">Cloud Sync</span>
-                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <div className="glass-card p-8 rounded-[2rem] border border-white/5 bg-white/[0.02] overflow-hidden border-dashed">
+                    <h4 className="text-[9px] font-black text-slate-500 uppercase mb-5 tracking-widest italic">Digital Wallet Integrity</h4>
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+                        <span className="text-[10px] font-black text-white uppercase tracking-wider">Cloud Sync</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                            <span className="text-[9px] font-black text-emerald-500 uppercase">Live</span>
+                        </div>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-white uppercase">Encryption</span>
-                        <span className="text-[9px] font-black text-life-cyan">AES-256</span>
+                        <span className="text-[10px] font-black text-white uppercase tracking-wider">Encryption</span>
+                        <span className="text-[9px] font-black text-life-cyan uppercase tracking-widest bg-life-cyan/10 px-2 py-1 rounded-lg">AES-X-256</span>
                     </div>
                 </div>
             </div>
