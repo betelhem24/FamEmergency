@@ -3,11 +3,21 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { DoctorScanner } from './components/DoctorScanner';
 import { PatientAlerts } from './components/PatientAlerts';
-import { Crosshair, LogOut, Scan, Radio } from 'lucide-react';
+import { Crosshair, LogOut, Scan, Radio, ClipboardList, ArrowRight, QrCode } from 'lucide-react';
 
 const DoctorDashboard: React.FC = () => {
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState<'scanner' | 'alerts'>('scanner');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'alerts' | 'history'>('scanner');
+  const [scanHistory, setScanHistory] = useState<any[]>(() => {
+    const saved = localStorage.getItem('doctor_scan_history');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const handleNewScan = (patientData: any) => {
+    const updatedHistory = [patientData, ...scanHistory.filter(p => p.id !== patientData.id)].slice(0, 10);
+    setScanHistory(updatedHistory);
+    localStorage.setItem('doctor_scan_history', JSON.stringify(updatedHistory));
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -44,8 +54,8 @@ const DoctorDashboard: React.FC = () => {
             onClick={() => setActiveTab('scanner')}
             className={`flex-1 flex items-center justify-center gap-4 py-8 rounded-[2rem] border-2 transition-all duration-300
               ${activeTab === 'scanner'
-                ? 'bg-medical-navy text-white border-medical-navy shadow-2xl scale-105'
-                : 'bg-white text-slate-400 border-slate-100 hover:border-medical-cyan/30 shadow-lg'}`}
+                ? 'bg-slate-900 text-white border-slate-900 shadow-2xl scale-105'
+                : 'bg-white text-slate-400 border-slate-100 hover:border-life-cyan/30 shadow-lg'}`}
           >
             <Scan size={32} strokeWidth={activeTab === 'scanner' ? 3 : 2} />
             <div className="text-left">
@@ -55,22 +65,62 @@ const DoctorDashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 flex items-center justify-center gap-4 py-8 rounded-[2rem] border-2 transition-all duration-300
+              ${activeTab === 'history'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-2xl scale-105'
+                : 'bg-white text-slate-400 border-slate-100 hover:border-life-cyan/30 shadow-lg'}`}
+          >
+            <ClipboardList size={32} strokeWidth={activeTab === 'history' ? 3 : 2} />
+            <div className="text-left">
+              <div className="text-sm font-black uppercase tracking-widest">Scan History</div>
+              <div className="text-[10px] opacity-60 font-medium italic">Last 10 Patient Records</div>
+            </div>
+          </button>
+
+          <button
             onClick={() => setActiveTab('alerts')}
             className={`flex-1 flex items-center justify-center gap-4 py-8 rounded-[2rem] border-2 transition-all duration-300
               ${activeTab === 'alerts'
-                ? 'bg-medical-navy text-white border-medical-navy shadow-2xl scale-105'
-                : 'bg-white text-slate-400 border-slate-100 hover:border-medical-cyan/30 shadow-lg'}`}
+                ? 'bg-slate-900 text-white border-slate-900 shadow-2xl scale-105'
+                : 'bg-white text-slate-400 border-slate-100 hover:border-life-cyan/30 shadow-lg'}`}
           >
             <Radio size={32} strokeWidth={activeTab === 'alerts' ? 3 : 2} className={activeTab === 'alerts' ? 'animate-pulse' : ''} />
             <div className="text-left">
-              <div className="text-sm font-black uppercase tracking-widest">Active Distress Signals</div>
+              <div className="text-sm font-black uppercase tracking-widest">Active SOS</div>
               <div className="text-[10px] opacity-60 font-medium italic">Monitor Regional Status</div>
             </div>
           </button>
         </div>
 
         <div className="transition-all duration-500">
-          {activeTab === 'scanner' ? <DoctorScanner /> : <PatientAlerts />}
+          {activeTab === 'scanner' && <DoctorScanner onScan={handleNewScan} />}
+          {activeTab === 'alerts' && <PatientAlerts />}
+          {activeTab === 'history' && (
+            <div className="glass-card p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-2xl animate-in zoom-in duration-500">
+              <h2 className="text-2xl font-black text-slate-900 italic mb-8 uppercase tracking-tighter">Historical Triage Feed</h2>
+              <div className="space-y-4">
+                {scanHistory.length === 0 ? (
+                  <div className="py-20 text-center opacity-20">
+                    <QrCode size={60} className="mx-auto mb-4" />
+                    <p className="font-black uppercase tracking-widest text-xs">No Recent Scans Detected</p>
+                  </div>
+                ) : (
+                  scanHistory.map((patient, i) => (
+                    <div key={i} className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-100 border-l-4 border-l-life-cyan">
+                      <div>
+                        <h4 className="font-black text-slate-900 uppercase italic tracking-tight">{patient.name}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Status: Scanned • UID: {patient.id?.slice(-6)}</p>
+                      </div>
+                      <button className="p-3 bg-white border border-slate-200 rounded-xl hover:bg-life-cyan hover:text-white transition-all">
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
