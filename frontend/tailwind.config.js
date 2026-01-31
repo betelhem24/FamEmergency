@@ -10,6 +10,8 @@ export default {
                 'navy-deep': '#0f172a',
                 'teal-dark': '#134e4a',
                 'life-cyan': '#06b6d4',
+                'medical-cyan': '#06b6d4',
+                'medical-navy': '#0f172a',
                 'emergency-red': '#ef4444',
             },
             fontFamily: {
