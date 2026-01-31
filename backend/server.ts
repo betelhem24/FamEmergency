@@ -15,6 +15,7 @@ import doctorRoutes from './routes/doctorRoutes';
 import postRoutes from './routes/postRoutes';
 import userRoutes from './routes/userRoutes';
 import { setupSocketHandlers } from './socketHandlers';
+import connectMongoDB from './config/mongo';
 dotenv.config();
 
 const app: Application = express();
@@ -36,8 +37,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Database Connection - REQUIREMENT: Live Neon Connection with throw error if fails
+// Database Connection - REQUIREMENT: Live Dual-Database Hybrid (Neon + Atlas)
 connectDB();
+connectMongoDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
