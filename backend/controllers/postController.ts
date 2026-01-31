@@ -1,9 +1,18 @@
 import { Request, Response } from 'express';
-import Post from '../models/Post';
+import prisma from '../config/db';
 
 export const getPosts = async (req: Request, res: Response) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 });
+        // REQUIREMENT: Connect to live database (Neon)
+        const posts = await prisma.post.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: {
+                supports: true,
+                comments: {
+                    orderBy: { createdAt: 'asc' }
+                }
+            }
+        });
         res.json(posts);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -13,10 +22,21 @@ export const getPosts = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
     try {
         const { userId, userName, content } = req.body;
-        const newPost = new Post({ userId, userName, content });
-        await newPost.save();
 
-        // Emit real-time update if io is available
+        // REQUIREMENT: Persistence in Posts table in Neon
+        const newPost = await prisma.post.create({
+            data: {
+                userId,
+                userName,
+                content
+            },
+            include: {
+                supports: true,
+                comments: true
+            }
+        });
+
+        // Emit real-time update
         const io = req.app.get('io');
         if (io) {
             io.emit('post:new', newPost);
@@ -30,26 +50,46 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const supportPost = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params; // post id
         const { userId } = req.body;
-        const post = await Post.findById(id);
-        if (!post) return res.status(404).json({ message: 'Post not found' });
 
-        const index = (post.supports as any).indexOf(userId);
-        if (index === -1) {
-            post.supports.push(userId as any);
+        // Check if already supported
+        const existingSupport = await prisma.support.findUnique({
+            where: {
+                postId_userId: {
+                    postId: id,
+                    userId: userId
+                }
+            }
+        });
+
+        if (existingSupport) {
+            await prisma.support.delete({
+                where: { id: existingSupport.id }
+            });
         } else {
-            post.supports.splice(index, 1);
+            await prisma.support.create({
+                data: {
+                    postId: id,
+                    userId: userId
+                }
+            });
         }
 
-        await post.save();
+        const updatedPost = await prisma.post.findUnique({
+            where: { id },
+            include: {
+                supports: true,
+                comments: true
+            }
+        });
 
         const io = req.app.get('io');
         if (io) {
-            io.emit('post:updated', post);
+            io.emit('post:updated', updatedPost);
         }
 
-        res.json(post);
+        res.json(updatedPost);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
@@ -57,20 +97,32 @@ export const supportPost = async (req: Request, res: Response) => {
 
 export const addComment = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params; // post id
         const { userId, userName, text } = req.body;
-        const post = await Post.findById(id);
-        if (!post) return res.status(404).json({ message: 'Post not found' });
 
-        post.comments.push({ userId, userName, text, createdAt: new Date() });
-        await post.save();
+        const comment = await prisma.comment.create({
+            data: {
+                postId: id,
+                userId,
+                userName,
+                text
+            }
+        });
+
+        const updatedPost = await prisma.post.findUnique({
+            where: { id },
+            include: {
+                supports: true,
+                comments: true
+            }
+        });
 
         const io = req.app.get('io');
         if (io) {
-            io.emit('post:updated', post);
+            io.emit('post:updated', updatedPost);
         }
 
-        res.json(post);
+        res.json(updatedPost);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
