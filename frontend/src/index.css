@@ -21,6 +21,9 @@
   .medical-glass {
     @apply backdrop-blur-[15px] border border-white/[0.2];
     transform: translateZ(0);
+    /* GPU Boost (Requirement) */
+    backface-visibility: hidden;
+    perspective: 1000px;
     will-change: transform, backdrop-filter;
   }
 
@@ -41,13 +44,14 @@
     @apply bg-white border border-slate-100 shadow-2xl;
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
 
     .glass-card,
     .glass-panel,
     .glass-nav,
     .medical-glass {
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px) !important;
+      /* Mobile Blur Cap (Requirement) */
     }
   }
 
