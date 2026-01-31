@@ -141,74 +141,75 @@ const Community: React.FC = () => {
                             key={post._id}
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="glass-card rounded-[2.5rem] border border-white/10 overflow-hidden"
+                            className="glass-card rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl"
                         >
-                            <div className="p-6 space-y-4">
+                            <div className="p-10 space-y-8">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-life-cyan/20 to-blue-500/20 flex items-center justify-center border border-white/10">
-                                            <span className="text-white font-black text-xs uppercase">{post.userName?.[0] || '?'}</span>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-life-cyan/20 to-blue-500/20 flex items-center justify-center border border-white/10 shadow-inner">
+                                            <span className="text-white font-black text-lg uppercase">{post.userName?.[0] || '?'}</span>
                                         </div>
                                         <div>
                                             <p className="text-sm font-black text-white uppercase tracking-tight">{post.userName}</p>
-                                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
                                                 {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
                                     </div>
-                                    <button className="text-slate-600 hover:text-white transition-colors">
-                                        <MoreHorizontal size={20} />
+                                    <button className="text-slate-600 hover:text-white transition-colors p-2">
+                                        <MoreHorizontal size={24} />
                                     </button>
                                 </div>
 
-                                <p className="text-sm text-slate-200 leading-relaxed font-medium bg-white/5 p-4 rounded-2xl border border-white/5">
+                                {/* BUBBLE CONTENT */}
+                                <div className="text-sm text-slate-200 leading-relaxed font-semibold bg-white/[0.03] p-8 rounded-[2rem] border border-white/5 shadow-inner">
                                     {post.content}
-                                </p>
+                                </div>
 
-                                <div className="flex items-center gap-6 pt-2">
+                                <div className="flex items-center gap-8 pt-2">
                                     <button
                                         onClick={() => handleSupport(post._id)}
-                                        className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${post.supports?.includes(user?.id) ? 'text-red-500 scale-110' : 'text-slate-500 hover:text-white'}`}
+                                        className={`flex items-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${post.supports?.includes(user?.id) ? 'text-red-500 scale-105' : 'text-slate-500 hover:text-white'}`}
                                     >
-                                        <Heart size={18} fill={post.supports?.includes(user?.id) ? "currentColor" : "none"} />
+                                        <Heart size={20} fill={post.supports?.includes(user?.id) ? "currentColor" : "none"} />
                                         {post.supports?.length || 0} Support
                                     </button>
-                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                        <MessageCircle size={18} />
+                                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                        <MessageCircle size={20} />
                                         {post.comments?.length || 0} Comments
                                     </div>
-                                    <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-auto transition-colors hover:text-white">
-                                        <Share2 size={18} />
+                                    <button className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-auto transition-colors hover:text-white">
+                                        <Share2 size={20} />
                                     </button>
                                 </div>
 
                                 {/* Comments Section */}
-                                <div className="pt-4 border-t border-white/5 space-y-4">
+                                <div className="pt-8 border-t border-white/5 space-y-6">
                                     {post.comments?.map((comment: any, idx: number) => (
-                                        <div key={idx} className="flex gap-3">
-                                            <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-white/40 border border-white/5 shrink-0">
+                                        <div key={idx} className="flex gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-white/40 border border-white/5 shrink-0 mt-1">
                                                 {comment.userName?.[0]}
                                             </div>
-                                            <div className="bg-white/5 rounded-2xl p-3 flex-1 border border-white/5">
-                                                <p className="text-[9px] font-black text-life-cyan uppercase tracking-tighter mb-1">{comment.userName}</p>
-                                                <p className="text-[11px] text-slate-300 font-medium">{comment.text}</p>
+                                            <div className="bg-white/[0.03] rounded-[1.5rem] px-6 py-4 flex-1 border border-white/5">
+                                                <p className="text-[9px] font-black text-life-cyan uppercase tracking-tighter mb-1.5">{comment.userName}</p>
+                                                <p className="text-xs text-slate-300 font-semibold leading-relaxed">{comment.text}</p>
                                             </div>
                                         </div>
                                     ))}
 
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-3 mt-4">
                                         <input
                                             type="text"
                                             value={commentTexts[post._id] || ''}
                                             onChange={(e) => setCommentTexts(prev => ({ ...prev, [post._id]: e.target.value }))}
                                             placeholder="Write a supportive comment..."
-                                            className="flex-1 bg-white/5 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-life-cyan/30 transition-all font-medium"
+                                            className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-xs text-white outline-none focus:border-life-cyan/30 focus:bg-white/[0.05] transition-all font-semibold"
                                         />
                                         <button
                                             onClick={() => handleAddComment(post._id)}
-                                            className="bg-white/5 border border-white/5 p-2.5 rounded-xl text-life-cyan hover:bg-life-cyan/10 transition-all"
+                                            className="bg-life-cyan/10 border border-life-cyan/20 px-6 rounded-2xl text-life-cyan hover:bg-life-cyan hover:text-white transition-all active:scale-95"
                                         >
-                                            <Send size={16} />
+                                            <Send size={18} />
                                         </button>
                                     </div>
                                 </div>
