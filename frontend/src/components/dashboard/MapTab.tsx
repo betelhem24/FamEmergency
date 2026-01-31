@@ -40,34 +40,34 @@ const MapTab: React.FC = () => {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="medical-glass p-6">
-                        <h3 className="text-xs font-black text-medical-navy uppercase mb-6 tracking-widest flex items-center gap-2 italic">
-                            <Hospital size={16} className="text-medical-cyan" /> Nearby Support
+                    <div className="glass-card p-6 rounded-[2rem]">
+                        <h3 className="text-[10px] font-black text-white uppercase mb-6 tracking-widest flex items-center gap-2 italic">
+                            <Hospital size={16} className="text-medical-cyan" /> Proximity Hubs
                         </h3>
                         <div className="space-y-4">
                             {[
-                                { name: 'Metro Health Center', dist: '0.8 mi', status: 'H-Ready' },
-                                { name: 'Central Fire Dept', dist: '1.2 mi', status: 'R-Active' },
-                                { name: '24h Trauma Unit', dist: '3.5 mi', status: 'H-Ready' }
+                                { name: 'Metro Health Center', dist: '0.8 mi', status: 'Active' },
+                                { name: 'Central Fire Dept', dist: '1.2 mi', status: 'Ready' },
+                                { name: '24h Trauma Unit', dist: '3.5 mi', status: 'Active' }
                             ].map(loc => (
-                                <div key={loc.name} className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                                    <div className="text-xs font-black text-medical-navy mb-0.5">{loc.name}</div>
+                                <div key={loc.name} className="p-3 bg-white/5 border border-white/5 rounded-xl hover:border-medical-cyan/30 transition-all cursor-pointer group">
+                                    <div className="text-[11px] font-black text-white mb-0.5 group-hover:text-medical-cyan uppercase tracking-tight">{loc.name}</div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase">{loc.dist}</span>
-                                        <span className="text-[10px] font-black text-medical-cyan uppercase">{loc.status}</span>
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{loc.dist}</span>
+                                        <span className="text-[9px] font-black text-medical-cyan uppercase tracking-widest">{loc.status}</span>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="medical-glass p-6 bg-gradient-to-br from-white to-slate-50">
+                    <div className="glass-card p-6 bg-gradient-to-br from-white/5 to-transparent rounded-[2rem]">
                         <div className="flex items-center gap-3 mb-4">
-                            <Shield className="text-medical-navy" size={20} />
-                            <span className="text-xs font-black text-medical-navy tracking-tight uppercase">Safe Zones</span>
+                            <Shield className="text-medical-cyan" size={18} />
+                            <span className="text-[10px] font-black text-white tracking-widest uppercase">Safe Protocols</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed uppercase">
-                            Emergency routing is optimized for maximum security and minimum transit time.
+                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed uppercase tracking-wider opacity-70">
+                            Emergency routing is dynamically optimized via neural health encryption.
                         </p>
                     </div>
                 </div>
