@@ -23,7 +23,6 @@ const Auth: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Requirement: Connect to live backend (logic will be finalized in controllers stage)
             const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
             const payload = isLogin
                 ? { email: formData.email, password: formData.password }
@@ -49,7 +48,6 @@ const Auth: React.FC = () => {
 
     return (
         <div className="h-screen bg-slate-950 overflow-hidden flex flex-col relative font-sans antialiased">
-            {/* GPU Boost & Mobile Optimizations */}
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .glass-accel { transform: translateZ(0); }
@@ -59,73 +57,55 @@ const Auth: React.FC = () => {
             `}} />
 
             {/* BACKGROUND DYNAMICS */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 text-white">
                 <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-medical-navy/40 to-transparent" />
                 <div className="absolute top-[10%] left-[10%] w-[80vw] h-[80vw] bg-medical-cyan/5 blur-[120px] rounded-full animate-pulse" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-life-cyan/5 blur-[100px] rounded-full" />
             </div>
 
-            {/* HEADER: GLOWING GLASS (REQUIREMENT) */}
+            {/* HEADER: GLOWING GLASS (TOP-ALIGNED) */}
             <motion.header
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="relative z-20 pt-20 px-8 text-center"
+                className="relative z-20 pt-16 px-8 text-center"
             >
                 <div className="inline-block relative">
-                    <h1 className="text-5xl md:text-6xl font-black text-white italic tracking-tighter uppercase relative z-10 transition-all">
+                    <h1 className="text-5xl font-black text-white italic tracking-tighter uppercase relative z-10">
                         FamEmergency
                     </h1>
-                    <div className="absolute inset-0 blur-3xl bg-medical-cyan/40 -z-10 scale-125 animate-pulse" />
+                    <div className="absolute inset-0 blur-2xl bg-medical-cyan/30 -z-10 scale-110" />
                 </div>
-                <p className="mt-6 text-[11px] text-medical-cyan font-black uppercase tracking-[0.5em] opacity-80">
-                    Live Response & Critical Support Node
+                <p className="mt-4 text-[10px] text-medical-cyan font-black uppercase tracking-[0.4em] opacity-80">
+                    Priority Response Identity Portal
                 </p>
             </motion.header>
 
             {/* SPACER */}
             <div className="flex-1" />
 
-            {/* INTERACTIVE CLUSTER: BOTTOM (REQUIREMENT) */}
+            {/* INTERACTIVE CLUSTER: MIDDLE -> BOTTOM (REQUIREMENT RESTORATION) */}
             <motion.div
                 initial={{ y: 500 }}
                 animate={{ y: 0 }}
-                transition={{ type: "spring", damping: 30, stiffness: 120 }}
-                className="relative z-30 p-8 pb-12 pt-10 rounded-t-[4rem] bg-white/[0.03] backdrop-blur-3xl border-t border-white/10 shadow-[0_-30px_60px_rgba(0,0,0,0.6)] glass-accel glass-blur"
+                transition={{ type: "spring", damping: 25, stiffness: 100 }}
+                className="relative z-30 p-8 pb-10 pt-10 rounded-t-[3.5rem] bg-white/[0.03] backdrop-blur-3xl border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] transform translateZ(0)"
             >
-                {/* ROLE TOGGLE (REQUIREMENT) */}
-                <div className="flex bg-slate-900/60 p-1.5 rounded-2xl border border-white/5 mb-8 shadow-inner">
-                    <button
-                        onClick={() => setRole('PATIENT')}
-                        className={`flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${role === 'PATIENT' ? 'bg-life-cyan text-white shadow-lg shadow-cyan-500/20' : 'text-slate-500'
-                            }`}
-                    >
-                        <Heart size={14} className={role === 'PATIENT' ? 'animate-pulse' : ''} /> Patient
-                    </button>
-                    <button
-                        onClick={() => setRole('DOCTOR')}
-                        className={`flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${role === 'DOCTOR' ? 'bg-medical-navy text-white shadow-lg shadow-blue-500/10' : 'text-slate-500'
-                            }`}
-                    >
-                        <Stethoscope size={14} /> Doctor
-                    </button>
-                </div>
-
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <AnimatePresence mode="wait">
                         {!isLogin && (
                             <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
                                 className="relative"
                             >
-                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-medical-cyan opacity-40">
+                                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-medical-cyan opacity-40">
                                     <UserIcon size={18} />
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="IDENTITY: FULL NAME"
-                                    className="w-full bg-white/5 border border-white/10 rounded-3xl py-5 pl-16 pr-6 text-sm text-white placeholder:text-white/20 focus:border-medical-cyan/50 outline-none transition-all font-bold"
+                                    placeholder="LEGAL FULL NAME"
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-sm text-white placeholder:text-white/20 focus:border-medical-cyan/50 outline-none transition-all font-bold"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 />
@@ -134,69 +114,83 @@ const Auth: React.FC = () => {
                     </AnimatePresence>
 
                     <div className="relative">
-                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-medical-cyan opacity-40">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-medical-cyan opacity-40">
                             <Mail size={18} />
                         </div>
                         <input
                             type="email"
-                            placeholder="COMMUNICATION NODE: EMAIL"
-                            className="w-full bg-white/5 border border-white/10 rounded-3xl py-5 pl-16 pr-6 text-sm text-white placeholder:text-white/20 focus:border-medical-cyan/50 outline-none transition-all font-bold"
+                            placeholder="PORTAL IDENTITY (EMAIL)"
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-sm text-white placeholder:text-white/20 focus:border-medical-cyan/50 outline-none transition-all font-bold"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                     </div>
 
                     <div className="relative">
-                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-medical-cyan opacity-40">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-medical-cyan opacity-40">
                             <Lock size={18} />
                         </div>
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="ENCRYPTION KEY: PASSWORD"
-                            className="w-full bg-white/5 border border-white/10 rounded-3xl py-5 pl-16 pr-24 text-sm text-white placeholder:text-white/20 focus:border-medical-cyan/50 outline-none transition-all font-bold"
+                            placeholder="ENCRYPTION KEY"
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4.5 pl-14 pr-24 text-sm text-white placeholder:text-white/20 focus:border-medical-cyan/50 outline-none transition-all font-bold"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-8 top-1/2 -translate-y-1/2"
+                            className="absolute right-6 top-1/2 -translate-y-1/2 text-medical-cyan"
                         >
-                            {showPassword ? <EyeOff size={18} className="text-slate-500" /> : <Eye size={18} className="text-medical-cyan opacity-60" />}
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-life-cyan py-6 rounded-3xl flex items-center justify-center gap-4 shadow-3xl shadow-cyan-500/40 active:scale-95 transition-all mt-8 group"
-                    >
-                        {loading ? <GlassSpinner size="sm" /> : (
-                            <>
-                                <span className="text-white font-black text-sm uppercase tracking-[0.3em] italic">
-                                    {isLogin ? "INITIALIZE LINK" : "ESTABLISH IDENTITY"}
-                                </span>
-                                <ChevronRight size={20} className="text-white group-hover:translate-x-1 transition-transform" />
-                            </>
-                        )}
-                    </button>
+                    {/* ACTION BUTTONS (SIDE BY SIDE REQUIREMENT) */}
+                    <div className="grid grid-cols-2 gap-4 mt-8">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`py-5 rounded-2xl flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest ${isLogin ? 'bg-life-cyan text-white shadow-lg shadow-cyan-500/20' : 'bg-white/5 text-slate-400 border border-white/5'
+                                }`}
+                        >
+                            {loading && isLogin ? <GlassSpinner size="xs" /> : "Sign In"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setIsLogin(!isLogin)}
+                            className={`py-5 rounded-2xl flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest ${!isLogin ? 'bg-medical-navy text-white shadow-lg' : 'bg-white/5 text-slate-400 border border-white/5'
+                                }`}
+                        >
+                            Sign Up
+                        </button>
+                    </div>
+
+                    {/* ROLE TOGGLE (BOTTOMMOST REQUIREMENT) */}
+                    <div className="mt-6 flex bg-slate-900/50 p-1.5 rounded-2xl border border-white/5">
+                        <button
+                            type="button"
+                            onClick={() => setRole('PATIENT')}
+                            className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${role === 'PATIENT' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-500'
+                                }`}
+                        >
+                            <Heart size={12} /> Patient
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setRole('DOCTOR')}
+                            className={`flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${role === 'DOCTOR' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-500'
+                                }`}
+                        >
+                            <Stethoscope size={12} /> Doctor
+                        </button>
+                    </div>
                 </form>
 
-                <div className="mt-10 flex items-center justify-between px-2">
-                    <button
-                        onClick={() => setIsLogin(!isLogin)}
-                        className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
-                    >
-                        {isLogin ? "Generate New Resident Identity" : "Access Established Portal"}
-                    </button>
-                    <div className="flex items-center gap-2 opacity-20">
-                        <ShieldCheck size={14} className="text-medical-cyan" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">TLS 1.3</span>
-                    </div>
+                <div className="mt-8 flex items-center justify-center px-2 opacity-30">
+                    <ShieldCheck size={12} className="text-medical-cyan mr-2" />
+                    <span className="text-[8px] font-black text-white uppercase tracking-widest">Secured via Dual-DB Encryption Node</span>
                 </div>
-
-                {/* BOTTOM GRIP */}
-                <div className="mt-12 h-1.5 w-16 bg-white/5 rounded-full mx-auto shadow-inner" />
             </motion.div>
         </div>
     );
