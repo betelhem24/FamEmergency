@@ -30,10 +30,11 @@ const Community: React.FC = () => {
 
     useEffect(() => {
         // One-time Service Worker registration
-        if ('serviceWorker' in navigator && !window.__sw_registered) {
+        const win = window as any;
+        if ('serviceWorker' in navigator && !win.__sw_registered) {
             navigator.serviceWorker.register('/sw.js').then(() => {
                 console.log('COMMUNITY: Service Worker Active (Offline Library Enabled)');
-                window.__sw_registered = true;
+                win.__sw_registered = true;
             });
         }
 
