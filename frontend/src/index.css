@@ -8,7 +8,7 @@
 @layer base {
   body {
     @apply font-sans text-white antialiased;
-    background: radial-gradient(circle at 50% 50%, #134e4a 0%, #0f172a 100%);
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -20,7 +20,10 @@
   .glass-panel,
   .glass-nav,
   .medical-glass {
-    @apply backdrop-blur-[15px] border border-white/[0.2];
+    backdrop-filter: blur(12px);
+    /* Clean Glass Rule: Exactly 12px */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Standard Contrast Edge */
     transform: translateZ(0);
     /* GPU Boost (Requirement) */
     backface-visibility: hidden;
@@ -29,20 +32,20 @@
   }
 
   .glass-card {
-    @apply bg-white/[0.1];
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
   }
 
   .glass-panel {
-    @apply bg-slate-900/[0.45] border-white/[0.15] shadow-lg;
+    @apply bg-slate-900/[0.45] shadow-lg;
   }
 
   .glass-nav {
-    @apply bg-navy-deep/[0.85] border-t border-white/[0.15];
+    @apply bg-slate-950/[0.8] border-t;
   }
 
   .medical-glass {
-    @apply bg-white border border-slate-100 shadow-2xl;
+    @apply bg-white border-slate-100 shadow-2xl;
   }
 
   @media (max-width: 768px) {
@@ -51,8 +54,7 @@
     .glass-panel,
     .glass-nav,
     .medical-glass {
-      backdrop-filter: blur(10px) !important;
-      /* Mobile Blur Cap (Requirement) */
+      backdrop-filter: blur(12px) !important;
     }
   }
 
