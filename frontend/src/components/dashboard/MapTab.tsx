@@ -25,17 +25,17 @@ const MapTab: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <div className="lg:col-span-3 medical-glass min-h-[500px] border-4 border-white overflow-hidden relative shadow-2xl">
+                <div className="lg:col-span-3 glass-card min-h-[500px] border border-white/10 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
                     {/* Simulated Map */}
-                    <div className="absolute inset-0 bg-slate-100 bg-[radial-gradient(circle,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[length:24px_24px]" />
+                    <div className="absolute inset-0 bg-[#020617] bg-[radial-gradient(circle,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:32px_32px]" />
 
-                    <div className="absolute top-1/3 left-1/2 w-8 h-8 -ml-4 rounded-full bg-medical-cyan/20 flex items-center justify-center">
-                        <div className="w-4 h-4 bg-medical-cyan rounded-full shadow-[0_0_15px_rgba(0,242,255,1)]" />
+                    <div className="absolute top-1/3 left-1/2 w-8 h-8 -ml-4 rounded-full bg-medical-cyan/20 flex items-center justify-center animate-pulse">
+                        <div className="w-4 h-4 bg-medical-cyan rounded-full shadow-[0_0_20px_rgba(6,182,212,1)]" />
                     </div>
 
-                    <div className="absolute bottom-6 left-6 p-4 medical-glass bg-white/90 border-slate-200">
-                        <div className="text-[10px] font-black text-slate-400 uppercase mb-1">Current Sector</div>
-                        <div className="text-sm font-black text-medical-navy font-mono">COORD_NY_CENTRAL_04</div>
+                    <div className="absolute bottom-8 left-8 p-5 glass-card rounded-2xl border border-white/10">
+                        <div className="text-[10px] font-black text-medical-cyan uppercase mb-1 tracking-widest">Active Sector</div>
+                        <div className="text-sm font-black text-white font-mono uppercase">NY_CMD_CENTER_GRID</div>
                     </div>
                 </div>
 
