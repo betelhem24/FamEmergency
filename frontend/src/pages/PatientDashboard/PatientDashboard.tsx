@@ -9,8 +9,9 @@ import FamilyTab from '../../components/dashboard/FamilyTab';
 import AnalyticsTab from '../../components/dashboard/AnalyticsTab';
 import ResponderTab from '../../components/dashboard/ResponderTab';
 import GuardianTimer from '../../components/dashboard/emergency/GuardianTimer';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../../context/AuthContext';
+import { useFallDetection } from '../../hooks/useFallDetection';
 
 const PatientDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('emergency');
