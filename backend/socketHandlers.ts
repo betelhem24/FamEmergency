@@ -106,6 +106,31 @@ export const setupSocketHandlers = (io: SocketServer) => {
             socket.to(data.room).emit('new-message', data);
         });
 
+        // Private Doctor-Patient Chat
+        socket.on('chat:private', (data) => {
+            const { to, message, userName } = data;
+            io.to(`user:${to}`).emit('chat:message', {
+                from: socket.userId,
+                userName,
+                message,
+                timestamp: new Date()
+            });
+        });
+
+        // Health Status Sync (from Patient to Doctors)
+        socket.on('health:update', (data) => {
+            socket.to('room:doctors').emit('health:status', {
+                ...data,
+                userId: socket.userId,
+                timestamp: new Date()
+            });
+        });
+
+        socket.on('doctor:join', () => {
+            socket.join('room:doctors');
+            console.log(`Doctor ${socket.userId} joined monitoring room`);
+        });
+
         socket.on('disconnect', () => {
             console.log(`User disconnected: ${socket.userId}`);
         });
