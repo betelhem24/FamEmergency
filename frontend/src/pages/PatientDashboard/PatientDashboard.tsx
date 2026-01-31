@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import BottomNav from '../../components/layout/BottomNav';
-import ProfileTab from '../../components/dashboard/ProfileTab';
+import ProfilTab from '../../components/dashboard/ProfileTab';
 import EmergencyTab from '../../components/dashboard/EmergencyTab';
 import FirstAidTab from '../../components/dashboard/FirstAidTab';
 import MapTab from '../../components/dashboard/MapTab';
@@ -9,9 +9,35 @@ import FamilyTab from '../../components/dashboard/FamilyTab';
 import AnalyticsTab from '../../components/dashboard/AnalyticsTab';
 import ResponderTab from '../../components/dashboard/ResponderTab';
 import GuardianTimer from '../../components/dashboard/emergency/GuardianTimer';
+import { io } from 'socket.io-client';
+import { useAuth } from '../../context/AuthContext';
 
 const PatientDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('emergency');
+  const { user } = useAuth();
+
+  // HEALT_SYNC: Broadcast vital signs to doctors in real-time
+  useEffect(() => {
+    const socket = io('http://localhost:5000', {
+      auth: { token: localStorage.getItem('token') }
+    });
+
+    const broadcastHealth = () => {
+      socket.emit('health:update', {
+        status: 'nominal',
+        heartRate: 70 + Math.floor(Math.random() * 10), // Simulated real-world data
+        userName: user?.name
+      });
+    };
+
+    const interval = setInterval(broadcastHealth, 5000);
+    broadcastHealth();
+
+    return () => {
+      clearInterval(interval);
+      socket.disconnect();
+    };
+  }, [user]);
 
   const renderContent = () => {
     switch (activeTab) {
