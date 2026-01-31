@@ -52,8 +52,11 @@ export const register = async (req: Request, res: Response) => {
       user: { id: user.id, name, email: normalizedEmail, role: user.role }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration Error:', error);
+    if (error.code === 'P1001' || error.code === 'P1017') {
+      return res.status(503).json({ message: 'Database connection unavailable. Please try again.' });
+    }
     res.status(500).json({ message: 'Neural link failed' });
   }
 };
@@ -86,8 +89,11 @@ export const login = async (req: Request, res: Response) => {
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login Error:', error);
+    if (error.code === 'P1001' || error.code === 'P1017') {
+      return res.status(503).json({ message: 'Database connection unavailable. Please try again.' });
+    }
     res.status(500).json({ message: 'Neural access denied' });
   }
 };
