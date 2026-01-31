@@ -17,14 +17,27 @@
   .glass-card {
     @apply bg-white/[0.1] backdrop-blur-[15px] border border-white/[0.2];
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    transform: translateZ(0);
+    will-change: transform, backdrop-filter;
   }
 
   .glass-panel {
     @apply bg-slate-900/[0.45] backdrop-blur-[15px] border border-white/[0.15] shadow-lg;
+    transform: translateZ(0);
   }
 
   .glass-nav {
     @apply bg-navy-deep/[0.85] backdrop-blur-[15px] border-t border-white/[0.15];
+    transform: translateZ(0);
+  }
+
+  @media (max-width: 640px) {
+
+    .glass-card,
+    .glass-panel,
+    .glass-nav {
+      backdrop-filter: blur(10px);
+    }
   }
 
   .text-glow-cyan {
