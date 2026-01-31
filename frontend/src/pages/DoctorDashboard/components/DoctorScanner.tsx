@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { QrCode, ShieldAlert, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
+import { QrCode, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface DoctorScannerProps {
@@ -24,10 +24,10 @@ export const DoctorScanner: React.FC<DoctorScannerProps> = ({ onScan }) => {
                 await html5QrCode.start(
                     { facingMode: "environment" },
                     config,
-                    (decodedText) => {
+                    (decodedText: string) => {
                         handleScanSuccess(decodedText);
                     },
-                    (errorMessage) => { /* ignore */ }
+                    (errorMessage: string) => { /* ignore */ }
                 );
             } catch (err) {
                 console.error("Scanner start error:", err);
