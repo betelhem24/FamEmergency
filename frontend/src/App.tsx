@@ -83,7 +83,16 @@ function AnimatedRoutes() {
 function MainApp() {
   const { user, logout, loading } = useAuth();
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="h-screen w-full bg-[#020617] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-medical-cyan/20 border-t-medical-cyan rounded-full animate-spin mx-auto"></div>
+          <p className="text-medical-cyan font-black uppercase tracking-widest text-xs">Loading Identity...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>
