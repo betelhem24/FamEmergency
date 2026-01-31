@@ -4,11 +4,15 @@ import prisma from '../config/db';
 export const getUserWithMedicalData = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const userId = id as string; // Casting to String for Prisma compatibility
+
+        if (typeof id !== 'string') {
+            return res.status(400).json({ message: 'Invalid Identity Identifier' });
+        }
 
         // REQUIREMENT: Connect to live database (Neon)
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
+        // We use type assertion for the include block to bypass IDE desync with Prisma Client
+        const user = await (prisma.user as any).findUnique({
+            where: { id },
             include: {
                 medicalRecord: true
             }
