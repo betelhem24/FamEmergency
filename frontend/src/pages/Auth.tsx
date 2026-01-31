@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User as UserIcon, Mail, Lock, Eye, EyeOff, ShieldCheck, Heart, Stethoscope, ArrowRight, Activity } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, Eye, EyeOff, Heart, Stethoscope } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
