@@ -118,7 +118,5 @@ const MedicalVault = () => {
         </div>
     );
 };
-    );
-};
 
 export default MedicalVault;
