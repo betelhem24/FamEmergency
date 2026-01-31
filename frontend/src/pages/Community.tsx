@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Send, MessageSquare, Heart, ShieldAlert, Activity, Search, BookOpen, Wind, Droplet, Share2, MoreHorizontal, MessageCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Send, MessageSquare, Heart, Activity, Share2, MoreHorizontal, MessageCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,7 +10,6 @@ const Community: React.FC = () => {
     const { user } = useAuth();
     const [posts, setPosts] = useState<any[]>([]);
     const [inputText, setInputText] = useState('');
-    const [socket, setSocket] = useState<Socket | null>(null);
     const [loading, setLoading] = useState(true);
     const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
 
