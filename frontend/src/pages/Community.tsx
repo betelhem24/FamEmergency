@@ -96,129 +96,144 @@ const Community: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full space-y-4 pt-4 pb-24 px-4 overflow-y-auto bg-slate-950 no-scrollbar">
-            <div className="flex items-center justify-between mb-4">
-                <div>
-                    <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">Medical Feed</h1>
-                    <p className="text-life-cyan/60 text-[9px] font-black tracking-[0.4em] uppercase">Community Support System</p>
-                </div>
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-life-cyan">
-                    <Users size={20} />
-                </div>
+        <div className="flex flex-col h-full space-y-4 pt-4 pb-24 px-4 overflow-y-auto bg-[#020617] no-scrollbar relative">
+            {/* CLEAN SURFACE: Root Background Blur Only */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute top-[20%] left-[-10%] w-[70vw] h-[70vw] bg-life-cyan/5 blur-[150px] rounded-full" />
+                <div className="absolute inset-0 backdrop-blur-[12px] bg-black/40" />
             </div>
 
-            {/* Post Creator */}
-            <form onSubmit={handleCreatePost} className="glass-card p-6 rounded-[2.5rem] border border-white/10 space-y-4">
-                <textarea
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Share a health update..."
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl p-4 text-white text-sm outline-none focus:border-life-cyan/30 transition-all resize-none h-24 font-medium"
-                />
-                <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Post to Community</span>
-                    <button type="submit" className="bg-life-cyan px-6 py-3 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-cyan-500/20 active:scale-95 transition-all flex items-center gap-2">
-                        <Send size={14} /> Send Update
-                    </button>
+            <div className="relative z-10 space-y-6">
+                <div className="flex items-center justify-between mb-8 px-2">
+                    <div>
+                        <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Medical Feed</h1>
+                        <p className="text-life-cyan/60 text-[10px] font-black tracking-[0.4em] uppercase mt-2">Community Support Node</p>
+                    </div>
+                    <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 text-life-cyan shadow-xl">
+                        <Users size={24} />
+                    </div>
                 </div>
-            </form>
 
-            {/* Feed */}
-            <div className="space-y-6">
-                {loading ? (
-                    <div className="py-20 text-center opacity-20 animate-pulse">
-                        <Activity size={48} className="mx-auto mb-4" />
-                        <p className="font-black uppercase tracking-[0.3em] text-xs">Syncing Feed...</p>
+                {/* Post Creator - NO BLUR */}
+                <form onSubmit={handleCreatePost} className="bg-white/[0.03] p-8 rounded-[3rem] border border-white/5 space-y-6 shadow-2xl">
+                    <textarea
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Share a medical update with your circle..."
+                        className="w-full bg-white/[0.02] border border-white/5 rounded-3xl p-6 text-white text-sm outline-none focus:border-life-cyan/30 transition-all resize-none h-32 font-semibold placeholder:text-slate-600"
+                    />
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2 opacity-30">
+                            <Activity size={12} className="text-life-cyan animate-pulse" />
+                            <span className="text-[9px] font-black text-white uppercase tracking-widest">Live Channel</span>
+                        </div>
+                        <button type="submit" className="bg-life-cyan px-8 py-4 rounded-2xl text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_15px_30px_rgba(6,182,212,0.2)] active:scale-95 transition-all flex items-center gap-3">
+                            <Send size={16} /> Broadcast Update
+                        </button>
                     </div>
-                ) : posts.length === 0 ? (
-                    <div className="py-20 text-center opacity-20">
-                        <MessageSquare size={48} className="mx-auto mb-4" />
-                        <p className="font-black uppercase tracking-[0.3em] text-xs">No updates yet</p>
-                    </div>
-                ) : (
-                    posts.map((post) => (
-                        <motion.div
-                            key={post._id}
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="glass-card rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl"
-                        >
-                            <div className="p-10 space-y-8">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-life-cyan/20 to-blue-500/20 flex items-center justify-center border border-white/10 shadow-inner">
-                                            <span className="text-white font-black text-lg uppercase">{post.userName?.[0] || '?'}</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-black text-white uppercase tracking-tight">{post.userName}</p>
-                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
-                                                {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button className="text-slate-600 hover:text-white transition-colors p-2">
-                                        <MoreHorizontal size={24} />
-                                    </button>
-                                </div>
+                </form>
 
-                                {/* BUBBLE CONTENT */}
-                                <div className="text-sm text-slate-200 leading-relaxed font-semibold bg-white/[0.03] p-8 rounded-[2rem] border border-white/5 shadow-inner">
-                                    {post.content}
-                                </div>
-
-                                <div className="flex items-center gap-8 pt-2">
-                                    <button
-                                        onClick={() => handleSupport(post._id)}
-                                        className={`flex items-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${post.supports?.includes(user?.id) ? 'text-red-500 scale-105' : 'text-slate-500 hover:text-white'}`}
-                                    >
-                                        <Heart size={20} fill={post.supports?.includes(user?.id) ? "currentColor" : "none"} />
-                                        {post.supports?.length || 0} Support
-                                    </button>
-                                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                        <MessageCircle size={20} />
-                                        {post.comments?.length || 0} Comments
-                                    </div>
-                                    <button className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-auto transition-colors hover:text-white">
-                                        <Share2 size={20} />
-                                    </button>
-                                </div>
-
-                                {/* Comments Section */}
-                                <div className="pt-8 border-t border-white/5 space-y-6">
-                                    {post.comments?.map((comment: any, idx: number) => (
-                                        <div key={idx} className="flex gap-4">
-                                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-white/40 border border-white/5 shrink-0 mt-1">
-                                                {comment.userName?.[0]}
+                {/* Feed */}
+                <div className="space-y-8">
+                    {loading ? (
+                        <div className="py-24 text-center opacity-30 animate-pulse">
+                            <Activity size={56} className="mx-auto mb-6 text-life-cyan" />
+                            <p className="font-black uppercase tracking-[0.4em] text-xs">Syncing Neural Feed...</p>
+                        </div>
+                    ) : posts.length === 0 ? (
+                        <div className="py-24 text-center opacity-20">
+                            <MessageSquare size={56} className="mx-auto mb-6" />
+                            <p className="font-black uppercase tracking-[0.4em] text-xs">No active updates in sector</p>
+                        </div>
+                    ) : (
+                        posts.map((post) => (
+                            <motion.div
+                                key={post._id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white/[0.03] rounded-[3.5rem] border border-white/5 overflow-hidden shadow-2xl"
+                            >
+                                <div className="p-10 space-y-10">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-life-cyan/30 to-blue-600/30 flex items-center justify-center border border-white/10 shadow-2xl">
+                                                <span className="text-white font-black text-2xl uppercase">{post.userName?.[0] || '?'}</span>
                                             </div>
-                                            <div className="bg-white/[0.03] rounded-[1.5rem] px-6 py-4 flex-1 border border-white/5">
-                                                <p className="text-[9px] font-black text-life-cyan uppercase tracking-tighter mb-1.5">{comment.userName}</p>
-                                                <p className="text-xs text-slate-300 font-semibold leading-relaxed">{comment.text}</p>
+                                            <div>
+                                                <p className="text-lg font-black text-white uppercase tracking-tighter leading-none">{post.userName}</p>
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2 bg-white/[0.05] w-fit px-2 py-1 rounded-lg">
+                                                    {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
                                             </div>
                                         </div>
-                                    ))}
+                                        <button className="text-slate-700 hover:text-white transition-colors p-2">
+                                            <MoreHorizontal size={28} />
+                                        </button>
+                                    </div>
 
-                                    <div className="flex gap-3 mt-4">
+                                    {/* BUBBLE CONTENT - DEEP CONTRAST */}
+                                    <div className="text-[15px] text-slate-100 leading-relaxed font-bold bg-white/[0.02] p-10 rounded-[2.5rem] border border-white/[0.03] shadow-inner italic">
+                                        "{post.content}"
+                                    </div>
+
+                                    <div className="flex items-center gap-10 pt-2 px-2">
+                                        <button
+                                            onClick={() => handleSupport(post._id)}
+                                            className={`flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] transition-all ${post.supports?.includes(user?.id) ? 'text-red-500 scale-105' : 'text-slate-500 hover:text-white'}`}
+                                        >
+                                            <Heart size={22} fill={post.supports?.includes(user?.id) ? "currentColor" : "none"} />
+                                            {post.supports?.length || 0}
+                                        </button>
+                                        <div className="flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                            <MessageCircle size={22} />
+                                            {post.comments?.length || 0}
+                                        </div>
+                                        <button className="flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-auto transition-colors hover:text-white">
+                                            <Share2 size={22} />
+                                        </button>
+                                    </div>
+
+                                    {/* Comments Section */}
+                                    {post.comments?.length > 0 && (
+                                        <div className="pt-10 border-t border-white/5 space-y-6">
+                                            {post.comments?.map((comment: any, idx: number) => (
+                                                <div key={idx} className="flex gap-5">
+                                                    <div className="w-10 h-10 rounded-2xl bg-white/[0.05] flex items-center justify-center text-[12px] font-black text-white/40 border border-white/5 shrink-0">
+                                                        {comment.userName?.[0]}
+                                                    </div>
+                                                    <div className="bg-white/[0.02] rounded-[1.8rem] px-8 py-5 flex-1 border border-white/[0.03]">
+                                                        <p className="text-[10px] font-black text-life-cyan uppercase tracking-widest mb-2">{comment.userName}</p>
+                                                        <p className="text-xs text-slate-300 font-bold leading-relaxed">{comment.text}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Add Comment Input */}
+                                    <div className="flex gap-4 pt-6">
                                         <input
                                             type="text"
                                             value={commentTexts[post._id] || ''}
                                             onChange={(e) => setCommentTexts(prev => ({ ...prev, [post._id]: e.target.value }))}
-                                            placeholder="Write a supportive comment..."
-                                            className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-xs text-white outline-none focus:border-life-cyan/30 focus:bg-white/[0.05] transition-all font-semibold"
+                                            placeholder="Write a message of support..."
+                                            className="flex-1 bg-white/[0.03] border border-white/5 rounded-[2rem] px-8 py-5 text-sm text-white outline-none focus:border-life-cyan/30 focus:bg-white/[0.05] transition-all font-bold placeholder:text-slate-600"
                                         />
                                         <button
                                             onClick={() => handleAddComment(post._id)}
-                                            className="bg-life-cyan/10 border border-life-cyan/20 px-6 rounded-2xl text-life-cyan hover:bg-life-cyan hover:text-white transition-all active:scale-95"
+                                            className="bg-life-cyan text-white px-8 rounded-[1.5rem] hover:opacity-90 transition-all shadow-xl active:scale-95 flex items-center justify-center"
                                         >
-                                            <Send size={18} />
+                                            <Send size={20} />
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))
-                )}
+                            </motion.div>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
+    );
     );
 };
 
