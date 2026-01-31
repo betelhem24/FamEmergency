@@ -86,43 +86,27 @@ const Auth: React.FC = () => {
 
     return (
         <div className="min-h-screen flex flex-col p-4 relative overflow-hidden bg-slate-950">
-            {/* Top-aligned App Name - Glowing Glass Style */}
+            {/* Top-aligned App Name - Glowing Glass Style Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="pt-12 pb-6 text-center"
+                className="pt-16 pb-8 text-center z-10"
             >
-                <h1 className="text-5xl font-black text-white tracking-tighter italic drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
-                    Fam<span className="text-life-cyan drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]">Emergency</span>
-                </h1>
-                <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.5em] mt-2">Professional Care Network</p>
+                <div className="inline-block glass-card px-8 py-4 rounded-3xl border border-white/20 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+                    <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter italic">
+                        Fam<span className="text-life-cyan drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">Emergency</span>
+                    </h1>
+                    <p className="text-white/40 text-[8px] font-black uppercase tracking-[0.4em] mt-1">Life-Saving Identity Portal</p>
+                </div>
             </motion.div>
 
             {/* Main Interactive Container - Pushed to Bottom for Mobile Thumb Access */}
-            <div className="flex-1 flex flex-col justify-end pb-8">
+            <div className="flex-1 flex flex-col justify-end pb-6 z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="glass-card w-full max-w-md mx-auto rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden border border-white/10 shadow-2xl"
+                    className="glass-card w-full max-w-md mx-auto rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden border border-white/10 shadow-2xl"
                 >
-                    {/* Header Navigation: Sign In / Sign Up Toggles */}
-                    {!loading && (
-                        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 mb-6">
-                            <button
-                                onClick={() => setIsLogin(true)}
-                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${isLogin ? 'bg-life-cyan text-white shadow-lg shadow-cyan-500/30' : 'text-slate-500 hover:text-white'}`}
-                            >
-                                Sign In
-                            </button>
-                            <button
-                                onClick={() => setIsLogin(false)}
-                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${!isLogin ? 'bg-life-cyan text-white shadow-lg shadow-cyan-500/30' : 'text-slate-500 hover:text-white'}`}
-                            >
-                                Sign Up
-                            </button>
-                        </div>
-                    )}
-
                     <AnimatePresence mode="wait">
                         {loading ? (
                             <motion.div
@@ -142,19 +126,28 @@ const Auth: React.FC = () => {
                                 onSubmit={handleSubmit}
                                 className="space-y-4"
                             >
+                                <div className="text-center mb-2">
+                                    <h2 className="text-xl font-black text-white uppercase tracking-widest italic">
+                                        {isLogin ? 'Access Portal' : 'Create Identity'}
+                                    </h2>
+                                    <p className="text-slate-500 text-[9px] uppercase font-black tracking-widest">
+                                        Authorized {role} Session
+                                    </p>
+                                </div>
+
                                 {error && (
-                                    <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-400 text-[10px] font-black uppercase text-center">{error}</div>
+                                    <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-red-400 text-[9px] font-black uppercase text-center">{error}</div>
                                 )}
 
                                 {!isLogin && (
                                     <div className="space-y-1">
-                                        <label className="text-[9px] uppercase tracking-widest text-slate-500 font-black ml-1">Full Name</label>
+                                        <label className="text-[8px] uppercase tracking-widest text-slate-500 font-black ml-1">Full Name</label>
                                         <div className="relative group">
-                                            <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={16} />
+                                            <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={14} />
                                             <input
                                                 type="text" required
-                                                placeholder="Leo Brooks"
-                                                className="w-full bg-white/5 border border-white/20 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all font-medium"
+                                                placeholder="Resident Name"
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all"
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             />
                                         </div>
@@ -162,33 +155,33 @@ const Auth: React.FC = () => {
                                 )}
 
                                 <div className="space-y-1">
-                                    <label className="text-[9px] uppercase tracking-widest text-slate-500 font-black ml-1">Email</label>
+                                    <label className="text-[8px] uppercase tracking-widest text-slate-500 font-black ml-1">Email Hash</label>
                                     <div className="relative group">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={16} />
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={14} />
                                         <input
                                             type="email" required
-                                            placeholder="leo@gmail.com"
-                                            className="w-full bg-white/5 border border-white/20 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all font-medium"
+                                            placeholder="identity@portal.com"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all"
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-[9px] uppercase tracking-widest text-slate-500 font-black ml-1">Password</label>
+                                    <label className="text-[8px] uppercase tracking-widest text-slate-500 font-black ml-1">Security Key</label>
                                     <div className="relative group">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={16} />
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={14} />
                                         <input
                                             type={showPassword ? 'text' : 'password'} required
                                             placeholder="••••••••"
-                                            className="w-full bg-white/5 border border-white/20 rounded-2xl py-3.5 pl-12 pr-12 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all font-medium"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-11 pr-11 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all"
                                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         />
                                         <button
                                             type="button" onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors"
                                         >
-                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                                         </button>
                                     </div>
                                 </div>
@@ -196,49 +189,41 @@ const Auth: React.FC = () => {
                                 {!isLogin && role === 'doctor' && (
                                     <>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase tracking-widest text-slate-500 font-black ml-1">Medical License</label>
-                                            <div className="relative group">
-                                                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={16} />
-                                                <input
-                                                    type="text" required
-                                                    placeholder="ML-48291-X"
-                                                    className="w-full bg-white/5 border border-white/20 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all font-medium"
-                                                    onChange={(e) => setFormData({ ...formData, medicalLicense: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] uppercase tracking-widest text-slate-500 font-black ml-1">Department</label>
-                                            <div className="relative group">
-                                                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-life-cyan transition-colors" size={16} />
-                                                <input
-                                                    type="text" required
-                                                    placeholder="Emergency / Cardiology"
-                                                    className="w-full bg-white/5 border border-white/20 rounded-2xl py-3.5 pl-12 pr-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all font-medium"
-                                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                                />
-                                            </div>
+                                            <label className="text-[8px] uppercase tracking-widest text-slate-500 font-black ml-1">License ID</label>
+                                            <input
+                                                type="text" required
+                                                placeholder="ML-XXXXXXX"
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-white text-sm focus:outline-none focus:border-life-cyan/50 focus:bg-white/10 transition-all"
+                                                onChange={(e) => setFormData({ ...formData, medicalLicense: e.target.value })}
+                                            />
                                         </div>
                                     </>
                                 )}
 
-                                {/* Submit and Role Toggle - Clustered at Bottom */}
-                                <div className="pt-4 space-y-4">
+                                {/* Bottom Button Cluster */}
+                                <div className="pt-6 grid grid-cols-2 gap-3">
                                     <button
                                         type="submit"
-                                        className="w-full bg-life-cyan py-4 rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                        className="col-span-2 bg-life-cyan py-4 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
                                     >
-                                        CONFIRM ACCESS
+                                        {isLogin ? 'Establish Session' : 'Register Identity'}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsLogin(!isLogin)}
+                                        className="bg-white/5 border border-white/10 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                                    >
+                                        {isLogin ? 'Go Sign Up' : 'Go Sign In'}
                                     </button>
 
                                     <button
                                         type="button"
                                         onClick={() => setRole(role === 'patient' ? 'doctor' : 'patient')}
-                                        className="w-full py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-life-cyan hover:bg-white/10 transition-all group"
+                                        className="bg-white/5 border border-white/10 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest text-life-cyan hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                                     >
-                                        {role === 'patient' ? <Stethoscope size={14} /> : <Heart size={14} />}
-                                        {role === 'patient' ? 'Doctor View' : 'Patient View'}
-                                        <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                                        {role === 'patient' ? <Stethoscope size={12} /> : <Heart size={12} />}
+                                        {role === 'patient' ? 'Doctor' : 'Patient'}
                                     </button>
                                 </div>
                             </motion.form>
