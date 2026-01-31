@@ -1,66 +1,48 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
-import prisma from '../db/prisma';
+import prisma from '../config/db'; // Using the central db config
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role, medicalLicense, department, bloodType, allergies } = req.body;
-
-    // I convert email to lowercase to prevent "Maya" vs "maya" issues
+    const { name, email, password, role } = req.body;
     const normalizedEmail = email.toLowerCase();
 
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    // REQUIREMENT: Check live database
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'Identity Node already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // I save to MongoDB
-    const mongoUser = new User({
-      name,
-      email: normalizedEmail,
-      password: hashedPassword,
-      role,
-      medicalLicense,
-      department,
-      bloodType,
-      allergies
+    // REQUIREMENT: Every new user must be visible in the Neon console
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email: normalizedEmail,
+        password: hashedPassword,
+        role: role || 'PATIENT'
+      }
     });
-    await mongoUser.save();
-
-    // I sync to Neon SQL
-    try {
-      await prisma.user.create({
-        data: {
-          id: mongoUser._id.toString(),
-          name,
-          email: normalizedEmail,
-          password: hashedPassword,
-          role: role.toUpperCase() as any,
-          createdAt: new Date()
-        }
-      });
-    } catch (sqlError) {
-      console.error('SQL Sync Error (non-fatal):', sqlError);
-    }
 
     const token = jwt.sign(
-      { userId: mongoUser._id, role: mongoUser.role },
+      { userId: user.id, role: user.role },
       process.env.JWT_SECRET || 'secret',
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     res.status(201).json({
       token,
-      user: { id: mongoUser._id, name, email: normalizedEmail, role }
+      user: { id: user.id, name, email: normalizedEmail, role: user.role }
     });
 
   } catch (error) {
     console.error('Registration Error:', error);
-    res.status(500).json({ message: 'Something went wrong during registration' });
+    res.status(500).json({ message: 'Neural link failed' });
   }
 };
 
@@ -69,30 +51,31 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const normalizedEmail = email.toLowerCase();
 
-    // I look for the user in MongoDB
-    const user = await User.findOne({ email: normalizedEmail });
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid identity credentials' });
     }
 
-    // I verify the password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid identity credentials' });
     }
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user.id, role: user.role },
       process.env.JWT_SECRET || 'secret',
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ message: 'Server error during login' });
+    res.status(500).json({ message: 'Neural access denied' });
   }
 };
