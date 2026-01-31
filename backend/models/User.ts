@@ -8,9 +8,6 @@ export interface IUser extends Document {
   // Doctor fields
   medicalLicense?: string;
   department?: string;
-  // Patient fields
-  bloodType?: string;
-  allergies?: string[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -19,9 +16,7 @@ const userSchema = new Schema<IUser>({
   password: { type: String, required: true },
   role: { type: String, enum: ['patient', 'doctor'], default: 'patient' },
   medicalLicense: { type: String },
-  department: { type: String },
-  bloodType: { type: String },
-  allergies: [{ type: String }]
+  department: { type: String }
 }, { timestamps: true });
 
 export default mongoose.model<IUser>('User', userSchema);
