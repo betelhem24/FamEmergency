@@ -20,8 +20,10 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // REQUIREMENT: Every new user must be visible in the Neon console
+    const userCount = await prisma.user.count();
     const user = await prisma.user.create({
       data: {
+        id: `user_${Date.now()}_${userCount}`, // Explicitly satisfy ID requirement
         name,
         email: normalizedEmail,
         password: hashedPassword,
