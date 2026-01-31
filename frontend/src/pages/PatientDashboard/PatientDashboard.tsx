@@ -16,29 +16,47 @@ import { useFallDetection } from '../../hooks/useFallDetection';
 const PatientDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('emergency');
   const { user } = useAuth();
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-  // HEALT_SYNC: Broadcast vital signs to doctors in real-time
+  const onConfirmedFall = (coords: { latitude: number; longitude: number }) => {
+    if (socket) {
+      socket.emit('emergency:alert', {
+        userId: user?.id,
+        userName: user?.name,
+        type: 'FALL_DETECTED',
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        status: 'ACTIVE'
+      });
+    }
+  };
+
+  const { countdown } = useFallDetection(onConfirmedFall);
+
+  // HEALTH_SYNC: Broadcast vital signs to doctors in real-time
   useEffect(() => {
-    const socket = io('http://localhost:5000', {
+    const newSocket = io('http://localhost:5000', {
       auth: { token: localStorage.getItem('token') }
     });
+    setSocket(newSocket);
 
     const broadcastHealth = () => {
-      socket.emit('health:update', {
-        status: 'nominal',
-        heartRate: 70 + Math.floor(Math.random() * 10), // Simulated real-world data
+      newSocket.emit('health:update', {
+        userId: user?.id,
+        status: countdown !== null ? 'emergency' : 'stable',
+        heartRate: (countdown !== null ? 110 : 70) + Math.floor(Math.random() * 10),
         userName: user?.name
       });
     };
 
-    const interval = setInterval(broadcastHealth, 5000);
+    const interval = setInterval(broadcastHealth, 3000);
     broadcastHealth();
 
     return () => {
       clearInterval(interval);
-      socket.disconnect();
+      newSocket.disconnect();
     };
-  }, [user]);
+  }, [user, countdown]);
 
   const renderContent = () => {
     switch (activeTab) {
