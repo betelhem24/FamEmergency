@@ -4,6 +4,7 @@ import { Server as SocketServer } from 'socket.io';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import compression from 'compression';
 import authRoutes from './routes/authRoutes';
 import contactRoutes from './routes/contactRoutes';
 import medicalRoutes from './routes/medicalRoutes';
@@ -11,11 +12,13 @@ import emergencyRoutes from './routes/emergencyRoutes';
 import locationRoutes from './routes/locationRoutes';
 import familyRoutes from './routes/familyRoutes';
 import doctorRoutes from './routes/doctorRoutes';
+import postRoutes from './routes/postRoutes';
 import { setupSocketHandlers } from './socketHandlers';
-
 dotenv.config();
 
 const app: Application = express();
+app.use(compression());
+
 const httpServer = createServer(app);
 const io = new SocketServer(httpServer, {
   cors: {
@@ -45,6 +48,7 @@ app.use('/api/emergency', emergencyRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/doctor', doctorRoutes);
+app.use('/api/posts', postRoutes);
 
 // Setup Socket.io handlers
 setupSocketHandlers(io);
