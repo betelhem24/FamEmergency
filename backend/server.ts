@@ -13,6 +13,7 @@ import locationRoutes from './routes/locationRoutes';
 import familyRoutes from './routes/familyRoutes';
 import doctorRoutes from './routes/doctorRoutes';
 import postRoutes from './routes/postRoutes';
+import userRoutes from './routes/userRoutes';
 import { setupSocketHandlers } from './socketHandlers';
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.use('/api/location', locationRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/users', userRoutes);
 
 // Setup Socket.io handlers
 setupSocketHandlers(io);
