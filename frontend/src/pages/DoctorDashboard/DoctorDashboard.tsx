@@ -3,11 +3,12 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { DoctorScanner } from './components/DoctorScanner';
 import { PatientAlerts } from './components/PatientAlerts';
-import { Crosshair, LogOut, Scan, Radio, ClipboardList, ArrowRight, QrCode } from 'lucide-react';
+import { DoctorChat } from './components/DoctorChat';
+import { Crosshair, LogOut, Scan, Radio, ClipboardList, ArrowRight, QrCode, MessageSquare } from 'lucide-react';
 
 const DoctorDashboard: React.FC = () => {
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState<'scanner' | 'alerts' | 'history'>('scanner');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'alerts' | 'history' | 'chat'>('scanner');
   const [scanHistory, setScanHistory] = useState<any[]>(() => {
     const saved = localStorage.getItem('doctor_scan_history');
     return saved ? JSON.parse(saved) : [];
@@ -91,11 +92,26 @@ const DoctorDashboard: React.FC = () => {
               <div className="text-[10px] opacity-60 font-medium italic">Monitor Regional Status</div>
             </div>
           </button>
+
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={`flex-1 flex items-center justify-center gap-4 py-8 rounded-[2rem] border-2 transition-all duration-300
+              ${activeTab === 'chat'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-2xl scale-105'
+                : 'bg-white text-slate-400 border-slate-100 hover:border-life-cyan/30 shadow-lg'}`}
+          >
+            <MessageSquare size={32} strokeWidth={activeTab === 'chat' ? 3 : 2} />
+            <div className="text-left">
+              <div className="text-sm font-black uppercase tracking-widest">Chat & Status</div>
+              <div className="text-[10px] opacity-60 font-medium italic">Private Patient Portal</div>
+            </div>
+          </button>
         </div>
 
         <div className="transition-all duration-500">
           {activeTab === 'scanner' && <DoctorScanner onScan={handleNewScan} />}
           {activeTab === 'alerts' && <PatientAlerts />}
+          {activeTab === 'chat' && <DoctorChat />}
           {activeTab === 'history' && (
             <div className="glass-card p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-2xl animate-in zoom-in duration-500">
               <h2 className="text-2xl font-black text-slate-900 italic mb-8 uppercase tracking-tighter">Historical Triage Feed</h2>
