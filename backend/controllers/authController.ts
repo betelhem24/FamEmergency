@@ -21,13 +21,23 @@ export const register = async (req: Request, res: Response) => {
 
     // REQUIREMENT: Every new user must be visible in the Neon console
     const userCount = await prisma.user.count();
+    const newUserRole = role || 'PATIENT';
+
     const user = await prisma.user.create({
       data: {
-        id: `user_${Date.now()}_${userCount}`, // Explicitly satisfy ID requirement
+        id: `user_${Date.now()}_${userCount}`,
         name,
         email: normalizedEmail,
         password: hashedPassword,
-        role: role || 'PATIENT'
+        role: newUserRole,
+        // Automatically create an empty MedicalRecord for PATIENTS
+        medicalRecord: newUserRole === 'PATIENT' ? {
+          create: {
+            fullName: name,
+            allergies: [],
+            conditions: []
+          }
+        } : undefined
       }
     });
 
