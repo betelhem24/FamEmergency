@@ -12,6 +12,7 @@ const Community: React.FC = () => {
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(true);
     const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
+    const [socket, setSocket] = useState<any>(null);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -233,7 +234,6 @@ const Community: React.FC = () => {
                 </div>
             </div>
         </div>
-    );
     );
 };
 
