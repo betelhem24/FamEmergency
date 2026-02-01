@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { User as UserIcon, Mail, Lock, Eye, EyeOff, Heart, Stethoscope, ChevronRight, Activity, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { User as UserIcon, Mail, Lock, Eye, EyeOff, Heart, Stethoscope, ShieldCheck, Sun, Moon, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 
 const Auth: React.FC = () => {
     const { login } = useAuth();
+    const { theme, setTheme } = useTheme();
     const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -19,8 +21,16 @@ const Auth: React.FC = () => {
         password: '',
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const cycleTheme = () => {
+        if (theme === 'dark') setTheme('light');
+        else if (theme === 'light') setTheme('blue');
+        else setTheme('dark');
+    };
+
+    const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Cpu;
+
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         setLoading(true);
         try {
             const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
@@ -63,7 +73,12 @@ const Auth: React.FC = () => {
                     animate={{ y: 0, opacity: 1 }}
                     className="space-y-3"
                 >
-                    <h1 className="text-6xl font-black tracking-tighter italic text-white uppercase leading-none drop-shadow-2xl">
+                    <div className="pointer-events-auto absolute top-[-40px] right-8">
+                        <button onClick={cycleTheme} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all text-medical-cyan">
+                            <ThemeIcon size={20} />
+                        </button>
+                    </div>
+                    <h1 className="text-6xl font-black tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-medical-cyan to-white uppercase leading-none drop-shadow-2xl">
                         FamEmergency
                     </h1>
                     <div className="flex items-center justify-center gap-3">
@@ -168,24 +183,26 @@ const Auth: React.FC = () => {
                 {/* MAIN COMMANDS */}
                 <div className="grid grid-cols-2 gap-4">
                     <button
-                        onClick={handleSubmit}
+                        type="button"
+                        onClick={() => isLogin ? handleSubmit(null as any) : setIsLogin(true)}
                         disabled={loading}
                         className={`py-6 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-[0.4em] pointer-events-auto !important ${isLogin
-                                ? 'bg-medical-cyan text-black shadow-[0_20px_40px_rgba(6,182,212,0.2)] active:scale-95'
-                                : 'bg-white/[0.03] text-slate-500 border border-white/5 hover:bg-white/[0.06]'
+                            ? 'bg-medical-cyan text-black shadow-[0_20px_40px_rgba(6,182,212,0.2)] active:scale-95'
+                            : 'bg-white/[0.03] text-slate-500 border border-white/5 hover:bg-white/[0.06]'
                             }`}
                     >
-                        {loading && isLogin ? <GlassSpinner size="xs" /> : "Sign In"}
+                        {loading && isLogin ? <GlassSpinner /> : "Sign In"}
                     </button>
                     <button
                         type="button"
-                        onClick={() => setIsLogin(!isLogin)}
+                        onClick={() => !isLogin ? handleSubmit(null as any) : setIsLogin(false)}
+                        disabled={loading}
                         className={`py-6 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-[0.4em] pointer-events-auto !important ${!isLogin
-                                ? 'bg-white text-black shadow-2xl active:scale-95'
-                                : 'bg-white/[0.03] text-slate-500 border border-white/5 hover:bg-white/[0.06]'
+                            ? 'bg-white text-black shadow-2xl active:scale-95'
+                            : 'bg-white/[0.03] text-slate-500 border border-white/5 hover:bg-white/[0.06]'
                             }`}
                     >
-                        Sign Up
+                        {loading && !isLogin ? <GlassSpinner /> : "Sign Up"}
                     </button>
                 </div>
 
