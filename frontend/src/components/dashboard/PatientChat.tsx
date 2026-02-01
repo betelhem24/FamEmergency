@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Send, User, ShieldCheck, MessageCircle, Heart, Activity } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../context/AuthContext';
+import { Send, ShieldCheck, MessageCircle, Activity } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 
 const SOCKET_URL = 'http://localhost:5000';
 
@@ -75,8 +75,8 @@ export const PatientChat: React.FC<{ targetDoctorId?: string }> = ({ targetDocto
                             className={`flex flex-col ${msg.from === user?.id ? 'items-end' : 'items-start'}`}
                         >
                             <div className={`max-w-[80%] p-4 rounded-[1.5rem] border ${msg.from === user?.id
-                                    ? 'bg-life-cyan border-life-cyan text-white rounded-tr-none'
-                                    : 'bg-white/10 border-white/10 text-white rounded-tl-none'
+                                ? 'bg-life-cyan border-life-cyan text-white rounded-tr-none'
+                                : 'bg-white/10 border-white/10 text-white rounded-tl-none'
                                 }`}>
                                 <p className="text-sm font-medium tracking-tight leading-relaxed">{msg.message}</p>
                             </div>
