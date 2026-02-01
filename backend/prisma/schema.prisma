@@ -1,42 +1,103 @@
-// I define the standard Prisma generator to create the client for TypeScript
 generator client {
   provider = "prisma-client-js"
 }
 
-// I set up the connection to the PostgreSQL database using the URL from the .env file
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// I define the User model to store account information in Neon
 model User {
-  // I changed this to String to match the MongoDB ObjectId format
-  id        String   @id
-  email     String   @unique
-  name      String?
-  password  String
-  
-  // I identify if the user is a PATIENT or a DOCTOR
-  role      String   @default("PATIENT")
-  
-  // I track exactly when the user registered
-  createdAt DateTime @default(now()) 
-  
-  // I create a relation to link many emergency contacts to one user
-  contacts  EmergencyContact[] 
+  id            String             @id
+  email         String             @unique
+  name          String?
+  password      String
+  role          String             @default("PATIENT")
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  Comment       Comment[]
+  Emergency     Emergency[]
+  contacts      EmergencyContact[]
+  medicalRecord MedicalRecord?
+  Post          Post[]
+  Support       Support[]
 }
 
-// I define the EmergencyContact model to store specific contact details
+model MedicalRecord {
+  id          String   @id
+  userId      String   @unique
+  fullName    String?
+  dob         String?
+  gender      String?
+  age         Int?     @default(0)
+  familyPhone String?
+  bloodType   String?
+  height      String?
+  weight      String?
+  allergies   String[] @default([])
+  conditions  String[] @default([])
+  medications Json[]   @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+}
+
 model EmergencyContact {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String
-  relation  String
-  
-  // I store the String ID of the user who owns this contact
+  id       Int    @id @default(autoincrement())
+  userId   String
+  name     String
+  phone    String
+  relation String
+  user     User   @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id        String   @id
+  postId    String
   userId    String
-  
-  // I establish the link back to the User model
-  user      User     @relation(fields: [userId], references: [id])
+  userName  String
+  text      String
+  createdAt DateTime @default(now())
+  Post      Post     @relation(fields: [postId], references: [id])
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+model Emergency {
+  id          String    @id
+  userId      String
+  type        String
+  severity    String    @default("CRITICAL")
+  latitude    Float
+  longitude   Float
+  address     String?
+  status      String    @default("ACTIVE")
+  triggeredAt DateTime  @default(now())
+  resolvedAt  DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  User        User      @relation(fields: [userId], references: [id])
+}
+
+model Post {
+  id        String    @id
+  userId    String
+  userName  String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @updatedAt
+  Comment   Comment[]
+  User      User      @relation(fields: [userId], references: [id])
+  Support   Support[]
+}
+
+model Support {
+  id        String   @id
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  Post      Post     @relation(fields: [postId], references: [id])
+  User      User     @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
 }
