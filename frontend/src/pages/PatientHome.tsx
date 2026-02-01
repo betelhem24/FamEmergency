@@ -28,7 +28,7 @@ const PatientHome: React.FC = () => {
                         className="fixed inset-0 z-[100] bg-red-600/95 flex flex-col items-center justify-center p-10 text-center"
                     >
                         <div className="bg-white p-8 rounded-full mb-10 animate-bounce shadow-2xl">
-                            < BellRing size={64} className="text-red-600" />
+                            <BellRing size={64} className="text-red-600" />
                         </div>
                         <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter mb-4 leading-none">Fall Detected!</h2>
                         <p className="text-white/90 font-black text-xs uppercase tracking-[0.3em] mb-12 max-w-xs">Emergency broadcast initiated. Unified response active.</p>
