@@ -72,4 +72,4 @@ const ResponderTab: React.FC = () => {
 
 export default ResponderTab;
 
-export default ResponderTab;
+
