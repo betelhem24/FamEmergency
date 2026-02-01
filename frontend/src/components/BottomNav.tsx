@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Shield, Activity, GraduationCap, Map, FileText, User, ScanLine, BarChart3, Users } from 'lucide-react';
 
 interface BottomNavProps {
@@ -29,26 +30,23 @@ const BottomNav: React.FC<BottomNavProps> = ({ role }) => {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-20 max-w-lg mx-auto">
                     {links.map((link) => (
-                        <NavLink
-                            key={link.to}
-                            to={link.to}
-                            className={({ isActive }) =>
-                                `flex flex-col items-center justify-center flex-1 h-full space-y-1.5 transition-all duration-300 relative group ${isActive ? 'text-medical-cyan' : 'text-slate-500 hover:text-slate-300'
-                                }`
-                            }
-                        >
-                            <div className="relative">
-                                <link.icon size={22} strokeWidth={isActive ? 3 : 2} className="transition-all duration-300" />
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="nav-glow"
-                                        className="absolute -inset-2 bg-medical-cyan/10 rounded-full blur-md"
-                                    />
-                                )}
-                            </div>
-                            <span className={`text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-0.5'}`}>
-                                {link.label}
-                            </span>
+                        <NavLink key={link.to} to={link.to} className="flex-1 h-full">
+                            {({ isActive }) => (
+                                <div className={`flex flex-col items-center justify-center h-full space-y-1.5 transition-all duration-300 relative group ${isActive ? 'text-medical-cyan' : 'text-slate-500 hover:text-slate-300'}`}>
+                                    <div className="relative">
+                                        <link.icon size={22} strokeWidth={isActive ? 3 : 2} className="transition-all duration-300" />
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="nav-glow"
+                                                className="absolute -inset-2 bg-medical-cyan/10 rounded-full blur-md"
+                                            />
+                                        )}
+                                    </div>
+                                    <span className={`text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-0.5'}`}>
+                                        {link.label}
+                                    </span>
+                                </div>
+                            )}
                         </NavLink>
                     ))}
                 </div>
