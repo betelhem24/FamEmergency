@@ -6,13 +6,21 @@ export default {
     ],
     theme: {
         extend: {
+            // Premium Enterprise Palette - Mapped to CSS Vars
             colors: {
-                'navy-deep': '#0f172a',
-                'teal-dark': '#134e4a',
-                'life-cyan': '#06b6d4',
-                'medical-cyan': '#06b6d4',
-                'medical-navy': '#0f172a',
-                'emergency-red': '#ef4444',
+                'navy-deep': 'var(--bg-primary)',
+                'navy-light': 'var(--bg-secondary)',
+                'medical-cyan': 'var(--accent-primary)',
+                'cyan-neon': 'var(--accent-primary)',
+                'life-cyan': 'var(--accent-glow)',
+                'cyan-glow': 'var(--accent-glow)',
+                'alert-red': 'var(--accent-alert)',
+                'glass-border': 'var(--glass-border)',
+                'glass-bg': 'var(--glass-bg)',
+                // Keep static alerts
+                'alert-dark': '#7f1d1d',
+                'success-green': '#10b981',
+                'warning-amber': '#f59e0b',
             },
             fontFamily: {
                 sans: ['Inter', 'Public Sans', 'sans-serif'],
