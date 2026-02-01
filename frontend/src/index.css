@@ -6,9 +6,54 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Default (Dark/Neural) */
+    --bg-primary: #020617;
+    --bg-secondary: #0f172a;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-primary: #06b6d4;
+    /* Cyan */
+    --accent-glow: #22d3ee;
+    --accent-alert: #ef4444;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(15, 23, 42, 0.6);
+  }
+
+  .light {
+    --bg-primary: #f8fafc;
+    /* Slate 50 */
+    --bg-secondary: #ffffff;
+    --text-primary: #0f172a;
+    /* Slate 900 */
+    --text-secondary: #475569;
+    --accent-primary: #0284c7;
+    /* Sky 600 */
+    --accent-glow: #38bdf8;
+    --accent-alert: #dc2626;
+    --glass-border: rgba(15, 23, 42, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+  }
+
+  .blue {
+    --bg-primary: #000a1f;
+    /* Deep Navy Blue */
+    --bg-secondary: #001233;
+    --text-primary: #e0f2fe;
+    --text-secondary: #bae6fd;
+    --accent-primary: #00d4ff;
+    /* Electric Blue */
+    --accent-glow: #7dd3fc;
+    --accent-alert: #ff1744;
+    --glass-border: rgba(224, 242, 254, 0.1);
+    --glass-bg: rgba(10, 25, 41, 0.6);
+  }
+
   body {
-    @apply font-sans text-white antialiased;
-    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    @apply font-sans antialiased transition-colors duration-500;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    background-image: radial-gradient(circle at 50% 0%, var(--bg-secondary) 0%, var(--bg-primary) 70%);
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -93,5 +138,5 @@
 }
 
 ::selection {
-  @apply bg-life-cyan/30 text-white;
+  @apply bg-cyan-500/30 text-white;
 }
