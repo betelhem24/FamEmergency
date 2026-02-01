@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Send, MessageSquare, Heart, Activity, Share2, MoreHorizontal, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 
 const SOCKET_URL = 'http://localhost:5000';
@@ -12,7 +12,6 @@ const Community: React.FC = () => {
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(true);
     const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
-    const [socket, setSocket] = useState<any>(null);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -30,7 +29,6 @@ const Community: React.FC = () => {
         fetchPosts();
 
         const newSocket = io(SOCKET_URL);
-        setSocket(newSocket);
 
         newSocket.on('post:new', (newPost: any) => {
             setPosts(prev => [newPost, ...prev]);
