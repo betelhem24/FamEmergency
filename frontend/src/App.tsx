@@ -5,7 +5,6 @@ import Layout from './components/Layout';
 import BottomNav from './components/BottomNav';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Auth
 import Auth from './pages/Auth';
 
 // Patient Module
@@ -80,47 +79,56 @@ function AnimatedRoutes() {
   );
 }
 
+import { SocketProvider } from './context/SocketContext';
+
 function MainApp() {
-  const { user, logout, loading } = useAuth();
+  const { user, token, logout, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="h-screen w-full bg-[#020617] flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-medical-cyan/20 border-t-medical-cyan rounded-full animate-spin mx-auto"></div>
-          <p className="text-medical-cyan font-black uppercase tracking-widest text-xs">Loading Identity...</p>
+          <div className="w-16 h-16 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-cyan-500 font-black uppercase tracking-widest text-xs">Loading Identity...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <Router>
-      <Layout>
-        {user && (
-          <div className="absolute top-4 right-4 z-[60]">
-            <button
-              onClick={logout}
-              className="text-[9px] bg-red-500/10 backdrop-blur-md px-4 py-2 rounded-full border border-red-500/20 hover:bg-red-500/20 transition-all text-red-500 font-black tracking-[0.2em] uppercase shadow-lg shadow-red-500/10 active:scale-95"
-            >
-              Sign Out
-            </button>
-          </div>
-        )}
+    <SocketProvider token={token}>
+      <Router>
+        <Layout>
+          {user && (
+            <div className="absolute top-4 right-4 z-[60]">
+              <button
+                onClick={logout}
+                className="text-[9px] bg-red-500/10 backdrop-blur-md px-4 py-2 rounded-full border border-red-500/20 hover:bg-red-500/20 transition-all text-red-500 font-black tracking-[0.2em] uppercase shadow-lg shadow-red-500/10 active:scale-95"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
 
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
-          <AnimatedRoutes />
-          {user && <BottomNav role={user.role.toLowerCase() as 'patient' | 'doctor'} />}
-        </div>
-      </Layout>
-    </Router>
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <AnimatedRoutes />
+            {user && <BottomNav role={user.role.toLowerCase() as 'patient' | 'doctor'} />}
+          </div>
+        </Layout>
+      </Router>
+    </SocketProvider>
   );
 }
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
+  console.log('DEBUG: Rendering App Component');
   return (
     <AuthProvider>
-      <MainApp />
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
     </AuthProvider>
   );
 }
