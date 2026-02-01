@@ -3,12 +3,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/db'; // Using the central db config
 
+import MongoUser from '../models/User'; // Import MongoDB User model
+
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
     const normalizedEmail = email.toLowerCase();
 
-    // REQUIREMENT: Check live database
+    // REQUIREMENT: Check live database (Neon)
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail }
     });
@@ -22,17 +24,26 @@ export const register = async (req: Request, res: Response) => {
     // REQUIREMENT: Every new user must be visible in the Neon console
     const userCount = await prisma.user.count();
     const newUserRole = role || 'PATIENT';
+    const neonId = `user_${Date.now()}_${userCount}`;
+    console.log('DEBUG: Creating Neon User with ID:', neonId);
+    console.log('DEBUG: Create Data:', JSON.stringify({
+      id: neonId,
+      name,
+      email: normalizedEmail,
+      role: newUserRole
+    }, null, 2));
 
-    const user = await (prisma.user as any).create({
+    // 1. Save to Neon PostgreSQL
+    const user = await prisma.user.create({
       data: {
-        id: `user_${Date.now()}_${userCount}`,
+        id: neonId,
         name,
         email: normalizedEmail,
         password: hashedPassword,
         role: newUserRole,
-        // Automatically create an empty MedicalRecord for PATIENTS
         medicalRecord: newUserRole === 'PATIENT' ? {
           create: {
+            id: `mr_${Date.now()}`,
             fullName: name,
             allergies: [],
             conditions: []
@@ -40,6 +51,25 @@ export const register = async (req: Request, res: Response) => {
         } : undefined
       }
     });
+
+    // 2. Save to MongoDB Atlas (Dual Write)
+    try {
+      // Check if user exists in Mongo to match behavior (though unlikely if not in Postgres)
+      const existingMongoUser = await MongoUser.findOne({ email: normalizedEmail });
+      if (!existingMongoUser) {
+        const mongoUser = new MongoUser({
+          name,
+          email: normalizedEmail,
+          password: hashedPassword,
+          role: newUserRole === 'PATIENT' ? 'patient' : 'doctor'
+        });
+        await mongoUser.save();
+        console.log(`[SUCCESS] User synced to MongoDB: ${normalizedEmail}`);
+      }
+    } catch (mongoError) {
+      console.error('MongoDB Sync Warning:', mongoError);
+      // We don't fail the request if Mongo fails, but we log it.
+    }
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
