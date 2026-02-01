@@ -27,7 +27,7 @@ export const DoctorScanner: React.FC<DoctorScannerProps> = ({ onScan }) => {
                     (decodedText: string) => {
                         handleScanSuccess(decodedText);
                     },
-                    (errorMessage: string) => { /* ignore */ }
+                    () => { /* ignore */ }
                 );
             } catch (err) {
                 console.error("Scanner start error:", err);
