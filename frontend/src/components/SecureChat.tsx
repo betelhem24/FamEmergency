@@ -1,95 +1,177 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Lock, X, Shield } from 'lucide-react';
+import { Send, Lock, X, Shield, Image as ImageIcon, CheckCheck } from 'lucide-react';
+import { useSocket } from '../context/SocketContext';
+import { useAuth } from '../context/AuthContext';
 
 interface Message {
-    id: number;
+    id: string;
     text: string;
-    sender: 'me' | 'other';
+    senderId: string;
+    senderRole: string;
     time: string;
+    image?: string;
 }
 
-const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientName: string }> = ({ isOpen, onClose, recipientName }) => {
+const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: string; recipientName: string }> = ({ isOpen, onClose, recipientId, recipientName }) => {
+    const { socket } = useSocket();
+    const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleMessage = (msg: Message) => {
+            if (msg.senderId === recipientId || msg.senderId === user?.id) {
+                setMessages(prev => [...prev, msg]);
+            }
+        };
+
+        socket.on('chat:message', handleMessage);
+        return () => {
+            socket.off('chat:message', handleMessage);
+        };
+    }, [socket, recipientId, user?.id]);
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     const sendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || !socket || !user) return;
 
-        setMessages([...messages, {
-            id: Date.now(),
+        const msg: Message = {
+            id: Math.random().toString(36).substring(7),
             text: newMessage,
-            sender: 'me',
+            senderId: user.id,
+            senderRole: user.role,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
+        };
+
+        socket.emit('chat:send', { to: recipientId, message: msg });
+        setMessages(prev => [...prev, msg]);
         setNewMessage('');
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && user) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                const msg: Message = {
+                    id: Math.random().toString(36).substring(7),
+                    text: '',
+                    image: base64String,
+                    senderId: user.id,
+                    senderRole: user.role,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                socket?.emit('chat:send', { to: recipientId, message: msg });
+                setMessages(prev => [...prev, msg]);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     return (
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    className="fixed bottom-4 right-4 w-96 h-[500px] glass-panel flex flex-col z-[1000] border-2 border-cyan-neon shadow-neon-cyan"
+                    initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                    exit={{ y: 20, opacity: 0, scale: 0.95 }}
+                    className="fixed bottom-24 right-4 left-4 md:left-auto md:w-96 h-[500px] glass-card flex flex-col z-[100] border border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]"
                 >
+                    {/* Hidden File Input */}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*,.pdf"
+                        className="hidden"
+                    />
+
                     {/* Header */}
-                    <div className="p-4 bg-navy-light/80 border-b border-cyan-neon/30 flex justify-between items-center rounded-t-xl">
-                        <div className="flex items-center gap-3">
+                    <div className="p-6 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
                             <div className="relative">
-                                <Shield className="w-5 h-5 text-cyan-neon" />
-                                <span className="absolute -bottom-1 -right-1 w-2 h-2 bg-success-green rounded-full animate-pulse" />
+                                <div className="p-3 bg-[var(--accent-primary)]/10 rounded-2xl text-[var(--accent-primary)]">
+                                    <Shield size={20} />
+                                </div>
+                                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--bg-primary)] animate-pulse" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-white text-sm">{recipientName}</h3>
-                                <p className="text-[10px] font-mono text-cyan-neon flex items-center gap-1">
-                                    <Lock className="w-3 h-3" /> END-TO-END ENCRYPTED
+                                <h3 className="font-black text-white text-[10px] uppercase tracking-widest italic">{recipientName}</h3>
+                                <p className="text-[8px] font-black text-[var(--accent-primary)] flex items-center gap-1 uppercase tracking-widest opacity-60">
+                                    <Lock size={10} /> Quantum Encrypted
                                 </p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="p-1 hover:bg-white/10 rounded transition-colors">
-                            <X className="w-5 h-5 text-slate-400" />
+                        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-all text-slate-500 hover:text-white">
+                            <X size={20} />
                         </button>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-navy-deep/50">
+                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
                         {messages.length === 0 && (
-                            <div className="text-center mt-10 opacity-50">
-                                <Lock className="w-12 h-12 mx-auto mb-2 text-cyan-neon" />
-                                <p className="text-xs text-white">Secure channel established.</p>
-                                <p className="text-xs font-mono text-cyan-neon">SESSION ID: {Date.now().toString().slice(-6)}</p>
+                            <div className="text-center mt-12 opacity-20 flex flex-col items-center">
+                                <Lock className="w-12 h-12 mb-4 text-[var(--accent-primary)]" />
+                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white">Channel Secured</p>
+                                <p className="text-[8px] font-black text-[var(--accent-primary)] mt-2 uppercase">Ready for Clinical Handshake</p>
                             </div>
                         )}
                         {messages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] p-3 rounded-lg text-sm ${msg.sender === 'me'
-                                    ? 'bg-cyan-neon/20 border border-cyan-neon/50 text-white rounded-br-none'
-                                    : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-bl-none'
+                            <div key={msg.id} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[85%] p-4 rounded-3xl ${msg.senderId === user?.id
+                                    ? 'bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/30 text-white rounded-tr-none'
+                                    : 'bg-white/5 border border-white/10 text-slate-200 rounded-tl-none'
                                     }`}>
-                                    <p>{msg.text}</p>
-                                    <span className="text-[10px] opacity-50 mt-1 block text-right">{msg.time}</span>
+                                    {msg.text && <p className="text-[11px] font-medium leading-relaxed">{msg.text}</p>}
+                                    {msg.image && (
+                                        <div className="space-y-2">
+                                            <img src={msg.image} alt="Encrypted medical data" className="rounded-2xl max-w-full border border-white/10 shadow-lg" />
+                                            <p className="text-[7px] font-black text-[var(--accent-primary)] uppercase tracking-widest text-center">Encapsulated Medical Object</p>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center justify-end gap-1 mt-2 opacity-40">
+                                        <span className="text-[8px] font-black uppercase tracking-tighter">{msg.time}</span>
+                                        {msg.senderId === user?.id && <CheckCheck size={10} className="text-[var(--accent-primary)]" />}
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     {/* Input */}
-                    <form onSubmit={sendMessage} className="p-4 bg-navy-light/80 border-t border-cyan-neon/30 rounded-b-xl flex gap-2">
+                    <form onSubmit={sendMessage} className="p-6 bg-white/5 border-t border-white/5 flex gap-3 items-center">
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="p-3 bg-white/5 rounded-2xl text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-all"
+                        >
+                            <ImageIcon size={18} />
+                        </button>
                         <input
                             type="text"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder="Type secure message..."
-                            className="flex-1 bg-navy-deep border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-neon transition-colors"
+                            className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white outline-none focus:border-[var(--accent-primary)]/30 transition-all placeholder-slate-500"
                         />
                         <button
                             type="submit"
-                            className="bg-cyan-neon text-navy-deep p-2 rounded hover:bg-cyan-glow transition-colors"
+                            disabled={!newMessage.trim()}
+                            className="bg-[var(--accent-primary)] text-black p-4 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg disabled:opacity-50 disabled:scale-100"
                         >
-                            <Send className="w-5 h-5" />
+                            <Send size={18} />
                         </button>
                     </form>
                 </motion.div>
