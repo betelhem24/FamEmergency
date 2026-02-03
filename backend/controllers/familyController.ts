@@ -59,7 +59,7 @@ export const getFamilyMembers = async (req: Request, res: Response) => {
         const family = await FamilyMember.find({
             userId,
             status: 'ACCEPTED'
-        }).populate('familyMemberId', 'name email role');
+        }).populate('familyMemberId', 'name email role phoneNumber');
 
         res.json({ success: true, family });
     } catch (error: any) {
