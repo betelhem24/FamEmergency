@@ -90,3 +90,59 @@ export const addComment = async (req: Request, res: Response) => {
         res.status(400).json({ message: error.message });
     }
 };
+export const deletePost = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = (req as any).user?.id || req.body.userId;
+
+        const post = await Post.findById(id);
+        if (!post) return res.status(404).json({ message: 'Post Not Found' });
+
+        if (post.userId !== userId) {
+            return res.status(403).json({ message: 'Not authorized to delete this post' });
+        }
+
+        await Post.findByIdAndDelete(id);
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('post:deleted', id);
+        }
+
+        res.json({ message: 'Post deleted successfully' });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const deleteComment = async (req: Request, res: Response) => {
+    try {
+        const { id, commentId } = req.params;
+        const userId = (req as any).user?.id || req.body.userId;
+
+        const post = await Post.findById(id);
+        if (!post) return res.status(404).json({ message: 'Post Not Found' });
+
+        const commentIdx = post.comments.findIndex((c: any) => c._id?.toString() === commentId);
+        if (commentIdx === -1) return res.status(404).json({ message: 'Comment Not Found' });
+
+        const comment = post.comments[commentIdx];
+
+        // Auth: Comment owner OR Post owner can delete
+        if (comment.userId !== userId && post.userId !== userId) {
+            return res.status(403).json({ message: 'Not authorized to delete this comment' });
+        }
+
+        post.comments.splice(commentIdx, 1);
+        await post.save();
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('post:updated', post);
+        }
+
+        res.json(post);
+    } catch (error: any) {
+        res.status(400).json({ message: error.message });
+    }
+};
