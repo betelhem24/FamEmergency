@@ -3,14 +3,16 @@ import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { registerUser } from '../../store/thunks';
 import { clearError } from '../../store/slices/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, UserCircle2, Crosshair } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, UserCircle2, Crosshair, FileBadge, Building2 } from 'lucide-react';
 
 const SignupForm = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        role: 'PATIENT' as 'PATIENT' | 'DOCTOR'
+        role: 'PATIENT' as 'PATIENT' | 'DOCTOR',
+        medicalLicense: '',
+        department: ''
     });
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -94,7 +96,6 @@ const SignupForm = () => {
                         />
                     </div>
 
-                    <div>
                         <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                             <UserCircle2 size={14} className="text-medical-cyan" /> Registry Role
                         </label>
@@ -107,6 +108,43 @@ const SignupForm = () => {
                             <option value="DOCTOR">MEDICAL_RESPONDER</option>
                         </select>
                     </div>
+
+                    {formData.role === 'DOCTOR' && (
+                        <>
+                            <div className="animate-in fade-in slide-in-from-top duration-500">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                    <FileBadge size={14} className="text-medical-cyan" /> Medical License ID
+                                </label>
+                                <input
+                                    type="text"
+                                    className="medical-input"
+                                    value={formData.medicalLicense}
+                                    onChange={(e) => setFormData({ ...formData, medicalLicense: e.target.value })}
+                                    placeholder="LIC-12345678"
+                                    required={formData.role === 'DOCTOR'}
+                                />
+                            </div>
+
+                            <div className="animate-in fade-in slide-in-from-top duration-500 delay-100">
+                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                    <Building2 size={14} className="text-medical-cyan" /> Department
+                                </label>
+                                <select
+                                    className="medical-input"
+                                    value={formData.department}
+                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                    required={formData.role === 'DOCTOR'}
+                                >
+                                    <option value="">Select Department</option>
+                                    <option value="Emergency">Emergency (ER)</option>
+                                    <option value="Cardiology">Cardiology</option>
+                                    <option value="Neurology">Neurology</option>
+                                    <option value="Pediatrics">Pediatrics</option>
+                                    <option value="General">General Practice</option>
+                                </select>
+                            </div>
+                        </>
+                    )}
 
                     <button
                         type="submit"
@@ -126,12 +164,12 @@ const SignupForm = () => {
                         </Link>
                     </p>
                 </div>
-            </div>
+            </div >
 
-            <p className="text-[9px] text-center text-slate-400 font-bold uppercase tracking-[0.3em] mt-8 opacity-50">
-                Encrypted Patient Data Protection System v3.1
-            </p>
-        </div>
+    <p className="text-[9px] text-center text-slate-400 font-bold uppercase tracking-[0.3em] mt-8 opacity-50">
+        Encrypted Patient Data Protection System v3.1
+    </p>
+        </div >
     );
 };
 
