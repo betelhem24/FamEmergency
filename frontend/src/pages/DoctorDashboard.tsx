@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { AlertTriangle, ShieldCheck, QrCode, Search, Save, X, Stethoscope } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, QrCode, Search, X, Stethoscope, Phone, MessageCircle, Activity } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../context/AuthContext';
@@ -27,8 +27,9 @@ const DoctorDashboard: React.FC = () => {
     const [loadingProfile, setLoadingProfile] = useState(false);
 
     // Patient Profile State
-    const [currentPatient, setCurrentPatient] = useState<any>(null); // Details of user
+    const [currentPatient, setCurrentPatient] = useState<any>(null);
     const [medicalRecord, setMedicalRecord] = useState<MedicalProfile | null>(null);
+    const [emergencyContacts, setEmergencyContacts] = useState<any[]>([]);
 
     // Mock Dashboard Data
     const [patients] = useState([
@@ -38,28 +39,34 @@ const DoctorDashboard: React.FC = () => {
     const [alerts, setAlerts] = useState<{ id: number; msg: string; time: string }[]>([]);
 
     useEffect(() => {
-        // Simulate incoming alerts
         const timer = setTimeout(() => {
             setAlerts(prev => [{ id: Date.now(), msg: 'CRITICAL ALERT: John Doe - BPM > 140', time: new Date().toLocaleTimeString() }, ...prev]);
         }, 2000);
         return () => clearTimeout(timer);
     }, []);
 
-    // Fetch Patient Logic
     const fetchPatientData = async (id: string) => {
         setLoadingProfile(true);
         try {
-            // In a real app, you'd likely fetch User profile AND Medical Record
-            // For now, let's assume the QR code gives us the ID
-            const res = await fetch(`/api/medical/user/${id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/medical/user/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
 
             if (data.success) {
                 setMedicalRecord(data.data);
-                // Mock user details since medical record might not have name if separate
-                setCurrentPatient({ id, name: "Verified Patient", email: "patient@example.com" });
+                try {
+                    const famRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/family/user/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const famData = await famRes.json();
+                    if (famData.success) {
+                        setEmergencyContacts(famData.family);
+                    }
+                } catch (e) {
+                    console.error("Family fetch error", e);
+                }
+                setCurrentPatient({ id, name: data.data.name || "Verified Patient", email: data.data.email });
                 setView('profile');
             } else {
                 alert('Patient record not found');
@@ -75,34 +82,20 @@ const DoctorDashboard: React.FC = () => {
 
     const handleScan = (result: any) => {
         if (result) {
+            const raw = result[0]?.rawValue;
+            if (!raw) return;
+            let id = raw;
             try {
-                // Expecting JSON from our QR code: { id, name ... }
-                // or just a raw ID string
-                const raw = result[0]?.rawValue;
-                if (!raw) return;
-
-                let id = raw;
-                try {
-                    const parsed = JSON.parse(raw);
-                    if (parsed.id) id = parsed.id;
-                } catch (e) { /* Not JSON, treat as ID string */ }
-
-                setScannedId(id);
-                fetchPatientData(id);
-            } catch (e) {
-                console.error("Scan Error", e);
-            }
+                const parsed = JSON.parse(raw);
+                if (parsed.id) id = parsed.id;
+            } catch (e) { }
+            setScannedId(id);
+            fetchPatientData(id);
         }
     };
 
-    const handleSaveRecord = async () => {
-        // Logic to save updated record
-        alert("Record Update Simulation: Success. Changes synced to Medical Vault.");
-    };
-
     return (
-        <div className="min-h-screen bg-navy-deep bg-neural-grid p-6 text-slate-200">
-
+        <div className="min-h-screen bg-[#020617] p-6 text-slate-200">
             {/* Command Header */}
             <header className="flex justify-between items-center mb-6 glass-nav p-4 rounded-xl border-t-2 border-cyan-neon">
                 <div className="flex items-center gap-4">
@@ -130,17 +123,13 @@ const DoctorDashboard: React.FC = () => {
                 </div>
             </header>
 
-            {/* MAIN CONTENT AREA */}
             <div className="h-[calc(100vh-140px)] relative">
-
-                {/* VIEW: DASHBOARD */}
                 {view === 'dashboard' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-                        {/* Map */}
                         <div className="lg:col-span-2 glass-panel p-1 rounded-xl overflow-hidden border border-cyan-neon/30 relative">
                             <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: '100%', width: '100%', background: '#020617' }}>
                                 <TileLayer
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                                 />
                                 {patients.map(p => (
@@ -155,18 +144,16 @@ const DoctorDashboard: React.FC = () => {
                                 ))}
                             </MapContainer>
                         </div>
-
-                        {/* Feed */}
                         <div className="flex flex-col gap-6">
                             <div className="glass-panel p-4 flex-1">
-                                <h3 className="text-sm font-bold text-alert-red flex items-center gap-2 mb-4 uppercase tracking-wider">
+                                <h3 className="text-sm font-bold text-red-500 flex items-center gap-2 mb-4 uppercase tracking-wider">
                                     <AlertTriangle className="w-4 h-4 animate-bounce" /> Critical Feed
                                 </h3>
                                 <div className="space-y-3">
                                     {alerts.map(alert => (
-                                        <div key={alert.id} className="p-3 bg-alert-red/10 border-l-4 border-alert-red rounded-r">
+                                        <div key={alert.id} className="p-3 bg-red-500/10 border-l-4 border-red-500 rounded-r">
                                             <div className="text-xs font-mono text-slate-400">{alert.time}</div>
-                                            <div className="text-sm font-bold text-white">{alert.msg}</div>
+                                            <div className="text-sm font-bold text-white uppercase tracking-tight italic">{alert.msg}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -175,11 +162,9 @@ const DoctorDashboard: React.FC = () => {
                     </div>
                 )}
 
-                {/* VIEW: SCANNER */}
                 {view === 'scanner' && (
                     <div className="flex flex-col items-center justify-center h-full glass-panel p-10 animate-in zoom-in-95">
                         <h2 className="text-3xl font-black text-white mb-8 uppercase tracking-widest">Identify Patient</h2>
-
                         <div className="w-full max-w-md aspect-square bg-black rounded-3xl overflow-hidden border-2 border-cyan-neon relative shadow-neon-cyan">
                             {activeScan && (
                                 <Scanner
@@ -197,12 +182,11 @@ const DoctorDashboard: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-
                         <div className="mt-8 flex gap-4 w-full max-w-md">
                             <input
                                 type="text"
                                 placeholder="Manual Patient ID Entry"
-                                className="flex-1 bg-navy-light border border-glass-border rounded-xl px-4 py-3 text-white focus:border-cyan-neon outline-none"
+                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-cyan-neon outline-none"
                                 value={scannedId}
                                 onChange={(e) => setScannedId(e.target.value)}
                             />
@@ -216,7 +200,6 @@ const DoctorDashboard: React.FC = () => {
                     </div>
                 )}
 
-                {/* VIEW: PATIENT PROFILE */}
                 {loadingProfile ? (
                     <div className="flex items-center justify-center h-full text-cyan-neon font-mono animate-pulse">
                         ACCESSING DEEP STORAGE...
@@ -229,66 +212,71 @@ const DoctorDashboard: React.FC = () => {
                                     <Stethoscope size={40} />
                                 </div>
                                 <div>
-                                    <h2 className="text-4xl font-black text-white uppercase italic">{currentPatient?.name || 'Unknown Patient'}</h2>
-                                    <p className="text-cyan-neon font-mono mt-1">ID: {currentPatient?.id}</p>
-                                    <div className="flex gap-2 mt-3">
-                                        <span className="px-3 py-1 bg-alert-red/20 text-alert-red rounded text-xs font-bold uppercase border border-alert-red/30">Cardiac Risk: High</span>
-                                        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-bold uppercase border border-blue-500/30">Diabetic</span>
-                                    </div>
+                                    <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">{currentPatient?.name}</h2>
+                                    <p className="text-cyan-neon font-mono mt-2 tracking-widest text-xs opacity-50">ID: {currentPatient?.id}</p>
                                 </div>
                             </div>
-                            <button onClick={handleSaveRecord} className="bg-success-green text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-success-green/80">
-                                <Save size={18} /> Update Record
+                            <button onClick={() => setView('dashboard')} className="p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all">
+                                <X size={24} />
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-6">
-                                <div className="bg-navy-light/50 p-6 rounded-2xl border border-white/5">
-                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Core Vitals</h3>
+                                <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Core Medical Data</h3>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] text-slate-500 block mb-1">Blood Type</label>
-                                            <select
-                                                className="w-full bg-navy-deep border border-glass-border rounded-lg p-3 text-white font-bold"
-                                                defaultValue={medicalRecord.bloodType}
-                                            >
-                                                <option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
-                                            </select>
+                                        <div className="p-4 bg-black/40 rounded-xl border border-white/5">
+                                            <label className="text-[10px] text-cyan-neon/50 block mb-1 uppercase font-black">Blood Type</label>
+                                            <p className="text-xl font-black text-white">{medicalRecord.bloodType}</p>
                                         </div>
-                                        <div>
-                                            <label className="text-[10px] text-slate-500 block mb-1">Weight (kg)</label>
-                                            <input type="text" defaultValue={medicalRecord.weight} className="w-full bg-navy-deep border border-glass-border rounded-lg p-3 text-white font-bold" />
+                                        <div className="p-4 bg-black/40 rounded-xl border border-white/5">
+                                            <label className="text-[10px] text-cyan-neon/50 block mb-1 uppercase font-black">Weight</label>
+                                            <p className="text-xl font-black text-white">{medicalRecord.weight} kg</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-navy-light/50 p-6 rounded-2xl border border-white/5">
-                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Allergies</h3>
-                                    <div className="flex flex-wrap gap-2 mb-4">
+                                <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Known Allergies</h3>
+                                    <div className="flex flex-wrap gap-2">
                                         {medicalRecord.allergies.map((a, i) => (
-                                            <span key={i} className="bg-warning-amber/10 text-warning-amber px-3 py-1 rounded-lg border border-warning-amber/20 flex items-center gap-2">
-                                                {a} <button className="hover:text-white"><X size={12} /></button>
+                                            <span key={i} className="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl border border-red-500/20 text-xs font-black uppercase italic">
+                                                {a}
                                             </span>
                                         ))}
                                     </div>
-                                    <input type="text" placeholder="+ Add Allergy" className="w-full bg-navy-deep border border-glass-border rounded-lg p-3 text-white text-sm" />
                                 </div>
                             </div>
 
                             <div className="space-y-6">
-                                <div className="bg-navy-light/50 p-6 rounded-2xl border border-white/5">
-                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Current Medications</h3>
+                                <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+                                    <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Emergency Family Contacts</h3>
                                     <div className="space-y-3">
-                                        {medicalRecord.medications.map((m, i) => (
-                                            <div key={i} className="flex gap-3">
-                                                <input type="text" defaultValue={m.name} className="flex-1 bg-navy-deep border border-glass-border rounded-lg p-3 text-white text-sm font-bold" />
-                                                <input type="text" defaultValue={m.dosage} className="w-24 bg-navy-deep border border-glass-border rounded-lg p-3 text-white text-sm" />
+                                        {emergencyContacts.length === 0 ? (
+                                            <p className="text-[10px] text-slate-500 uppercase italic">No linked guardians detected</p>
+                                        ) : emergencyContacts.map((member: any) => (
+                                            <div key={member._id} className="bg-black/40 border border-emerald-500/20 rounded-2xl p-5 flex justify-between items-center shadow-2xl">
+                                                <div>
+                                                    <p className="text-white font-black text-sm uppercase italic tracking-tighter">{member.familyMemberId.name}</p>
+                                                    <p className="text-[9px] text-emerald-500 uppercase font-black tracking-[0.2em] mt-1">{member.relationship}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={`tel:${member.familyMemberId.phoneNumber}`}
+                                                        className="p-3 bg-emerald-500/20 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-black transition-all"
+                                                    >
+                                                        <Phone size={16} />
+                                                    </a>
+                                                    <a
+                                                        href={`sms:${member.familyMemberId.phoneNumber}`}
+                                                        className="p-3 bg-cyan-500/20 text-cyan-neon rounded-xl hover:bg-cyan-neon hover:text-black transition-all"
+                                                    >
+                                                        <MessageCircle size={16} />
+                                                    </a>
+                                                </div>
                                             </div>
                                         ))}
-                                        <button className="w-full py-3 border border-dashed border-white/20 text-slate-400 rounded-lg hover:border-cyan-neon hover:text-cyan-neon transition-colors text-sm font-bold">
-                                            + Add Medication
-                                        </button>
                                     </div>
                                 </div>
                             </div>
