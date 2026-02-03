@@ -1,8 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
+import path from 'path';
+
 import express, { Application } from 'express';
 import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import compression from 'compression';
 import { connectDB } from './config/db';
 import authRoutes from './routes/authRoutes';
@@ -16,7 +19,6 @@ import postRoutes from './routes/postRoutes';
 import userRoutes from './routes/userRoutes';
 import { setupSocketHandlers } from './socketHandlers';
 import connectMongoDB from './config/mongo';
-dotenv.config();
 
 const app: Application = express();
 
@@ -70,6 +72,9 @@ setupSocketHandlers(io);
 
 // Make io accessible to routes
 app.set('io', io);
+
+// Serve Static Uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Server Start
 httpServer.listen(PORT, () => {
