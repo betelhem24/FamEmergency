@@ -8,6 +8,7 @@ interface User {
     medicalLicense?: string;
     bloodType?: string;
     allergies?: string[];
+    theme?: 'dark' | 'light' | 'blue';
 }
 
 interface AuthContextType {
