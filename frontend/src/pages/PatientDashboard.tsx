@@ -131,21 +131,21 @@ const PatientDashboard: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* Emergency Button */}
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={triggerEmergency}
-                        className={`w-full p-8 rounded-xl border-2 flex flex-col items-center justify-center gap-4 transition-all duration-300 ${isEmergency
-                            ? 'bg-alert-red border-alert-red shadow-neon-red'
-                            : 'bg-alert-dark/20 border-alert-red/50 hover:bg-alert-red/20'
-                            }`}
+                    {/* Health Insights Card */}
+                    <motion.div
+                        initial={{ x: 50, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="glass-panel p-6 border-l-4 border-emerald-500"
                     >
-                        <AlertCircle className={`w-12 h-12 ${isEmergency ? 'text-white animate-spin' : 'text-alert-red'}`} />
-                        <span className="text-xl font-black tracking-widest text-alert-red">
-                            {isEmergency ? 'SIGNAL TRANSMITTING...' : 'INITIATE SOS'}
-                        </span>
-                    </motion.button>
+                        <h3 className="text-sm font-mono text-emerald-500 mb-4 uppercase tracking-widest">Neural Health Insight</h3>
+                        <p className="text-[10px] text-slate-400 leading-relaxed font-bold uppercase tracking-wide">
+                            Heart rhythm stable. SpO2 levels optimal. System suggests maintaining current hydration levels for peak performance.
+                        </p>
+                        <div className="mt-6 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                            <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">AI Status: Analyzing...</span>
+                        </div>
+                    </motion.div>
                 </div>
 
             </div>
