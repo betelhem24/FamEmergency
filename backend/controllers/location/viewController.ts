@@ -7,7 +7,7 @@ export const getFamilyLocations = async (req: Request, res: Response) => {
         const userId = (req as any).user.id;
         const family = await FamilyMember.find({
             userId, status: 'ACCEPTED', 'permissions.canViewLocation': true
-        }).populate('familyMemberId', 'name email');
+        }).populate('familyMemberId', 'name email phoneNumber');
 
         const locations = await Promise.all(family.map(async (f) => {
             const loc = await Location.findOne({ userId: f.familyMemberId })
