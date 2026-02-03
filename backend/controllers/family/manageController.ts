@@ -13,6 +13,18 @@ export const getFamilyMembers = async (req: Request, res: Response) => {
     }
 };
 
+export const getFamilyByUser = async (req: Request, res: Response) => {
+    try {
+        const { userId } = req.params;
+        const family = await FamilyMember.find({ userId, status: 'ACCEPTED' })
+            .populate('familyMemberId', 'name email role');
+
+        res.json({ success: true, family });
+    } catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 export const removeFamilyMember = async (req: Request, res: Response) => {
     try {
         const { memberId } = req.params;
