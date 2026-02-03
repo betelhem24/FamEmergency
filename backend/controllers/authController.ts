@@ -1,16 +1,21 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import prisma from '../config/db'; // Using the central db config
 
 import MongoUser from '../models/User'; // Import MongoDB User model
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role } = req.body;
-    const normalizedEmail = email.toLowerCase();
+    console.log('[AUTH_REGISTER] Request body:', req.body);
+    const { name, email, password, role, medicalLicense, department } = req.body;
+    const trimmedName = name?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
+    const trimmedPassword = password?.trim();
+    const normalizedRole = role?.trim().toUpperCase() || 'PATIENT';
 
-    // REQUIREMENT: Check live database (Neon)
+    // Check if user already exists in Neon
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail }
     });
@@ -19,32 +24,28 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Identity Node already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // REQUIREMENT: Doctor MUST provide medical license
+    if (normalizedRole === 'DOCTOR' && !medicalLicense) {
+      return res.status(400).json({ message: 'Medical License Number is REQUIRED for Doctor registration' });
+    }
 
-    // REQUIREMENT: Every new user must be visible in the Neon console
-    const userCount = await prisma.user.count();
-    const newUserRole = role || 'PATIENT';
-    const neonId = `user_${Date.now()}_${userCount}`;
-    console.log('DEBUG: Creating Neon User with ID:', neonId);
-    console.log('DEBUG: Create Data:', JSON.stringify({
-      id: neonId,
-      name,
-      email: normalizedEmail,
-      role: newUserRole
-    }, null, 2));
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const sharedId = crypto.randomUUID();
 
     // 1. Save to Neon PostgreSQL
     const user = await prisma.user.create({
       data: {
-        id: neonId,
-        name,
+        id: sharedId,
+        name: trimmedName,
         email: normalizedEmail,
         password: hashedPassword,
-        role: newUserRole,
-        medicalRecord: newUserRole === 'PATIENT' ? {
+        role: normalizedRole,
+        medicalLicense: normalizedRole === 'DOCTOR' ? medicalLicense : undefined,
+        department: normalizedRole === 'DOCTOR' ? department : undefined,
+        medicalRecord: normalizedRole === 'PATIENT' ? {
           create: {
             id: `mr_${Date.now()}`,
-            fullName: name,
+            fullName: trimmedName,
             allergies: [],
             conditions: []
           }
@@ -54,21 +55,22 @@ export const register = async (req: Request, res: Response) => {
 
     // 2. Save to MongoDB Atlas (Dual Write)
     try {
-      // Check if user exists in Mongo to match behavior (though unlikely if not in Postgres)
       const existingMongoUser = await MongoUser.findOne({ email: normalizedEmail });
       if (!existingMongoUser) {
         const mongoUser = new MongoUser({
-          name,
+          _id: sharedId,
+          name: trimmedName,
           email: normalizedEmail,
           password: hashedPassword,
-          role: newUserRole === 'PATIENT' ? 'patient' : 'doctor'
+          role: normalizedRole.toLowerCase() as 'patient' | 'doctor',
+          medicalLicense: normalizedRole === 'DOCTOR' ? medicalLicense : undefined,
+          department: normalizedRole === 'DOCTOR' ? department : undefined,
         });
         await mongoUser.save();
-        console.log(`[SUCCESS] User synced to MongoDB: ${normalizedEmail}`);
+        console.log(`[SUCCESS] User synced to MongoDB with shared ID: ${sharedId}`);
       }
     } catch (mongoError) {
       console.error('MongoDB Sync Warning:', mongoError);
-      // We don't fail the request if Mongo fails, but we log it.
     }
 
     const token = jwt.sign(
@@ -79,7 +81,7 @@ export const register = async (req: Request, res: Response) => {
 
     res.status(201).json({
       token,
-      user: { id: user.id, name, email: normalizedEmail, role: user.role }
+      user: { id: user.id, name: trimmedName, email: normalizedEmail, role: user.role, theme: user.theme }
     });
 
   } catch (error: any) {
@@ -94,18 +96,26 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email?.trim().toLowerCase();
+    const trimmedPassword = password?.trim();
+
+    console.log(`[LOGIN_DEBUG] Attempting login for: ${normalizedEmail}`);
+    // console.log('[LOGIN_DEBUG] Request body:', req.body); // Careful with logging password!
 
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail }
     });
 
     if (!user) {
+      console.log(`[LOGIN_DEBUG] User not found in Prisma: ${normalizedEmail}`);
       return res.status(400).json({ message: 'Invalid identity credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(trimmedPassword, user.password);
+    console.log(`[LOGIN_DEBUG] Password match result: ${isMatch}`);
+
     if (!isMatch) {
+      console.log(`[LOGIN_DEBUG] Password mismatch for user: ${normalizedEmail}`);
       return res.status(400).json({ message: 'Invalid identity credentials' });
     }
 
@@ -117,7 +127,7 @@ export const login = async (req: Request, res: Response) => {
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, theme: user.theme }
     });
   } catch (error: any) {
     console.error('Login Error:', error);
