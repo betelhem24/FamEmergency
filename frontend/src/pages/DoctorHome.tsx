@@ -1,113 +1,249 @@
-import React from 'react';
-import { ScanLine, MapPin, BarChart3, Users, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { ScanLine, BarChart3, Users, ShieldAlert, X, AlertCircle, Phone, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BarChart, Bar, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useSocket } from '../context/SocketContext';
+import SecureChat from '../components/SecureChat';
+import { EmergencyMap } from '../components/Map/EmergencyMap';
 
 const DoctorHome: React.FC = () => {
     const { user } = useAuth();
+    const { socket } = useSocket();
     const navigate = useNavigate();
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [chatOpen, setChatOpen] = useState(false);
+    const [activeChatRecipient, setActiveChatRecipient] = useState({ id: '', name: '' });
     const doctorName = user?.name || "Doctor";
+    const [patients, setPatients] = useState<any[]>([]);
+    const [loadingPatients, setLoadingPatients] = useState(false);
 
-    const chartData = [
-        { name: 'Mon', count: 12 },
-        { name: 'Tue', count: 19 },
-        { name: 'Wed', count: 15 },
-        { name: 'Thu', count: 22 },
-        { name: 'Fri', count: 30 },
-        { name: 'Sat', count: 10 },
-        { name: 'Sun', count: 8 },
-    ];
+    useEffect(() => {
+        fetchPatients();
+    }, []);
 
-    const COLORS = ['#06b6d4', '#10b981', '#06b6d4', '#10b981', '#06b6d4', '#10b981', '#06b6d4'];
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.emit('doctor:join');
+
+        socket.on('emergency:alert', (data) => {
+            console.log('[DOCTOR] Received alert:', data);
+            setAlerts(prev => {
+                const exists = prev.find(a => a.emergencyId === data.emergencyId);
+                if (exists) return prev;
+                return [data, ...prev];
+            });
+        });
+
+        socket.on('emergency:cancelled', (data) => {
+            console.log('[DOCTOR] Alert cancelled:', data);
+            setAlerts(prev => prev.filter(a => a.emergencyId !== data.emergencyId));
+        });
+
+        return () => {
+            socket.off('emergency:alert');
+            socket.off('emergency:cancelled');
+        };
+    }, [socket]);
+
+    const handleResolveAlert = (id: string) => {
+        setAlerts(prev => prev.filter((a: any) => a.emergencyId !== id));
+    };
+
+    const fetchPatients = async () => {
+        setLoadingPatients(true);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/doctor/patients`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setPatients(data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch patients', error);
+        } finally {
+            setLoadingPatients(false);
+        }
+    };
 
     return (
-        <div className="space-y-6 pt-4 pb-20 px-2 overflow-y-auto max-h-[90vh]">
+        <div className="space-y-6 pt-4 pb-24 px-4 overflow-y-auto h-full no-scrollbar bg-[var(--bg-primary)]">
             {/* Header */}
-            <div className="px-2">
-                <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">Dr. {doctorName.split(' ')[0]}</h1>
-                <p className="text-life-cyan/80 text-[10px] font-black tracking-[0.4em] uppercase">Emergency Command Center</p>
-            </div>
+            <header className="flex justify-between items-center mb-2">
+                <div>
+                    <h1 className="text-3xl font-black text-[var(--text-primary)] italic tracking-tighter uppercase underline decoration-[var(--accent-primary)] decoration-4 underline-offset-8">
+                        Dr. {doctorName.split(' ')[0]}
+                    </h1>
+                    <p className="text-[var(--accent-primary)]/60 text-[9px] font-black tracking-[0.4em] uppercase mt-3 italic">Emergency Command Center</p>
+                </div>
+                <div className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)]"></span>
+                </div>
+            </header>
 
-            {/* Map Placeholder with Circles */}
-            <div className="px-2">
-                <div className="relative h-56 glass-card rounded-[2.5rem] overflow-hidden border border-white/20">
-                    <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
-                        {/* Fake map drawing */}
-                        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-life-cyan/40 via-transparent to-transparent"></div>
-                        <div className="w-full h-full bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/0,0,1,0/400x400?access_token=none')] bg-cover opacity-40"></div>
+            {/* Active Alerts Feed */}
+            <AnimatePresence>
+                {alerts.length > 0 && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="space-y-4 mb-6"
+                    >
+                        {alerts.map((alert) => (
+                            <motion.div
+                                key={alert.emergencyId}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                className="bg-red-500/10 border border-red-500/30 rounded-3xl p-6 relative overflow-hidden group"
+                            >
+                                <div className="absolute top-0 right-0 p-4">
+                                    <button onClick={() => handleResolveAlert(alert.emergencyId)} className="text-red-500/40 hover:text-red-500 transition-colors">
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="bg-red-500 p-3 rounded-2xl animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+                                        <ShieldAlert size={24} className="text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Live {alert.type} Alert</span>
+                                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
+                                        </div>
+                                        <h4 className="text-xl font-black text-white italic uppercase tracking-tighter leading-none mb-2">
+                                            {alert.userName || 'Unknown Patient'}
+                                        </h4>
+                                        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-red-200/60">
+                                            <span className="flex items-center gap-1"><AlertCircle size={10} /> {alert.severity}</span>
+                                            <span className="flex items-center gap-1 leading-none italic underline">Map Tracking Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setActiveChatRecipient({ id: alert.userId, name: alert.userName });
+                                        setChatOpen(true);
+                                    }}
+                                    className="w-full mt-4 py-3 bg-white/5 border border-white/10 text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-xl active:scale-[0.98] transition-all"
+                                >
+                                    Open Secure Chat
+                                </button>
+                                <button
+                                    onClick={() => navigate('/doctor/scan')} // In real app, navigate to specific tracking page
+                                    className="w-full mt-2 py-3 bg-red-500 text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-xl active:scale-[0.98] transition-all"
+                                >
+                                    Respond to Emergency
+                                </button>
 
-                        {/* Family Circles */}
-                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 4 }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_20px_#10b981]"></motion.div>
-                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 3, delay: 1 }} className="absolute top-1/3 left-1/4 w-3 h-3 bg-life-cyan rounded-full shadow-[0_0_15px_#06b6d4]"></motion.div>
-                        <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2.5, delay: 0.5 }} className="absolute bottom-1/4 right-1/3 w-2 h-2 bg-life-cyan rounded-full shadow-[0_0_10px_#06b6d4]"></motion.div>
-                    </div>
-                    <div className="absolute bottom-4 left-4 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
-                        <MapPin size={12} className="text-emerald-400" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Active Family Radar</span>
+                                {alert.familyContacts && alert.familyContacts.length > 0 && (
+                                    <div className="mt-6 pt-6 border-t border-red-500/20 space-y-3">
+                                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-red-500/60">Emergency Family Guardians</p>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {alert.familyContacts.map((contact: any, idx: number) => (
+                                                <div key={idx} className="flex items-center justify-between bg-white/[0.03] p-3 rounded-2xl border border-white/5">
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-white uppercase">{contact.name}</p>
+                                                        <p className="text-[8px] text-slate-500 uppercase font-bold">{contact.relationship}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <a href={`tel:${contact.phone}`} className="p-2 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                                            <Phone size={14} />
+                                                        </a>
+                                                        <a href={`sms:${contact.phone}`} className="p-2 bg-white/5 text-white/40 rounded-xl hover:bg-white/10 transition-all">
+                                                            <MessageCircle size={14} />
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Live Map Tracking Hub - Full Width Focus */}
+            <div className="relative h-[450px] w-full rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl">
+                <EmergencyMap activeAlerts={alerts} />
+
+                {/* Overlay Status */}
+                <div className="absolute top-6 left-6 z-[40]">
+                    <div className="glass-card px-4 py-2 flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white">Coverage: Global Sector-8</span>
                     </div>
                 </div>
             </div>
 
-            {/* Main Action Scanner */}
-            <div className="px-2">
-                <button
-                    onClick={() => navigate('/doctor/scan')}
-                    className="w-full relative group h-40 overflow-hidden rounded-[3rem]"
-                >
-                    <div className="absolute inset-0 bg-life-cyan/20 group-hover:bg-life-cyan/30 transition-colors"></div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center border-2 border-life-cyan/40 group-hover:border-life-cyan/60 rounded-[3rem] shadow-[0_15px_30px_rgba(6,182,212,0.2)]">
-                        <div className="p-4 bg-life-cyan rounded-2xl shadow-lg mb-3">
-                            <ScanLine size={32} className="text-white" />
+            {/* Patient Directory Section */}
+            <div className="glass-card p-8 rounded-[3rem] border-white/5">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-500">
+                            <Users size={24} />
                         </div>
-                        <h2 className="text-xl font-black text-white uppercase tracking-tighter italic">Scan for Medical Info</h2>
+                        <div>
+                            <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Medical Support Network</h4>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Registry: {patients.length} Registered Patients</p>
+                        </div>
                     </div>
-                    <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-transparent to-life-cyan/10 border-b-2 border-life-cyan/40 animate-scan pointer-events-none"></div>
-                </button>
-            </div>
+                    <button onClick={fetchPatients} className="p-2 hover:bg-white/5 rounded-xl transition-all">
+                        <ScanLine size={18} className="text-slate-500" />
+                    </button>
+                </div>
 
-            {/* Chart Widget */}
-            <div className="px-2">
-                <div className="glass-card p-6 rounded-[2.5rem] border border-white/10 shadow-xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                            <BarChart3 size={14} className="text-life-cyan" /> Patients Scanned (Weekly)
-                        </h3>
-                        <span className="text-emerald-500 text-[10px] font-black">+14%</span>
-                    </div>
-                    <div className="h-40 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={chartData}>
-                                <Tooltip
-                                    contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                                    itemStyle={{ color: '#06b6d4', fontWeight: 'bold', fontSize: '10px' }}
-                                />
-                                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                                    {chartData.map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar">
+                    {loadingPatients ? (
+                        <div className="py-10 text-center">
+                            <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Scanning Registry...</p>
+                        </div>
+                    ) : (
+                        patients.map((patient) => (
+                            <div key={patient.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 group hover:bg-white/[0.06] transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-white/5">
+                                        <span className="text-xs font-black text-white uppercase">{patient.name.charAt(0)}</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase tracking-tight">{patient.name}</p>
+                                        <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{patient.email}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => navigate(`/doctor/profile/${patient.id || patient._id}`)}
+                                        className="px-4 py-2 bg-white/5 text-white/60 rounded-xl text-[8px] font-black uppercase tracking-widest hover:bg-[var(--accent-primary)] hover:text-black transition-all"
+                                    >
+                                        Profile
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setActiveChatRecipient({ id: patient.id || patient._id, name: patient.name });
+                                            setChatOpen(true);
+                                        }}
+                                        className="px-4 py-2 bg-indigo-500/10 text-indigo-400 rounded-xl text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all"
+                                    >
+                                        Chat
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
-
-            {/* Quick Action Bottom Bar */}
-            <div className="grid grid-cols-2 gap-4 px-2">
-                <button
-                    onClick={() => navigate('/doctor/profile')}
-                    className="glass-panel p-4 rounded-[2rem] border border-white/10 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-all border-l-4 border-l-life-cyan"
-                >
-                    <Users className="text-life-cyan mb-2" size={20} />
-                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Profiles</p>
-                </button>
-                <button className="glass-panel p-4 rounded-[2rem] border border-white/10 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-all">
-                    <Plus className="text-emerald-500 mb-2" size={20} />
-                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">New Entry</p>
-                </button>
-            </div>
+            <SecureChat
+                isOpen={chatOpen}
+                onClose={() => setChatOpen(false)}
+                recipientId={activeChatRecipient.id}
+                recipientName={activeChatRecipient.name}
+            />
         </div>
     );
 };
