@@ -18,6 +18,11 @@ export interface IEmergency extends Document {
     triggeredAt: Date;
     resolvedAt?: Date;
     notes?: string;
+    familyContacts?: Array<{
+        name: string;
+        phone: string;
+        relationship: string;
+    }>;
 }
 
 const EmergencySchema: Schema = new Schema({
@@ -52,7 +57,12 @@ const EmergencySchema: Schema = new Schema({
     }],
     triggeredAt: { type: Date, default: Date.now },
     resolvedAt: Date,
-    notes: String
+    notes: String,
+    familyContacts: [{
+        name: String,
+        phone: String,
+        relationship: String
+    }]
 }, { timestamps: true });
 
 export default mongoose.model<IEmergency>('Emergency', EmergencySchema);
