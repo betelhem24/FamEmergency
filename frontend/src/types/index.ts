@@ -22,6 +22,9 @@ export interface EmergencyContact {
 }
 
 export interface MedicalProfile {
+    fullName?: string;
+    age?: string;
+    gender?: string;
     bloodType: string;
     height: string;
     weight: string;
@@ -33,4 +36,10 @@ export interface MedicalProfile {
         frequency: string;
     }[];
     contacts: EmergencyContact[];
+    images?: {
+        id: string;
+        url: string;
+        title: string;
+        uploadedAt: string;
+    }[];
 }
