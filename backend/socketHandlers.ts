@@ -22,7 +22,7 @@ export const setupSocketHandlers = (io: SocketServer) => {
                 token,
                 process.env.JWT_SECRET || ''
             ) as any;
-            socket.userId = decoded.id;
+            socket.userId = decoded.userId;
             next();
         } catch (err) {
             console.log('[SOCKET] Connection rejected: Invalid token');
@@ -31,7 +31,7 @@ export const setupSocketHandlers = (io: SocketServer) => {
     });
 
     io.on('connection', (socket: AuthSocket) => {
-        console.log(`User connected: ${socket.userId}`);
+        console.log(`[SOCKET] User connected: ${socket.userId} (ID: ${socket.id})`);
 
         // Join user's personal room
         socket.join(`user:${socket.userId}`);
@@ -166,7 +166,7 @@ export const setupSocketHandlers = (io: SocketServer) => {
         });
 
         socket.on('disconnect', () => {
-            console.log(`User disconnected: ${socket.userId}`);
+            console.log(`[SOCKET] User disconnected: ${socket.userId} (ID: ${socket.id})`);
         });
     });
 };
