@@ -1,13 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, Activity, GraduationCap, Map, FileText, User, ScanLine, BarChart3, Users } from 'lucide-react';
+import { Shield, Activity, GraduationCap, Map, FileText, ScanLine, BarChart3, Users } from 'lucide-react';
+import { useEmergency } from '../context/EmergencyContext';
 
 interface BottomNavProps {
     role: 'patient' | 'doctor';
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ role }) => {
+    const { sosTriggered } = useEmergency();
+
+    if (sosTriggered) return null;
+
     const patientLinks = [
         { to: '/', icon: Shield, label: 'Home' },
         { to: '/timer', icon: Activity, label: 'Timer' },
@@ -18,9 +23,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ role }) => {
     ];
 
     const doctorLinks = [
-        { to: '/doctor', icon: ScanLine, label: 'Scan' },
-        { to: '/doctor/analytics', icon: BarChart3, label: 'Data' },
-        { to: '/doctor/profile', icon: User, label: 'Records' },
+        { to: '/doctor', icon: Map, label: 'Dispatch' },
+        { to: '/doctor/scan', icon: ScanLine, label: 'Scan' },
+        { to: '/doctor/patients', icon: Users, label: 'Registry' },
+        { to: '/doctor/community', icon: Users, label: 'Social' },
+        { to: '/doctor/analytics', icon: BarChart3, label: 'Analytics' },
     ];
 
     const links = role === 'patient' ? patientLinks : doctorLinks;
