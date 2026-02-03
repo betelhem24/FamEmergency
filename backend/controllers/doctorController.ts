@@ -53,3 +53,19 @@ export const getPatients = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getDoctors = async (req: Request, res: Response) => {
+    try {
+        const doctors = await User.find({ role: 'doctor' }).select('-password');
+        res.status(200).json({
+            success: true,
+            data: doctors
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch doctors',
+            error: error.message
+        });
+    }
+};
