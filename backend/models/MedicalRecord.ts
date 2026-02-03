@@ -24,6 +24,12 @@ export interface IMedicalRecord extends Document {
         phone: string;
         relationship: string;
     }[];
+    images?: {
+        id: string;
+        url: string;
+        title: string;
+        uploadedAt: string;
+    }[];
     createdAt: Date;
 }
 
@@ -49,11 +55,17 @@ const medicalRecordSchema = new Schema<IMedicalRecord>({
         name: String,
         phone: String,
         relationship: String
+    }],
+    images: [{
+        id: String,
+        url: String,
+        title: String,
+        uploadedAt: { type: String, default: () => new Date().toISOString() }
     }]
 }, { timestamps: true });
 
 // Encryption Hook
-medicalRecordSchema.pre('save', function (next) {
+medicalRecordSchema.pre('save', function (next: any) {
     if (this.isModified('allergies')) {
         this.allergies = this.allergies.map(a => encrypt(a));
     }
