@@ -1,19 +1,32 @@
 import { Request, Response } from 'express';
 import Emergency from '../models/Emergency';
 import FamilyMember from '../models/FamilyMember';
+import EmergencyContact from '../models/EmergencyContact';
+import User from '../models/User';
 
 export const triggerEmergency = async (req: Request, res: Response) => {
     try {
         const { type, severity, location, notes } = req.body;
         const userId = (req as any).user.id;
 
+        const emergencyContacts = await EmergencyContact.find({ userId });
+        const familyContacts = emergencyContacts.map(c => ({
+            name: c.contactName,
+            phone: c.phoneNumber,
+            relationship: c.relationship
+        }));
+
+        const user = await User.findById(userId);
+
         const emergency = new Emergency({
             userId,
+            userName: user?.name,
             type: type || 'SOS',
             severity: severity || 'CRITICAL',
             location,
             notes,
-            status: 'ACTIVE'
+            status: 'ACTIVE',
+            familyContacts
         });
 
         await emergency.save();
