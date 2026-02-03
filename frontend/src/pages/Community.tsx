@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Send, MessageSquare, Heart, Activity, Share2, MoreHorizontal, MessageCircle } from 'lucide-react';
+import { Users, Send, MessageSquare, Heart, Activity, Share2, MoreHorizontal, MessageCircle, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import { useSocket } from '../context/SocketContext';
 
 const SOCKET_URL = 'http://localhost:5000';
 
@@ -12,11 +13,16 @@ const Community: React.FC = () => {
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(true);
     const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const { socket } = useSocket();
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/posts');
+                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
                 const data = await response.json();
                 setPosts(data);
                 setLoading(false);
@@ -28,29 +34,40 @@ const Community: React.FC = () => {
 
         fetchPosts();
 
-        const newSocket = io(SOCKET_URL);
+        if (socket) {
+            socket.on('post:new', (newPost: any) => {
+                setPosts(prev => [newPost, ...prev]);
+            });
 
-        newSocket.on('post:new', (newPost: any) => {
-            setPosts(prev => [newPost, ...prev]);
-        });
+            socket.on('post:updated', (updatedPost: any) => {
+                setPosts(prev => prev.map(p => p._id === updatedPost._id ? updatedPost : p));
+            });
 
-        newSocket.on('post:updated', (updatedPost: any) => {
-            setPosts(prev => prev.map(p => p._id === updatedPost._id ? updatedPost : p));
-        });
+            socket.on('post:deleted', (postId: string) => {
+                setPosts(prev => prev.filter(p => p._id !== postId));
+            });
+        }
 
         return () => {
-            newSocket.disconnect();
+            if (socket) {
+                socket.off('post:new');
+                socket.off('post:updated');
+                socket.off('post:deleted');
+            }
         };
-    }, []);
+    }, [socket]);
 
     const handleCreatePost = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!inputText.trim()) return;
 
         try {
-            await fetch('http://localhost:5000/api/posts', {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({
                     userId: user?.id,
                     userName: user?.name,
@@ -64,14 +81,53 @@ const Community: React.FC = () => {
     };
 
     const handleSupport = async (postId: string) => {
+        // Optimistic Update: Immediately toggle support in UI
+        setPosts(prev => prev.map(p => {
+            if (p._id !== postId) return p;
+            const isSupported = p.supports?.includes(user?.id);
+            const newSupports = isSupported
+                ? p.supports.filter((id: string) => id !== user?.id)
+                : [...(p.supports || []), user?.id];
+            return { ...p, supports: newSupports };
+        }));
+
         try {
-            await fetch(`http://localhost:5000/api/posts/${postId}/support`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/${postId}/support`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({ userId: user?.id }),
             });
         } catch (error) {
             console.error("Error supporting post:", error);
+            // Revert on error (optional, skipping for simplicity in this protocol phase)
+        }
+    };
+
+    const handleDeletePost = async (postId: string) => {
+        if (!window.confirm('Are you sure you want to delete this post?')) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            setPosts((prev: any[]) => prev.filter(p => p._id !== postId));
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        }
+    };
+
+    const handleDeleteComment = async (postId: string, commentId: string) => {
+        if (!window.confirm('Are you sure you want to delete this comment?')) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/${postId}/comment/${commentId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+        } catch (error) {
+            console.error("Error deleting comment:", error);
         }
     };
 
@@ -79,9 +135,12 @@ const Community: React.FC = () => {
         const text = commentTexts[postId];
         if (!text || !text.trim()) return;
         try {
-            await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/posts/${postId}/comment`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({
                     userId: user?.id,
                     userName: user?.name,
@@ -132,6 +191,18 @@ const Community: React.FC = () => {
                     </div>
                 </form>
 
+                {/* SEARCH BAR */}
+                <div className="glass-card p-4 rounded-[2rem] border-white/5 flex items-center gap-4">
+                    <Search className="text-[var(--text-secondary)] ml-2" size={20} />
+                    <input
+                        type="search"
+                        placeholder="Search community..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-transparent border-none text-white text-sm w-full focus:ring-0 outline-none font-bold placeholder:text-slate-600 uppercase tracking-wider"
+                    />
+                </div>
+
                 {/* Feed */}
                 <div className="space-y-8">
                     {loading ? (
@@ -139,95 +210,124 @@ const Community: React.FC = () => {
                             <Activity size={56} className="mx-auto mb-6 text-life-cyan" />
                             <p className="font-black uppercase tracking-[0.4em] text-xs">Syncing Neural Feed...</p>
                         </div>
-                    ) : posts.length === 0 ? (
+                    ) : posts
+                        .filter(post =>
+                            post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            post.userName?.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
+                        .length === 0 ? (
                         <div className="py-24 text-center opacity-20">
                             <MessageSquare size={56} className="mx-auto mb-6" />
-                            <p className="font-black uppercase tracking-[0.4em] text-xs">No active updates in sector</p>
+                            <p className="font-black uppercase tracking-[0.4em] text-xs">No matching updates</p>
                         </div>
                     ) : (
-                        posts.map((post) => (
-                            <motion.div
-                                key={post._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white/[0.03] rounded-[3.5rem] border border-white/5 overflow-hidden shadow-2xl"
-                            >
-                                <div className="p-10 space-y-10">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-5">
-                                            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-life-cyan/30 to-blue-600/30 flex items-center justify-center border border-white/10 shadow-2xl">
-                                                <span className="text-white font-black text-2xl uppercase">{post.userName?.[0] || '?'}</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-lg font-black text-white uppercase tracking-tighter leading-none">{post.userName}</p>
-                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2 bg-white/[0.05] w-fit px-2 py-1 rounded-lg">
-                                                    {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button className="text-slate-700 hover:text-white transition-colors p-2">
-                                            <MoreHorizontal size={28} />
-                                        </button>
-                                    </div>
-
-                                    {/* BUBBLE CONTENT - DEEP CONTRAST */}
-                                    <div className="text-[15px] text-slate-100 leading-relaxed font-bold bg-white/[0.02] p-10 rounded-[2.5rem] border border-white/[0.03] shadow-inner italic">
-                                        "{post.content}"
-                                    </div>
-
-                                    <div className="flex items-center gap-10 pt-2 px-2">
-                                        <button
-                                            onClick={() => handleSupport(post._id)}
-                                            className={`flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] transition-all ${post.supports?.includes(user?.id) ? 'text-red-500 scale-105' : 'text-slate-500 hover:text-white'}`}
-                                        >
-                                            <Heart size={22} fill={post.supports?.includes(user?.id) ? "currentColor" : "none"} />
-                                            {post.supports?.length || 0}
-                                        </button>
-                                        <div className="flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
-                                            <MessageCircle size={22} />
-                                            {post.comments?.length || 0}
-                                        </div>
-                                        <button className="flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-auto transition-colors hover:text-white">
-                                            <Share2 size={22} />
-                                        </button>
-                                    </div>
-
-                                    {/* Comments Section */}
-                                    {post.comments?.length > 0 && (
-                                        <div className="pt-10 border-t border-white/5 space-y-6">
-                                            {post.comments?.map((comment: any, idx: number) => (
-                                                <div key={idx} className="flex gap-5">
-                                                    <div className="w-10 h-10 rounded-2xl bg-white/[0.05] flex items-center justify-center text-[12px] font-black text-white/40 border border-white/5 shrink-0">
-                                                        {comment.userName?.[0]}
-                                                    </div>
-                                                    <div className="bg-white/[0.02] rounded-[1.8rem] px-8 py-5 flex-1 border border-white/[0.03]">
-                                                        <p className="text-[10px] font-black text-life-cyan uppercase tracking-widest mb-2">{comment.userName}</p>
-                                                        <p className="text-xs text-slate-300 font-bold leading-relaxed">{comment.text}</p>
-                                                    </div>
+                        posts
+                            .filter(post =>
+                                post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                post.userName?.toLowerCase().includes(searchQuery.toLowerCase())
+                            )
+                            .map((post) => (
+                                <motion.div
+                                    key={post._id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white/[0.03] rounded-[3.5rem] border border-white/5 overflow-hidden shadow-2xl"
+                                >
+                                    <div className="p-10 space-y-10">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-5">
+                                                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-life-cyan/30 to-blue-600/30 flex items-center justify-center border border-white/10 shadow-2xl">
+                                                    <span className="text-white font-black text-2xl uppercase">{post.userName?.[0] || '?'}</span>
                                                 </div>
-                                            ))}
+                                                <div>
+                                                    <p className="text-lg font-black text-white uppercase tracking-tighter leading-none">{post.userName}</p>
+                                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2 bg-white/[0.05] w-fit px-2 py-1 rounded-lg">
+                                                        {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {(post.userId === user?.id) && (
+                                                <button
+                                                    onClick={() => handleDeletePost(post._id)}
+                                                    className="text-red-500/50 hover:text-red-500 transition-colors p-2"
+                                                >
+                                                    <span className="text-[10px] font-black uppercase tracking-widest mr-2">Delete</span>
+                                                    <MoreHorizontal size={28} />
+                                                </button>
+                                            )}
+                                            {post.userId !== user?.id && (
+                                                <button className="text-slate-700 hover:text-white transition-colors p-2">
+                                                    <MoreHorizontal size={28} />
+                                                </button>
+                                            )}
                                         </div>
-                                    )}
 
-                                    {/* Add Comment Input */}
-                                    <div className="flex gap-4 pt-6">
-                                        <input
-                                            type="text"
-                                            value={commentTexts[post._id] || ''}
-                                            onChange={(e) => setCommentTexts(prev => ({ ...prev, [post._id]: e.target.value }))}
-                                            placeholder="Write a message of support..."
-                                            className="flex-1 bg-white/[0.03] border border-white/5 rounded-[2rem] px-8 py-5 text-sm text-white outline-none focus:border-life-cyan/30 focus:bg-white/[0.05] transition-all font-bold placeholder:text-slate-600"
-                                        />
-                                        <button
-                                            onClick={() => handleAddComment(post._id)}
-                                            className="bg-life-cyan text-white px-8 rounded-[1.5rem] hover:opacity-90 transition-all shadow-xl active:scale-95 flex items-center justify-center"
-                                        >
-                                            <Send size={20} />
-                                        </button>
+                                        {/* BUBBLE CONTENT - DEEP CONTRAST */}
+                                        <div className="text-[15px] text-slate-100 leading-relaxed font-bold bg-white/[0.02] p-10 rounded-[2.5rem] border border-white/[0.03] shadow-inner italic">
+                                            "{post.content}"
+                                        </div>
+
+                                        <div className="flex items-center gap-10 pt-2 px-2">
+                                            <button
+                                                onClick={() => handleSupport(post._id)}
+                                                className={`flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] transition-all ${post.supports?.includes(user?.id) ? 'text-red-500 scale-105' : 'text-slate-500 hover:text-white'}`}
+                                            >
+                                                <Heart size={22} fill={post.supports?.includes(user?.id) ? "currentColor" : "none"} />
+                                                {post.supports?.length || 0}
+                                            </button>
+                                            <div className="flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                                <MessageCircle size={22} />
+                                                {post.comments?.length || 0}
+                                            </div>
+                                            <button className="flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 ml-auto transition-colors hover:text-white">
+                                                <Share2 size={22} />
+                                            </button>
+                                        </div>
+
+                                        {/* Comments Section */}
+                                        {post.comments?.length > 0 && (
+                                            <div className="pt-10 border-t border-white/5 space-y-6">
+                                                {post.comments?.map((comment: any, idx: number) => (
+                                                    <div key={idx} className="flex gap-5">
+                                                        <div className="w-10 h-10 rounded-2xl bg-white/[0.05] flex items-center justify-center text-[12px] font-black text-white/40 border border-white/5 shrink-0">
+                                                            {comment.userName?.[0]}
+                                                        </div>
+                                                        <div className="bg-white/[0.02] rounded-[1.8rem] px-8 py-5 flex-1 border border-white/[0.03] relative group/comment">
+                                                            <p className="text-[10px] font-black text-life-cyan uppercase tracking-widest mb-2">{comment.userName}</p>
+                                                            <p className="text-xs text-slate-300 font-bold leading-relaxed">{comment.text}</p>
+                                                            {(comment.userId === user?.id || post.userId === user?.id) && (
+                                                                <button
+                                                                    onClick={() => handleDeleteComment(post._id, comment._id)}
+                                                                    className="absolute top-4 right-4 text-red-500/30 hover:text-red-500 opacity-0 group-hover/comment:opacity-100 transition-all"
+                                                                >
+                                                                    <MoreHorizontal size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Add Comment Input */}
+                                        <div className="flex gap-4 pt-6">
+                                            <input
+                                                type="text"
+                                                value={commentTexts[post._id] || ''}
+                                                onChange={(e) => setCommentTexts(prev => ({ ...prev, [post._id]: e.target.value }))}
+                                                placeholder="Write a message of support..."
+                                                className="flex-1 bg-white/[0.03] border border-white/5 rounded-[2rem] px-8 py-5 text-sm text-white outline-none focus:border-life-cyan/30 focus:bg-white/[0.05] transition-all font-bold placeholder:text-slate-600"
+                                            />
+                                            <button
+                                                onClick={() => handleAddComment(post._id)}
+                                                className="bg-life-cyan text-white px-8 rounded-[1.5rem] hover:opacity-90 transition-all shadow-xl active:scale-95 flex items-center justify-center"
+                                            >
+                                                <Send size={20} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))
+                                </motion.div>
+                            ))
                     )}
                 </div>
             </div>
