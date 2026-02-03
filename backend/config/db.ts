@@ -3,11 +3,23 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // REQUIREMENT: Stable Neon PostgreSQL connection with proper pooling
+// Connection parameters are now configured in .env
+const getDatabaseUrl = () => {
+    return process.env.DATABASE_URL;
+};
+
 const prisma = new PrismaClient({
     log: ['error', 'warn'], // Reduced logging to prevent spam
     datasources: {
         db: {
-            url: process.env.DATABASE_URL,
+            url: getDatabaseUrl(),
+        },
+    },
+    // Connection pool configuration for stability
+    // @ts-ignore - Prisma connection pool settings
+    __internal: {
+        engine: {
+            connectionLimit: 10,
         },
     },
 });
@@ -21,16 +33,40 @@ export const connectDB = async () => {
         return;
     }
 
-    try {
-        await prisma.$connect();
-        // Test the connection with a simple query
-        await prisma.$queryRaw`SELECT 1`;
-        isConnected = true;
-        console.log('[SUCCESS] Neon PostgreSQL Connected');
-    } catch (error) {
-        console.error('[ERROR] Neon Database connection failed:', error);
-        // Requirement: Throw error if connection fails to prevent starting with fake data
-        process.exit(1);
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY_MS = 5000;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            console.log(`[DB_CONNECT] Attempt ${attempt}/${MAX_RETRIES}...`);
+            await prisma.$connect();
+            // Test the connection with a simple query
+            await prisma.$queryRaw`SELECT 1`;
+            isConnected = true;
+            console.log('[SUCCESS] Neon PostgreSQL Connected');
+            return;
+        } catch (error: any) {
+            const errorCode = error?.code;
+            const errorMessage = error?.message || String(error);
+
+            console.error(`[ERROR] Neon Database connection attempt ${attempt} failed:`, {
+                code: errorCode,
+                message: errorMessage
+            });
+
+            // Check for specific error codes: P1001 (Can't reach database) or "Closed"
+            if (errorCode === 'P1001' || errorMessage.includes('Closed')) {
+                if (attempt < MAX_RETRIES) {
+                    console.log(`[RETRY] Waiting ${RETRY_DELAY_MS / 1000}s before retry...`);
+                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+                    continue;
+                }
+            }
+
+            // If we've exhausted retries or it's a different error, exit
+            console.error('[FATAL] Could not establish Neon PostgreSQL connection after retries');
+            process.exit(1);
+        }
     }
 };
 
