@@ -7,35 +7,7 @@
 
 @layer base {
   :root {
-    /* Default (Dark/Neural) */
-    --bg-primary: #020617;
-    --bg-secondary: #0f172a;
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --accent-primary: #06b6d4;
-    /* Cyan */
-    --accent-glow: #22d3ee;
-    --accent-alert: #ef4444;
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-bg: rgba(15, 23, 42, 0.6);
-  }
-
-  .light {
-    --bg-primary: #f8fafc;
-    /* Slate 50 */
-    --bg-secondary: #ffffff;
-    --text-primary: #0f172a;
-    /* Slate 900 */
-    --text-secondary: #475569;
-    --accent-primary: #0284c7;
-    /* Sky 600 */
-    --accent-glow: #38bdf8;
-    --accent-alert: #dc2626;
-    --glass-border: rgba(15, 23, 42, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-  }
-
-  .blue {
+    /* Default (Blue/Medical) */
     --bg-primary: #000a1f;
     /* Deep Navy Blue */
     --bg-secondary: #001233;
@@ -45,8 +17,44 @@
     /* Electric Blue */
     --accent-glow: #7dd3fc;
     --accent-alert: #ff1744;
-    --glass-border: rgba(224, 242, 254, 0.1);
-    --glass-bg: rgba(10, 25, 41, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+  }
+
+  .light {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --accent-primary: #0284c7;
+    --accent-glow: #38bdf8;
+    --accent-alert: #dc2626;
+    --glass-border: rgba(15, 23, 42, 0.15);
+    --glass-bg: rgba(15, 23, 42, 0.08);
+  }
+
+  .dark {
+    --bg-primary: #020617;
+    --bg-secondary: #0f172a;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --accent-primary: #06b6d4;
+    --accent-glow: #22d3ee;
+    --accent-alert: #ef4444;
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+  }
+
+  .blue {
+    --bg-primary: #000a1f;
+    --bg-secondary: #001233;
+    --text-primary: #e0f2fe;
+    --text-secondary: #bae6fd;
+    --accent-primary: #00d4ff;
+    --accent-glow: #7dd3fc;
+    --accent-alert: #ff1744;
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-bg: rgba(255, 255, 255, 0.08);
   }
 
   body {
@@ -65,32 +73,47 @@
   .glass-panel,
   .glass-nav,
   .medical-glass {
-    backdrop-filter: blur(12px);
-    /* Clean Glass Rule: Exactly 12px */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    /* Standard Contrast Edge */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* More subtle border */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    /* Default shadow */
     transform: translateZ(0);
-    /* GPU Boost (Requirement) */
     backface-visibility: hidden;
     perspective: 1000px;
     will-change: transform, backdrop-filter;
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      inset 0 0 20px 0 rgba(255, 255, 255, 0.02);
+    /* Inner glow for depth */
   }
 
   .glass-panel {
-    @apply bg-slate-900/[0.45] shadow-lg;
+    @apply shadow-xl;
+    background: rgba(0, 0, 0, 0.2);
+    /* Slightly darker for panels */
   }
 
   .glass-nav {
-    @apply bg-slate-950/[0.8] border-t;
+    @apply border-t border-white/5;
+    background: rgba(2, 6, 23, 0.7);
+    /* Darker for nav */
+    backdrop-filter: blur(20px);
   }
 
   .medical-glass {
-    @apply bg-white border-slate-100 shadow-2xl;
+    @apply shadow-2xl;
+    border: 1px solid rgba(6, 182, 212, 0.1);
+    /* Cyan hint */
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.05);
+    /* Cyan glow */
   }
 
   @media (max-width: 768px) {
@@ -99,7 +122,7 @@
     .glass-panel,
     .glass-nav,
     .medical-glass {
-      backdrop-filter: blur(12px) !important;
+      backdrop-filter: blur(24px) !important;
     }
   }
 
@@ -139,4 +162,38 @@
 
 ::selection {
   @apply bg-cyan-500/30 text-white;
+}
+
+/* Breathing Animation for SOS Button */
+@keyframes breath {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-breath {
+  animation: breath 3s ease-in-out infinite;
+}
+
+/* SOS Pulse Animation for Circular Button */
+@keyframes sos-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-sos-pulse {
+  animation: sos-pulse 2s ease-in-out infinite;
 }
