@@ -9,17 +9,10 @@ const getDatabaseUrl = () => {
 };
 
 const prisma = new PrismaClient({
-    log: ['error', 'warn'], // Reduced logging to prevent spam
+    log: ['error', 'warn'],
     datasources: {
         db: {
             url: getDatabaseUrl(),
-        },
-    },
-    // Connection pool configuration for stability
-    // @ts-ignore - Prisma connection pool settings
-    __internal: {
-        engine: {
-            connectionLimit: 10,
         },
     },
 });
