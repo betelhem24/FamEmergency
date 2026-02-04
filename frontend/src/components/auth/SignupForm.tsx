@@ -96,6 +96,7 @@ const SignupForm = () => {
                         />
                     </div>
 
+                    <div>
                         <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 mb-3">
                             <UserCircle2 size={14} className="text-medical-cyan" /> Registry Role
                         </label>
@@ -164,12 +165,12 @@ const SignupForm = () => {
                         </Link>
                     </p>
                 </div>
-            </div >
+            </div>
 
-    <p className="text-[9px] text-center text-slate-400 font-bold mt-8 opacity-50">
-        Encrypted Patient Data Protection System v3.1
-    </p>
-        </div >
+            <p className="text-[9px] text-center text-slate-400 font-bold mt-8 opacity-50">
+                Encrypted Patient Data Protection System v3.1
+            </p>
+        </div>
     );
 };
 
