@@ -22,15 +22,25 @@
   }
 
   .light {
-    --bg-primary: #f8fafc;
-    --bg-secondary: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --accent-primary: #0284c7;
+    /* Softer, more pleasant light mode */
+    --bg-primary: #f0f4f8;
+    /* Soft blue-gray background */
+    --bg-secondary: #e1e8ed;
+    /* Slightly darker for depth */
+    --text-primary: #1a202c;
+    /* Dark blue-gray for text */
+    --text-secondary: #4a5568;
+    /* Medium gray for secondary text */
+    --accent-primary: #0ea5e9;
+    /* Vibrant sky blue */
     --accent-glow: #38bdf8;
-    --accent-alert: #dc2626;
-    --glass-border: rgba(15, 23, 42, 0.15);
-    --glass-bg: rgba(15, 23, 42, 0.08);
+    /* Lighter blue for highlights */
+    --accent-alert: #ef4444;
+    /* Red for alerts */
+    --glass-border: rgba(30, 58, 138, 0.12);
+    /* Subtle blue border */
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    /* Semi-transparent white */
   }
 
   .dark {
@@ -75,16 +85,24 @@
   .medical-glass {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass-bg);
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    /* More subtle border */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    /* Default shadow */
+    border: 1px solid var(--glass-border);
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
     will-change: transform, backdrop-filter;
+  }
+
+  /* Light mode specific glass effects */
+  .light .glass-card,
+  .light .glass-panel,
+  .light .glass-nav,
+  .light .medical-glass {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   }
 
   .glass-card {
@@ -95,10 +113,21 @@
     /* Inner glow for depth */
   }
 
+  .light .glass-card {
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 2px 4px -1px rgba(0, 0, 0, 0.03),
+      inset 0 0 20px 0 rgba(255, 255, 255, 0.8);
+  }
+
   .glass-panel {
     @apply shadow-xl;
     background: rgba(0, 0, 0, 0.2);
     /* Slightly darker for panels */
+  }
+
+  .light .glass-panel {
+    background: rgba(255, 255, 255, 0.8);
   }
 
   .glass-nav {
@@ -108,12 +137,23 @@
     backdrop-filter: blur(20px);
   }
 
+  .light .glass-nav {
+    @apply border-t border-slate-200;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+  }
+
   .medical-glass {
     @apply shadow-2xl;
     border: 1px solid rgba(6, 182, 212, 0.1);
     /* Cyan hint */
     box-shadow: 0 0 15px rgba(6, 182, 212, 0.05);
     /* Cyan glow */
+  }
+
+  .light .medical-glass {
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.08);
   }
 
   @media (max-width: 768px) {
@@ -130,8 +170,16 @@
     text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
   }
 
+  .light .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+  }
+
   .shadow-glow-cyan {
     box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  }
+
+  .light .shadow-glow-cyan {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
   }
 }
 
