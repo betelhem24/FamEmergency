@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IFamilyMember extends Document {
-    userId: mongoose.Types.ObjectId;
-    familyMemberId: mongoose.Types.ObjectId;
+    userId: string;
+    familyMemberId: string;
     relationship: string;
     status: 'PENDING' | 'ACCEPTED' | 'BLOCKED';
     permissions: {
@@ -15,14 +15,12 @@ export interface IFamilyMember extends Document {
 
 const FamilyMemberSchema: Schema = new Schema({
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true,
         index: true
     },
     familyMemberId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true
     },
     relationship: { type: String, default: 'Family' },
