@@ -19,7 +19,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Update theme when user logs in and has a stored preference
     useEffect(() => {
-        if (user?.theme && user.theme !== theme) {
+        const saved = localStorage.getItem('app-theme');
+        if (!saved && user?.theme) {
             setThemeState(user.theme as Theme);
         }
     }, [user]);
