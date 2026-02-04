@@ -3,7 +3,7 @@ import Location from '../../models/Location';
 
 export const updateLocation = async (req: Request, res: Response) => {
     try {
-        const { latitude, longitude, accuracy } = req.body;
+        const { latitude, longitude, accuracy, heartRate, batteryLevel } = req.body;
         const userId = (req as any).user.id;
 
         const location = new Location({
@@ -11,7 +11,9 @@ export const updateLocation = async (req: Request, res: Response) => {
             latitude,
             longitude,
             accuracy: accuracy || 0,
-            isTracking: true
+            isTracking: true,
+            heartRate,
+            batteryLevel
         });
 
         await location.save();
