@@ -17,7 +17,7 @@ export const getPatientQRCode = async (req: Request, res: Response): Promise<voi
 
         // Fetch user data from Prisma
         const user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: userId as string }
         });
 
         if (!user) {
@@ -39,8 +39,8 @@ export const getPatientQRCode = async (req: Request, res: Response): Promise<voi
 
         // Prepare QR data
         const qrData = {
-            id: userId,
-            name: record.fullName || user.name,
+            id: userId as string,
+            name: record.fullName || user.name || 'Unknown Patient',
             age: age || undefined,
             bloodType: record.bloodType || 'Unknown',
             allergies: record.allergies || [],
