@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { AlertTriangle, ShieldCheck, QrCode, Search, X, Stethoscope, Phone, MessageCircle, Activity } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, QrCode, Search, X, Stethoscope, Phone, MessageCircle } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../context/AuthContext';
@@ -129,8 +129,8 @@ const DoctorDashboard: React.FC = () => {
                         <div className="lg:col-span-2 glass-panel p-1 rounded-xl overflow-hidden border border-cyan-neon/30 relative">
                             <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: '100%', width: '100%', background: '#020617' }}>
                                 <TileLayer
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                    url="https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
+                                    attribution='&copy; Google Maps'
                                 />
                                 {patients.map(p => (
                                     <Marker key={p.id} position={p.location as [number, number]}>
