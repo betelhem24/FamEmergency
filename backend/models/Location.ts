@@ -1,17 +1,19 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ILocation extends Document {
-    userId: mongoose.Types.ObjectId;
+    userId: string;
     latitude: number;
     longitude: number;
     accuracy: number;
     timestamp: Date;
     isTracking: boolean;
+    heartRate?: number;
+    batteryLevel?: number;
 }
 
 const LocationSchema: Schema = new Schema({
     userId: {
-        type: Schema.Types.ObjectId,
+        type: String,
         ref: 'User',
         required: true,
         index: true
@@ -20,7 +22,9 @@ const LocationSchema: Schema = new Schema({
     longitude: { type: Number, required: true },
     accuracy: { type: Number, default: 0 },
     timestamp: { type: Date, default: Date.now },
-    isTracking: { type: Boolean, default: true }
+    isTracking: { type: Boolean, default: true },
+    heartRate: { type: Number },
+    batteryLevel: { type: Number }
 }, { timestamps: true });
 
 // Index for efficient location queries
