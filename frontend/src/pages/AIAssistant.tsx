@@ -83,8 +83,8 @@ const AIAssistant: React.FC = () => {
                             className={`flex ${m.role === 'ai' ? 'justify-start' : 'justify-end'}`}
                         >
                             <div className={`max-w-[80%] p-4 rounded-3xl text-[11px] font-black tracking-tight leading-relaxed shadow-xl border ${m.role === 'ai'
-                                    ? 'bg-white/[0.03] border-white/5 text-[var(--text-primary)] rounded-tl-none'
-                                    : 'bg-[var(--accent-primary)] text-black border-[var(--accent-primary)]/20 rounded-tr-none'
+                                ? 'bg-white/[0.03] border-white/5 text-[var(--text-primary)] rounded-tl-none'
+                                : 'bg-[var(--accent-primary)] text-black border-[var(--accent-primary)]/20 rounded-tr-none'
                                 }`}>
                                 {m.content}
                             </div>
@@ -102,7 +102,7 @@ const AIAssistant: React.FC = () => {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            className="flex-1 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none text-white"
+                            className="flex-1 bg-transparent px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none text-[var(--text-primary)]"
                         />
                         <button
                             onClick={handleSend}
@@ -156,7 +156,7 @@ const AIAssistant: React.FC = () => {
                                     <Pill size={24} />
                                 </div>
                                 <div>
-                                    <h4 className="text-lg font-black text-white italic tracking-tight uppercase">{scanResult.name}</h4>
+                                    <h4 className="text-lg font-black text-[var(--text-primary)] italic tracking-tight uppercase">{scanResult.name}</h4>
                                     <p className="text-[9px] text-emerald-500 font-black uppercase tracking-widest mt-0.5">Neural Scan Complete</p>
                                 </div>
                             </div>
@@ -166,7 +166,7 @@ const AIAssistant: React.FC = () => {
                         <div className="space-y-4 mb-6">
                             <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5">
                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">AI Dosage Protocol</p>
-                                <p className="text-white font-black text-xs uppercase tracking-tight">{scanResult.dosage} • {scanResult.frequency}</p>
+                                <p className="text-[var(--text-primary)] font-black text-xs uppercase tracking-tight">{scanResult.dosage} • {scanResult.frequency}</p>
                             </div>
                             <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20 flex items-start gap-3">
                                 <AlertTriangleIcon className="text-red-500 shrink-0" size={16} />
