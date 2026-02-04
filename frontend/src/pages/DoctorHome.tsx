@@ -114,7 +114,7 @@ const DoctorHome: React.FC = () => {
                                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">Live {alert.type} Alert</span>
                                             <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
                                         </div>
-                                        <h4 className="text-xl font-black text-white italic uppercase tracking-tighter leading-none mb-2">
+                                        <h4 className="text-xl font-black text-[var(--text-primary)] italic uppercase tracking-tighter leading-none mb-2">
                                             {alert.userName || 'Unknown Patient'}
                                         </h4>
                                         <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-red-200/60">
@@ -128,7 +128,7 @@ const DoctorHome: React.FC = () => {
                                         setActiveChatRecipient({ id: alert.userId, name: alert.userName });
                                         setChatOpen(true);
                                     }}
-                                    className="w-full mt-4 py-3 bg-white/5 border border-white/10 text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-xl active:scale-[0.98] transition-all"
+                                    className="w-full mt-4 py-3 bg-white/5 border border-white/10 text-[var(--text-primary)] rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-xl active:scale-[0.98] transition-all"
                                 >
                                     Open Secure Chat
                                 </button>
@@ -146,7 +146,7 @@ const DoctorHome: React.FC = () => {
                                             {alert.familyContacts.map((contact: any, idx: number) => (
                                                 <div key={idx} className="flex items-center justify-between bg-white/[0.03] p-3 rounded-2xl border border-white/5">
                                                     <div>
-                                                        <p className="text-[10px] font-black text-white uppercase">{contact.name}</p>
+                                                        <p className="text-[10px] font-black text-[var(--text-primary)] uppercase">{contact.name}</p>
                                                         <p className="text-[8px] text-slate-500 uppercase font-bold">{contact.relationship}</p>
                                                     </div>
                                                     <div className="flex gap-2">
@@ -212,7 +212,7 @@ const DoctorHome: React.FC = () => {
                                         <span className="text-xs font-black text-white uppercase">{patient.name.charAt(0)}</span>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-white uppercase tracking-tight">{patient.name}</p>
+                                        <p className="text-[10px] font-black text-[var(--text-primary)] uppercase tracking-tight">{patient.name}</p>
                                         <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{patient.email}</p>
                                     </div>
                                 </div>
