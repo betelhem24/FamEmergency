@@ -1,0 +1,178 @@
+/* High-Tech Radar Styles - Inspiration: Family Radar Image */
+
+:root {
+  --radar-bg: #050b16;
+  --radar-sidebar: rgba(10, 20, 38, 0.7);
+  --neon-cyan: #00f2ff;
+  --neon-purple: #a855f7;
+  --neon-pink: #f472b6;
+  --neon-blue: #3b82f6;
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulse-neon {
+  0% {
+    box-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+  }
+
+  50% {
+    box-shadow: 0 0 15px var(--neon-cyan), 0 0 25px var(--neon-cyan);
+  }
+
+  100% {
+    box-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+  }
+}
+
+@keyframes scan-horizontal {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-container {
+  background-color: var(--radar-bg);
+  color: white;
+}
+
+.glass-sidebar {
+  background: var(--radar-sidebar);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid var(--glass-border);
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+
+.vitals-sidebar {
+  width: 80px;
+  background: rgba(15, 25, 45, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+  gap: 40px;
+}
+
+.user-pill {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid transparent;
+}
+
+.user-pill.active {
+  background: rgba(0, 242, 255, 0.08);
+  border-color: rgba(0, 242, 255, 0.3);
+  transform: translateX(10px);
+}
+
+.user-pill.active::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 15%;
+  bottom: 15%;
+  width: 4px;
+  background: var(--neon-cyan);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 15px var(--neon-cyan);
+}
+
+.neon-marker-container {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure markers are visible and above map tiles */
+.custom-neon-icon {
+  z-index: 9999 !important;
+  /* High z-index for visibility */
+  filter: none !important;
+  /* Prevent any filters from affecting visibility */
+}
+
+.neon-marker-glow {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, var(--marker-color-alpha) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulse-neon 2s infinite ease-in-out;
+}
+
+/* Invert map colors for a dark high-tech look */
+.leaflet-tile-pane {
+  filter: none;
+  z-index: 0;
+}
+
+.leaflet-container {
+  background: #020617 !important;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  background: rgba(5, 11, 22, 0.9) !important;
+  color: white !important;
+  border: 1px solid rgba(0, 242, 255, 0.3) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 20px !important;
+  padding: 5px;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: rgba(5, 11, 22, 0.9) !important;
+}
+
+.vital-icon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--neon-cyan);
+}
+
+.vital-value {
+  font-size: 10px;
+  font-weight: 800;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Street paths glow */
+.leaflet-interactive {
+  filter: drop-shadow(0 0 5px var(--neon-cyan));
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
