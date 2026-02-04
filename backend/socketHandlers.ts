@@ -2,6 +2,8 @@ import { Server as SocketServer, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Location from './models/Location';
 import Emergency from './models/Emergency';
+import Chat from './models/Chat';
+import User from './models/User';
 
 interface AuthSocket extends Socket {
     userId?: string;
@@ -36,25 +38,32 @@ export const setupSocketHandlers = (io: SocketServer) => {
         // Join user's personal room
         socket.join(`user:${socket.userId}`);
 
+        // Broadcast user online status
+        socket.broadcast.emit('user:online', { userId: socket.userId });
+
         // Handle location updates
         socket.on('location:update', async (data) => {
             try {
-                const { latitude, longitude, accuracy } = data;
+                const { latitude, longitude, accuracy, heartRate, batteryLevel } = data;
 
                 const location = new Location({
                     userId: socket.userId,
                     latitude,
                     longitude,
-                    accuracy: accuracy || 0
+                    accuracy: accuracy || 0,
+                    heartRate,
+                    batteryLevel
                 });
 
                 await location.save();
 
-                // Broadcast to family members
+                // Broadcast to family members and doctors
                 socket.broadcast.emit('location:updated', {
                     userId: socket.userId,
                     latitude,
                     longitude,
+                    heartRate: heartRate || 72,
+                    batteryLevel: batteryLevel || 85,
                     timestamp: new Date()
                 });
             } catch (error) {
@@ -65,8 +74,6 @@ export const setupSocketHandlers = (io: SocketServer) => {
         // Handle emergency alerts
         socket.on('emergency:trigger', async (data) => {
             try {
-                // If data includes emergency details, we might want to create it here or just fetch it
-                // For now, assuming client creates it and sends ID
                 const emergency = await Emergency.findById(data.emergencyId)
                     .populate('userId', 'name email');
 
@@ -84,7 +91,7 @@ export const setupSocketHandlers = (io: SocketServer) => {
                         triggeredAt: emergency.triggeredAt
                     });
 
-                    // Also notify specifically assigned responders if any
+                    // Also notify specifically assigned responders
                     if (emergency.responders && emergency.responders.length > 0) {
                         emergency.responders.forEach((responder: any) => {
                             io.to(`user:${responder.userId}`).emit('emergency:alert', {
@@ -116,37 +123,123 @@ export const setupSocketHandlers = (io: SocketServer) => {
             });
         });
 
-        // V3 Community Chat Handlers
-        socket.on('join-room', (room) => {
-            socket.join(room);
-            console.log(`User ${socket.userId} joined room: ${room}`);
+        // Persistent Private Chat with Status Updates
+        socket.on('chat:private', async (data) => {
+            const { to, message, userName, image } = data;
+
+            try {
+                // Persistent save to MongoDB
+                let chat = await Chat.findOne({
+                    participants: { $all: [socket.userId, to] }
+                });
+
+                if (!chat) {
+                    chat = new Chat({
+                        participants: [socket.userId, to],
+                        messages: [],
+                        unreadCount: { [socket.userId as string]: 0, [to]: 0 }
+                    });
+                }
+
+                const msgToPersist = {
+                    senderId: socket.userId as string,
+                    senderName: userName || 'User',
+                    text: message,
+                    timestamp: new Date(),
+                    status: 'sent' as const,
+                    image
+                };
+
+                chat.messages.push(msgToPersist as any);
+                chat.lastActive = new Date();
+
+                // Increment unread count for recipient
+                if (!chat.unreadCount) chat.unreadCount = {};
+                (chat.unreadCount as any)[to] = ((chat.unreadCount as any)[to] || 0) + 1;
+
+                await chat.save();
+
+                // Emit to the recipient with delivery confirmation
+                io.to(`user:${to}`).emit('chat:message', {
+                    from: socket.userId,
+                    userName: userName,
+                    message: message,
+                    image,
+                    timestamp: msgToPersist.timestamp,
+                    status: 'delivered'
+                });
+
+                // Send delivery confirmation back to sender
+                socket.emit('chat:delivered', {
+                    to,
+                    timestamp: msgToPersist.timestamp
+                });
+
+                console.log(`[CHAT] Persistent message from ${socket.userId} to ${to}`);
+            } catch (error) {
+                console.error('[CHAT] Persistence error:', error);
+
+                // Fallback: still emit even if saving fails
+                io.to(`user:${to}`).emit('chat:message', {
+                    from: socket.userId,
+                    userName: userName,
+                    message: message,
+                    image,
+                    timestamp: new Date()
+                });
+            }
         });
 
-        socket.on('send-message', (data) => {
-            // Broadcast to everyone in the room except the sender
-            socket.to(data.room).emit('new-message', data);
-        });
-
-        // Private Doctor-Patient Chat
-        socket.on('chat:send', (data) => {
-            const { to, message } = data;
-            // Emit to the recipient
-            io.to(`user:${to}`).emit('chat:message', message);
-            // In a real app, we would save the message to MongoDB here
-            console.log(`[CHAT] Message from ${socket.userId} to ${to}: ${message.text || 'Image'}`);
-        });
-
-        socket.on('chat:private', (data) => {
-            const { to, message, userName } = data;
-            io.to(`user:${to}`).emit('chat:message', {
+        // Typing indicator
+        socket.on('chat:typing', (data) => {
+            const { to, isTyping } = data;
+            io.to(`user:${to}`).emit('chat:typing', {
                 from: socket.userId,
-                userName,
-                message,
-                timestamp: new Date()
+                isTyping
             });
         });
 
-        // Health Status Sync (from Patient to Doctors)
+        // Read receipt
+        socket.on('chat:markRead', async (data) => {
+            const { from } = data;
+
+            try {
+                const chat = await Chat.findOne({
+                    participants: { $all: [socket.userId, from] }
+                });
+
+                if (chat) {
+                    // Mark messages as read
+                    let updated = false;
+                    chat.messages.forEach((msg: any) => {
+                        if (msg.senderId === from && msg.status !== 'read') {
+                            msg.status = 'read';
+                            msg.readAt = new Date();
+                            updated = true;
+                        }
+                    });
+
+                    // Reset unread count
+                    if (chat.unreadCount) {
+                        (chat.unreadCount as any)[socket.userId as string] = 0;
+                    }
+
+                    if (updated) {
+                        await chat.save();
+
+                        // Notify sender
+                        io.to(`user:${from}`).emit('chat:read', {
+                            from: socket.userId,
+                            timestamp: new Date()
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('[CHAT] Mark read error:', error);
+            }
+        });
+
+        // Health Status Sync
         socket.on('health:update', (data) => {
             socket.to('room:doctors').emit('health:status', {
                 ...data,
@@ -158,15 +251,12 @@ export const setupSocketHandlers = (io: SocketServer) => {
         socket.on('doctor:join', () => {
             socket.join('room:doctors');
             console.log(`Doctor ${socket.userId} joined monitoring room`);
-            // Notify patients that a doctor is online (optional feature enhancement)
-            socket.broadcast.emit('doctor:status', {
-                userId: socket.userId,
-                status: 'online'
-            });
         });
 
         socket.on('disconnect', () => {
-            console.log(`[SOCKET] User disconnected: ${socket.userId} (ID: ${socket.id})`);
+            console.log(`[SOCKET] User disconnected: ${socket.userId}`);
+            // Broadcast user offline status
+            socket.broadcast.emit('user:offline', { userId: socket.userId });
         });
     });
 };
