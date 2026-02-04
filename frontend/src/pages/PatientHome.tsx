@@ -193,7 +193,7 @@ const PatientHome: React.FC = () => {
                 <div className="glass-card rounded-[2rem] p-6 border border-white/5 flex items-center justify-between">
                     <div>
                         <p className="text-[8px] font-black text-[var(--text-secondary)] uppercase tracking-[0.3em] mb-1">Active User</p>
-                        <h4 className="text-lg font-black text-white italic uppercase tracking-tight leading-none">{patientName}</h4>
+                        <h4 className="text-lg font-black text-[var(--text-primary)] italic uppercase tracking-tight leading-none">{patientName}</h4>
                     </div>
                     <div className="flex gap-2">
                         <div className="bg-red-500/10 px-3 py-2 rounded-xl text-red-500 border border-red-500/20">
@@ -209,7 +209,7 @@ const PatientHome: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-[7px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Heart Rate</p>
-                            <p className="text-xs font-black text-white">72 BPM</p>
+                            <p className="text-xs font-black text-[var(--text-primary)]">72 BPM</p>
                         </div>
                     </div>
                     <div className="glass-card p-4 rounded-2xl border border-white/5 flex items-center gap-3">
@@ -218,7 +218,7 @@ const PatientHome: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-[7px] font-black text-[var(--text-secondary)] uppercase tracking-widest">SpO2</p>
-                            <p className="text-xs font-black text-white">98%</p>
+                            <p className="text-xs font-black text-[var(--text-primary)]">98%</p>
                         </div>
                     </div>
                 </div>
