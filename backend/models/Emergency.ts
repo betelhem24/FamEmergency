@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IEmergency extends Document {
-    userId: mongoose.Types.ObjectId;
+    userId: string;
     type: 'SOS' | 'GUARDIAN_TIMER' | 'FALL_DETECTED' | 'MANUAL';
     severity: 'CRITICAL' | 'URGENT' | 'WARNING';
     location: {
@@ -11,7 +11,7 @@ export interface IEmergency extends Document {
     };
     status: 'ACTIVE' | 'CANCELLED' | 'RESOLVED';
     responders: Array<{
-        userId: mongoose.Types.ObjectId;
+        userId: string;
         status: 'NOTIFIED' | 'SEEN' | 'RESPONDING' | 'DECLINED';
         timestamp: Date;
     }>;
@@ -26,7 +26,7 @@ export interface IEmergency extends Document {
 }
 
 const EmergencySchema: Schema = new Schema({
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: String, ref: 'User', required: true },
     type: {
         type: String,
         enum: ['SOS', 'GUARDIAN_TIMER', 'FALL_DETECTED', 'MANUAL'],
@@ -48,7 +48,7 @@ const EmergencySchema: Schema = new Schema({
         default: 'ACTIVE'
     },
     responders: [{
-        userId: { type: Schema.Types.ObjectId, ref: 'User' },
+        userId: { type: String, ref: 'User' },
         status: {
             type: String,
             enum: ['NOTIFIED', 'SEEN', 'RESPONDING', 'DECLINED']
