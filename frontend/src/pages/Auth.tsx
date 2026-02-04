@@ -123,12 +123,12 @@ const Auth: React.FC = () => {
                             <ThemeIcon size={20} />
                         </button>
                     </div>
-                    <h1 className="text-6xl font-black tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-white uppercase leading-none drop-shadow-2xl">
+                    <h1 className="text-6xl font-black tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-white leading-none drop-shadow-2xl">
                         FamEmergency
                     </h1>
                     <div className="flex items-center justify-center gap-3">
                         <div className="h-[1px] w-8 bg-[var(--accent-primary)]/30" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.6em] text-[var(--accent-primary)] drop-shadow-md">
+                        <span className="text-[10px] font-black text-[var(--accent-primary)] drop-shadow-md">
                             Identity Command Node
                         </span>
                         <div className="h-[1px] w-8 bg-[var(--accent-primary)]/30" />
@@ -148,7 +148,7 @@ const Auth: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setRole('PATIENT')}
-                            className={`flex-1 py-4 rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${role === 'PATIENT' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
+                            className={`flex-1 py-4 rounded-2xl text-[9px] font-black transition-all flex items-center justify-center gap-2 ${role === 'PATIENT' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
                                 }`}
                         >
                             <Heart size={14} className={role === 'PATIENT' ? 'text-red-500' : ''} /> Patient
@@ -156,7 +156,7 @@ const Auth: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setRole('DOCTOR')}
-                            className={`flex-1 py-4 rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-2 ${role === 'DOCTOR' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
+                            className={`flex-1 py-4 rounded-2xl text-[9px] font-black transition-all flex items-center justify-center gap-2 ${role === 'DOCTOR' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
                                 }`}
                         >
                             <Stethoscope size={14} className={role === 'DOCTOR' ? 'text-blue-500' : ''} /> Doctor
@@ -178,7 +178,7 @@ const Auth: React.FC = () => {
                                         <input
                                             type="text"
                                             placeholder="LEGAL IDENTITY NAME"
-                                            className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black uppercase tracking-widest"
+                                            className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             required={!isLogin}
@@ -196,7 +196,7 @@ const Auth: React.FC = () => {
                                                 <input
                                                     type="text"
                                                     placeholder="MEDICAL LICENSE ID"
-                                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black uppercase tracking-widest"
+                                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black"
                                                     value={formData.medicalLicense}
                                                     onChange={(e) => setFormData({ ...formData, medicalLicense: e.target.value })}
                                                     required={role === 'DOCTOR'}
@@ -207,7 +207,7 @@ const Auth: React.FC = () => {
                                                 <input
                                                     type="text"
                                                     placeholder="DEPARTMENT"
-                                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black uppercase tracking-widest"
+                                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black"
                                                     value={formData.department}
                                                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                                                 />
@@ -223,7 +223,7 @@ const Auth: React.FC = () => {
                             <input
                                 type="email"
                                 placeholder="ACCESS CHANNEL (EMAIL)"
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black uppercase tracking-widest"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-6 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 required
@@ -235,7 +235,7 @@ const Auth: React.FC = () => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="ENCRYPTION KEY"
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-24 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black uppercase tracking-widest"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-16 pr-24 text-xs text-white placeholder:text-slate-600 focus:border-[var(--accent-primary)]/30 focus:bg-white/[0.06] outline-none transition-all font-black"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 required
@@ -261,7 +261,7 @@ const Auth: React.FC = () => {
                         type="button"
                         onClick={() => isLogin ? handleSubmit(null as any) : setIsLogin(true)}
                         disabled={loading}
-                        className={`py-5 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-[0.4em] pointer-events-auto !important ${isLogin
+                        className={`py-5 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] pointer-events-auto !important ${isLogin
                             ? 'bg-[var(--accent-primary)] text-black shadow-[0_20px_40px_rgba(6,182,212,0.2)] active:scale-95'
                             : 'bg-white/[0.03] text-slate-500 border border-white/5 hover:bg-white/[0.06]'
                             }`}
@@ -272,7 +272,7 @@ const Auth: React.FC = () => {
                         type="button"
                         onClick={() => !isLogin ? handleSubmit(null as any) : setIsLogin(false)}
                         disabled={loading}
-                        className={`py-5 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-[0.4em] pointer-events-auto !important ${!isLogin
+                        className={`py-5 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] pointer-events-auto !important ${!isLogin
                             ? 'bg-white text-black shadow-2xl active:scale-95'
                             : 'bg-white/[0.03] text-slate-500 border border-white/5 hover:bg-white/[0.06]'
                             }`}
@@ -281,7 +281,7 @@ const Auth: React.FC = () => {
                     </button>
                 </div>
 
-                <p className="text-center text-[8px] font-black uppercase tracking-[0.5em] text-slate-600 italic">
+                <p className="text-center text-[8px] font-black text-slate-600 italic">
                     <ShieldCheck size={10} className="inline mr-2 text-[var(--accent-primary)]" /> Secure Hybrid Channel Loop
                 </p>
             </footer>
