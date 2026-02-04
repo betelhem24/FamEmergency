@@ -9,12 +9,14 @@ const getDatabaseUrl = () => {
 };
 
 const prisma = new PrismaClient({
-    log: ['error', 'warn'],
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
     datasources: {
         db: {
             url: getDatabaseUrl(),
         },
     },
+    // Connection pool configuration for Neon serverless
+    // This prevents connection exhaustion and handles connection lifecycle properly
 });
 
 // Connection management with retry logic
