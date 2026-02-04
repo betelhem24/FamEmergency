@@ -100,21 +100,21 @@ const MedicalVault = () => {
             <div className="flex p-1 bg-white/[0.03] rounded-2xl border border-white/5 shadow-inner">
                 <button
                     onClick={() => setActiveTab('details')}
-                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === 'details' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-500 hover:text-slate-400'
+                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === 'details' ? 'bg-white/10 text-[var(--text-primary)] shadow-xl' : 'text-slate-500 hover:text-slate-400'
                         }`}
                 >
                     Vitals
                 </button>
                 <button
                     onClick={() => setActiveTab('qr')}
-                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === 'qr' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-500 hover:text-slate-400'
+                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === 'qr' ? 'bg-white/10 text-[var(--text-primary)] shadow-xl' : 'text-slate-500 hover:text-slate-400'
                         }`}
                 >
                     Life-Key
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === 'history' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-500 hover:text-slate-400'
+                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === 'history' ? 'bg-white/10 text-[var(--text-primary)] shadow-xl' : 'text-slate-500 hover:text-slate-400'
                         }`}
                 >
                     Reports
@@ -162,11 +162,11 @@ const MedicalVault = () => {
                                 <div className="grid grid-cols-2 w-full gap-4 mt-8 pt-8 border-t border-white/5">
                                     <div className="text-left">
                                         <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Blood Type</p>
-                                        <p className="text-sm font-black text-white italic">{profile.bloodType}</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)] italic">{profile.bloodType}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Node ID</p>
-                                        <p className="text-sm font-black text-white italic">#{user?.id?.slice(-6).toUpperCase()}</p>
+                                        <p className="text-sm font-black text-[var(--text-primary)] italic">#{user?.id?.slice(-6).toUpperCase()}</p>
                                     </div>
                                 </div>
                             </div>
@@ -210,7 +210,7 @@ const MedicalVault = () => {
                                                     <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img.url}`} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-white uppercase text-[10px] tracking-tight">{img.title}</p>
+                                                    <p className="font-black text-[var(--text-primary)] uppercase text-[10px] tracking-tight">{img.title}</p>
                                                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{new Date(img.uploadedAt).toLocaleDateString()} • Verified Scan</p>
                                                 </div>
                                             </div>
