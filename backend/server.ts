@@ -80,6 +80,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Server Start
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
   console.log(`Socket.io ready for real-time connections`);
 });
