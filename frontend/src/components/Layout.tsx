@@ -7,14 +7,18 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
-        <div className="min-h-screen bg-[#020617] text-white font-sans selection:bg-medical-cyan selection:text-[#020617] overflow-hidden relative">
-            <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#020617] via-[#020617] to-[#0f172a] pointer-events-none" />
-            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+        <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans selection:bg-cyan-500/30 overflow-hidden relative transition-colors duration-500">
+            <div
+                className="absolute inset-0 z-0 pointer-events-none opacity-50"
+                style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, var(--bg-secondary) 0%, var(--bg-primary) 70%)' }}
+            />
+            <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
                 {[...Array(6)].map((_, i) => (
                     <motion.div
                         key={i}
-                        className="absolute bg-medical-cyan/10 rounded-full blur-[120px]"
+                        className="absolute bg-[var(--accent-primary)] rounded-full blur-[120px]"
                         style={{
+                            opacity: 0.1,
                             width: '40rem',
                             height: '40rem',
                             left: (Math.random() * 100) + '%',
