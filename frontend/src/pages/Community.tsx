@@ -199,7 +199,7 @@ const Community: React.FC = () => {
                         placeholder="Search community..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="bg-transparent border-none text-white text-sm w-full focus:ring-0 outline-none font-bold placeholder:text-slate-600 uppercase tracking-wider"
+                        className="bg-transparent border-none text-white text-sm w-full focus:ring-0 outline-none font-bold placeholder:text-slate-600"
                     />
                 </div>
 
