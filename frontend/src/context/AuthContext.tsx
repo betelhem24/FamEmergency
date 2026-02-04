@@ -9,6 +9,7 @@ interface User {
     bloodType?: string;
     allergies?: string[];
     theme?: 'dark' | 'light' | 'blue';
+    photo?: string;
 }
 
 interface AuthContextType {
