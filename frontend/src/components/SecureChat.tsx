@@ -5,28 +5,62 @@ import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 
 interface Message {
-    id: string;
+    _id?: string;
+    id?: string;
     text: string;
     senderId: string;
-    senderRole: string;
-    time: string;
+    senderName?: string;
+    senderRole?: string;
+    timestamp: string | Date;
+    time?: string;
     image?: string;
 }
 
 const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: string; recipientName: string }> = ({ isOpen, onClose, recipientId, recipientName }) => {
     const { socket } = useSocket();
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Fetch Chat History on mount or when recipient changes
+    useEffect(() => {
+        if (!isOpen || !recipientId || !user?.id) return;
+
+        const fetchHistory = async () => {
+            setIsLoading(true);
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/chat/history?participant1=${user.id}&participant2=${recipientId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setMessages(data);
+                }
+            } catch (err) {
+                console.error('[CHAT] Failed to fetch history:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchHistory();
+    }, [isOpen, recipientId, user?.id, token]);
+
+    // Socket Listener
     useEffect(() => {
         if (!socket) return;
 
-        const handleMessage = (msg: Message) => {
-            if (msg.senderId === recipientId || msg.senderId === user?.id) {
-                setMessages(prev => [...prev, msg]);
+        const handleMessage = (msg: any) => {
+            console.log('[CHAT] New message received:', msg);
+            // Check if the message belongs to this conversation
+            if (msg.senderId === recipientId) {
+                setMessages(prev => [...prev, {
+                    ...msg,
+                    timestamp: msg.timestamp || new Date()
+                }]);
             }
         };
 
@@ -34,7 +68,7 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
         return () => {
             socket.off('chat:message', handleMessage);
         };
-    }, [socket, recipientId, user?.id]);
+    }, [socket, recipientId]);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -50,8 +84,9 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
             id: Math.random().toString(36).substring(7),
             text: newMessage,
             senderId: user.id,
+            senderName: user.name,
             senderRole: user.role,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: new Date().toISOString()
         };
 
         socket.emit('chat:send', { to: recipientId, message: msg });
@@ -70,14 +105,20 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
                     text: '',
                     image: base64String,
                     senderId: user.id,
+                    senderName: user.name,
                     senderRole: user.role,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    timestamp: new Date().toISOString()
                 };
                 socket?.emit('chat:send', { to: recipientId, message: msg });
                 setMessages(prev => [...prev, msg]);
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const formatTime = (ts: string | Date) => {
+        const date = new Date(ts);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     return (
@@ -87,7 +128,7 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
                     initial={{ y: 20, opacity: 0, scale: 0.95 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: 20, opacity: 0, scale: 0.95 }}
-                    className="fixed bottom-24 right-4 left-4 md:left-auto md:w-96 h-[500px] glass-card flex flex-col z-[100] border border-white/10 shadow-2xl overflow-hidden rounded-[2.5rem]"
+                    className="fixed bottom-24 right-4 left-4 md:left-auto md:w-96 h-[550px] bg-[#0a0f18]/95 backdrop-blur-2xl flex flex-col z-[2000] border border-white/10 shadow-2xl overflow-hidden rounded-[3rem]"
                 >
                     {/* Hidden File Input */}
                     <input
@@ -105,12 +146,12 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
                                 <div className="p-3 bg-[var(--accent-primary)]/10 rounded-2xl text-[var(--accent-primary)]">
                                     <Shield size={20} />
                                 </div>
-                                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--bg-primary)] animate-pulse" />
+                                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0f18] animate-pulse" />
                             </div>
                             <div>
                                 <h3 className="font-black text-white text-[10px] uppercase tracking-widest italic">{recipientName}</h3>
                                 <p className="text-[8px] font-black text-[var(--accent-primary)] flex items-center gap-1 uppercase tracking-widest opacity-60">
-                                    <Lock size={10} /> Quantum Encrypted
+                                    <Lock size={10} /> Persistent Secure Channel
                                 </p>
                             </div>
                         </div>
@@ -121,15 +162,19 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
 
                     {/* Messages */}
                     <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
-                        {messages.length === 0 && (
+                        {isLoading ? (
+                            <div className="flex justify-center items-center h-full">
+                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest animate-pulse">Synchronizing History...</span>
+                            </div>
+                        ) : messages.length === 0 && (
                             <div className="text-center mt-12 opacity-20 flex flex-col items-center">
                                 <Lock className="w-12 h-12 mb-4 text-[var(--accent-primary)]" />
-                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white">Channel Secured</p>
-                                <p className="text-[8px] font-black text-[var(--accent-primary)] mt-2 uppercase">Ready for Clinical Handshake</p>
+                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white">No Message Logs</p>
+                                <p className="text-[8px] font-black text-[var(--accent-primary)] mt-2 uppercase">Start an encrypted conversation</p>
                             </div>
                         )}
-                        {messages.map(msg => (
-                            <div key={msg.id} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+                        {messages.map((msg, idx) => (
+                            <div key={msg._id || msg.id || idx} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[85%] p-4 rounded-3xl ${msg.senderId === user?.id
                                     ? 'bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/30 text-white rounded-tr-none'
                                     : 'bg-white/5 border border-white/10 text-slate-200 rounded-tl-none'
@@ -142,7 +187,7 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
                                         </div>
                                     )}
                                     <div className="flex items-center justify-end gap-1 mt-2 opacity-40">
-                                        <span className="text-[8px] font-black uppercase tracking-tighter">{msg.time}</span>
+                                        <span className="text-[8px] font-black uppercase tracking-tighter">{formatTime(msg.timestamp)}</span>
                                         {msg.senderId === user?.id && <CheckCheck size={10} className="text-[var(--accent-primary)]" />}
                                     </div>
                                 </div>
@@ -164,7 +209,7 @@ const SecureChat: React.FC<{ isOpen: boolean; onClose: () => void; recipientId: 
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder="Type secure message..."
-                            className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white outline-none focus:border-[var(--accent-primary)]/30 transition-all placeholder-slate-500"
+                            className="flex-1 bg-white/10 border border-white/10 rounded-2xl px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white outline-none focus:border-[var(--accent-primary)]/30 transition-all placeholder-slate-500"
                         />
                         <button
                             type="submit"
