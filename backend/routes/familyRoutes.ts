@@ -1,11 +1,14 @@
 import express from 'express';
-import { addFamilyMember } from '../controllers/family/addController';
+import { addFamilyMember, searchUsers } from '../controllers/family/addController';
 import { getFamilyMembers, removeFamilyMember, getFamilyByUser } from '../controllers/family/manageController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 router.use(authMiddleware);
+
+// GET /api/family/search - Search for users to add
+router.get('/search', searchUsers);
 
 // POST /api/family/add - Search and add family member
 router.post('/add', addFamilyMember);
