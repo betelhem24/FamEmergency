@@ -14,6 +14,7 @@ const Auth: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState<'PATIENT' | 'DOCTOR'>('PATIENT');
+    const [error, setError] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -34,6 +35,7 @@ const Auth: React.FC = () => {
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         setLoading(true);
+        setError(null);
         try {
             const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
             const trimmedEmail = formData.email.trim();
@@ -95,8 +97,9 @@ const Auth: React.FC = () => {
 
             login(data.user, data.token);
             navigate(data.user.role === 'DOCTOR' ? '/doctor' : '/');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Auth failed', error);
+            setError(error.message || 'Authentication failed');
         } finally {
             setLoading(false);
         }
@@ -147,7 +150,10 @@ const Auth: React.FC = () => {
                     <div className="flex bg-white/[0.03] p-1.5 rounded-3xl border border-white/5 mb-12">
                         <button
                             type="button"
-                            onClick={() => setRole('PATIENT')}
+                            onClick={() => {
+                                setRole('PATIENT');
+                                setError(null);
+                            }}
                             className={`flex-1 py-4 rounded-2xl text-[9px] font-black transition-all flex items-center justify-center gap-2 ${role === 'PATIENT' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
                                 }`}
                         >
@@ -155,13 +161,31 @@ const Auth: React.FC = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setRole('DOCTOR')}
+                            onClick={() => {
+                                setRole('DOCTOR');
+                                setError(null);
+                            }}
                             className={`flex-1 py-4 rounded-2xl text-[9px] font-black transition-all flex items-center justify-center gap-2 ${role === 'DOCTOR' ? 'bg-white/10 text-white shadow-xl' : 'text-slate-600 hover:text-slate-400'
                                 }`}
                         >
                             <Stethoscope size={14} className={role === 'DOCTOR' ? 'text-blue-500' : ''} /> Doctor
                         </button>
                     </div>
+
+                    {/* ERROR MESSAGE DISPLAY */}
+                    <AnimatePresence>
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl text-red-500 text-[10px] font-black italic flex items-center gap-3 backdrop-blur-md"
+                            >
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                                {error}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <AnimatePresence mode="wait">
@@ -259,7 +283,14 @@ const Auth: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <button
                         type="button"
-                        onClick={() => isLogin ? handleSubmit(null as any) : setIsLogin(true)}
+                        onClick={() => {
+                            if (isLogin) {
+                                handleSubmit(null as any);
+                            } else {
+                                setIsLogin(true);
+                                setError(null);
+                            }
+                        }}
                         disabled={loading}
                         className={`py-5 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] pointer-events-auto !important ${isLogin
                             ? 'bg-[var(--accent-primary)] text-black shadow-[0_20px_40px_rgba(6,182,212,0.2)] active:scale-95'
@@ -270,7 +301,14 @@ const Auth: React.FC = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => !isLogin ? handleSubmit(null as any) : setIsLogin(false)}
+                        onClick={() => {
+                            if (!isLogin) {
+                                handleSubmit(null as any);
+                            } else {
+                                setIsLogin(false);
+                                setError(null);
+                            }
+                        }}
                         disabled={loading}
                         className={`py-5 rounded-3xl flex items-center justify-center gap-3 transition-all font-black text-[10px] pointer-events-auto !important ${!isLogin
                             ? 'bg-white text-black shadow-2xl active:scale-95'
