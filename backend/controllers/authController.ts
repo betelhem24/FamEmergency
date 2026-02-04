@@ -108,7 +108,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (!user) {
       console.log(`[LOGIN_DEBUG] User not found in Prisma: ${normalizedEmail}`);
-      return res.status(400).json({ message: 'Invalid identity credentials' });
+      return res.status(401).json({ message: 'This email is not registered. Please sign up first.' });
     }
 
     const isMatch = await bcrypt.compare(trimmedPassword, user.password);
@@ -116,7 +116,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (!isMatch) {
       console.log(`[LOGIN_DEBUG] Password mismatch for user: ${normalizedEmail}`);
-      return res.status(400).json({ message: 'Invalid identity credentials' });
+      return res.status(401).json({ message: 'Incorrect password. Please try again.' });
     }
 
     const token = jwt.sign(
