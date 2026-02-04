@@ -1,5 +1,7 @@
 import React from 'react';
 import { Search, Navigation, Hospital, Shield } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const MapTab: React.FC = () => {
     return (
@@ -26,16 +28,30 @@ const MapTab: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div className="lg:col-span-3 glass-card min-h-[500px] border border-white/10 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
-                    {/* Simulated Map */}
-                    <div className="absolute inset-0 bg-[#020617] bg-[radial-gradient(circle,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:32px_32px]" />
+                    <MapContainer
+                        center={[40.7128, -74.006]}
+                        zoom={13}
+                        style={{ height: '100%', width: '100%' }}
+                        zoomControl={false}
+                    >
+                        <TileLayer
+                            url="https://mt1.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}"
+                            attribution='&copy; Google Maps'
+                        />
+                        {/* Example Hospital Markers */}
+                        {[
+                            { name: 'Metro Health Center', pos: [40.7228, -74.016] },
+                            { name: 'Central Fire Dept', pos: [40.7028, -73.996] }
+                        ].map((loc, idx) => (
+                            <Marker key={idx} position={loc.pos as [number, number]}>
+                                <Popup>{loc.name}</Popup>
+                            </Marker>
+                        ))}
+                    </MapContainer>
 
-                    <div className="absolute top-1/3 left-1/2 w-8 h-8 -ml-4 rounded-full bg-medical-cyan/20 flex items-center justify-center animate-pulse">
-                        <div className="w-4 h-4 bg-medical-cyan rounded-full shadow-[0_0_20px_rgba(6,182,212,1)]" />
-                    </div>
-
-                    <div className="absolute bottom-8 left-8 p-5 glass-card rounded-2xl border border-white/10">
+                    <div className="absolute bottom-8 left-8 p-5 glass-card rounded-2xl border border-white/10 z-[1000]">
                         <div className="text-[10px] font-black text-medical-cyan uppercase mb-1 tracking-widest">Active Sector</div>
-                        <div className="text-sm font-black text-white font-mono uppercase">NY_CMD_CENTER_GRID</div>
+                        <div className="text-sm font-black text-white font-mono uppercase">REAL-TIME SATELLITE FEED</div>
                     </div>
                 </div>
 
