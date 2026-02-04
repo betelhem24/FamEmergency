@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldAlert, MapPin, Users, Navigation } from 'lucide-react';
+// No framer-motion imports needed
+import { Users, Navigation } from 'lucide-react';
 
 // Fix for default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -72,13 +72,13 @@ export const EmergencyMap: React.FC<EmergencyMapProps> = ({ activeAlerts }) => {
             <MapContainer
                 center={center}
                 zoom={14}
-                style={{ height: '100%', width: '100%', filter: 'grayscale(0.2) contrast(1.1)' }}
+                style={{ height: '100%', width: '100%' }}
                 scrollWheelZoom={false}
                 zoomControl={false}
             >
                 <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://mt1.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}"
+                    attribution='&copy; Google Maps'
                 />
                 <MapUpdater center={center} />
 
